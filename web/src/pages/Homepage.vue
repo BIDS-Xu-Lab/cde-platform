@@ -5,14 +5,17 @@ import { RouterLink } from 'vue-router';
 <template>
 <div id="homepage">
     <div style="font-size: 4rem;">
-        CDE 2.0
+        <i class="fa fa-edit"></i>
+        CDE Reviewer
     </div>
     <div style="font-size: 1rem; font-style: italic;">
-        Create, share, and visualize Common Data Elements (CDEs) in a collaborative environment!
+        Create, share, and visualize Common Data Elements (CDEs) in a collaborative environment
     </div>
-<RouterLink to="/main">
-    Get Started!
-</RouterLink>
+    <div class="py-3">
+        <RouterLink to="/main">
+            Get Started!
+        </RouterLink>
+    </div>
 </div>
 </template>
 

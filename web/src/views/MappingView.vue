@@ -346,6 +346,16 @@ onMounted(() => {
                             Description:
                             {{ item.description }}
                         </div>
+
+                        <div class="term-additional">
+                            <div class="w-full text-right pr-2">
+                                <i class="fa fa-info-circle"></i>
+                                Additional Info
+                            </div>
+                            <div class="term-additional-info">
+                                
+                            </div>
+                        </div>
                     </div>
                 </template>
             </div>
@@ -440,6 +450,10 @@ onMounted(() => {
                             Question Text:
                             {{ item.description }}
                         </div>
+
+                        <div class="result-valueset">
+
+                        </div>
                         
                     </div>
                 </template>
@@ -504,10 +518,16 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
 }
+.term-additional {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 .working-term {
     background-color: var(--bg-color-menu-hover);
 }
+
 
 .result-list-box {
     height: 100%;

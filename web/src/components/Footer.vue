@@ -12,7 +12,7 @@ onMounted(() => {
 <div class="footer">
 <div class="footer-left">
     <i class="fa fa-edit"></i>
-    CDE Manager
+    CDE Reviewer
 
     {{ store.version }}
 </div>
