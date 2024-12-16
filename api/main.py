@@ -95,8 +95,6 @@ async def user_login(
     '''
     User login
     '''
-    # logging.info(f"User login token: {user_login.email[:20]} ...")
-
     # try:
         # check whether this user is in the database
     _user = dict(
