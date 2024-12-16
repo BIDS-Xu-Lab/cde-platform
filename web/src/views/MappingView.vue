@@ -348,7 +348,8 @@ onMounted(() => {
                                 size="small"
                                 icon="pi pi-times"
                                 label="De-select"
-                                class="mr-1"
+                                severity="warn"
+                                class="mr-1 btn-mini btn-de-select"
                                 v-tooltip.right="'De-select this concept.'"
                                 @click="store.showGuide()">
                             </Button>
@@ -448,6 +449,7 @@ onMounted(() => {
                             <Button
                                 size="small"
                                 icon="pi pi-check"
+                                severity="success"
                                 label="Select"
                                 class="mr-1"
                                 v-tooltip.right="'Select this concept.'"
@@ -467,6 +469,7 @@ onMounted(() => {
                                 size="small"
                                 icon="pi pi-list"
                                 label="Value Mapping"
+                                severity="secondary"
                                 class="btn-mini"
                                 v-tooltip.right="'Map values for this concept.'"
                                 @click="store.showGuide()">
