@@ -331,15 +331,16 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="term-concept">
-                        <div class="flex items-center">
+                        <div class="flex items-center text-small">
                             <template v-if="CDEHelper.hasSelectedResult(item)">
-                                <Badge :value="CDEHelper.getSelectedResult(item)?.conceptSource" severity="info" />
+                                <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>
                                 <span>
+                                    {{ CDEHelper.getSelectedResult(item)?.conceptSource }} / 
                                     {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
                                 </span>
                             </template>
                             <template v-else>
-                                <i class="fa fa-exclamation-triangle"></i>
+                                <i class="fa fa-exclamation-triangle mr-1"></i>
                                 No concept selected
                             </template>
                         </div>
@@ -385,12 +386,18 @@ onMounted(() => {
                     <div class="text-lg font-bold">
                         <i class="fa-solid fa-cubes"></i>
                         CDE Mapping 
-                        <b>
-                            [{{ store.working_term?.[store.mapping.data_col_name] }}]
+                        <b v-if="store.working_term">
+                            {{ store.working_term?.[store.mapping.data_col_name] }}
                         </b>
                     </div>
                     <div class="panel-subtitle text-sm">
-                        CDEs
+                        <template v-if="store.working_term?.results.length > 0">
+                            <b>{{ store.working_term?.results.length }}</b>
+                            potential matches found
+                        </template>
+                        <template v-else>
+                            No results found
+                        </template>
                     </div>
                 </div>
             </div>
