@@ -1,10 +1,9 @@
 <script setup>
 import { useDataStore } from '../DataStore';
-import Footer from '../components/Footer.vue';
 const store = useDataStore();
 
 function onClickVis() {
-    console.log('Save clicked');
+    console.log('* clicked Save');
 }
 </script>
 
@@ -49,7 +48,6 @@ function onClickVis() {
 
 </div>
 
-<Footer />
 
 </template>
 

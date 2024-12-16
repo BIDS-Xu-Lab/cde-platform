@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { useToast } from "primevue/usetoast";
+import { hasResults } from './CDEHelper';
 
 export const useDataStore = defineStore('jarvis', {
 
@@ -18,7 +19,7 @@ state: () => ({
     current_view: 'dashboard',
 
     // working project
-    project: {
+    working_project: {
         id: 1,
         name: 'My Project',
         description: 'This is a project description',
@@ -26,7 +27,10 @@ state: () => ({
     },
 
     // working file
-    file: [],
+    working_file: [],
+
+    // working term
+    working_term_idx: -1,
 
     // for mapping
     mapping: {
@@ -64,7 +68,6 @@ state: () => ({
         sort_terms_by: null,
         filter_terms_by: '',
 
-        working_term_idx: -1,
 
         data_col_name: 'element',
         data_col_description: 'description',
@@ -85,7 +88,10 @@ state: () => ({
 }),
 
 getters: {
-    
+    working_term: (state) => {
+        return state.working_file[state.working_term_idx];
+    },
+
 },
 
 actions: {
@@ -100,6 +106,19 @@ actions: {
             detail: 'This is a guide to the application',
             life: 5000
         });
+    },
+
+    ///////////////////////////////////////////////////////
+    // Working File
+    ///////////////////////////////////////////////////////
+    isWorkingTerm(term) {
+        // check if the term is the working term by indexOf
+        // working file is a list of term objects, need to use id to compare
+        return this.working_term_idx == term.id;
+    },
+
+    reset() {
+        this.mapping.working_term_idx = [];
     }
 }
 });

@@ -1,10 +1,9 @@
 <script setup>
 import { useDataStore } from '../DataStore';
-import Footer from '../components/Footer.vue';
 const store = useDataStore();
 
 function onClickNewFile() {
-    console.log('New file clicked');
+    console.log('* clicked New file ');
 }
 
 </script>
@@ -51,9 +50,6 @@ function onClickNewFile() {
 <div class="main">
 
 </div>
-
-
-<Footer />
 
 </template>
 

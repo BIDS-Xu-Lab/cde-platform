@@ -3,6 +3,7 @@ import NaviMenu from '../components/NaviMenu.vue';
 import DashboardView from '../views/DashboardView.vue';
 import MappingView from '../views/MappingView.vue';
 import ProfileView from '../views/ProfileView.vue';
+import Footer from '../components/Footer.vue';
 
 import { useDataStore } from '../DataStore';
 import ProjectListView from '../views/ProjectListView.vue';
@@ -36,6 +37,9 @@ const store = useDataStore();
 <!-- Vis view -->
 <VisView v-if="store.current_view == 'vis'" />
 </div>
+
+<Footer />
+
 </template>
 
 <style scoped>

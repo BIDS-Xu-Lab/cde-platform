@@ -29,7 +29,7 @@ const store = useDataStore();
 window.store = store;
 
 // make sample data
-store.file = CDEHelper.makeSampleData();
+store.working_file = CDEHelper.makeSampleData();
 
 // add the router to the app
 app.use(router);

@@ -8,6 +8,10 @@ const router = useRouter();
 function onClickGoHome() {
     router.push('/');
 }
+
+onMounted(() => {
+    console.log('* mounted Footer');
+});
 </script>
 
 <template>
@@ -68,7 +72,7 @@ function onClickGoHome() {
         <div class="mr-2">
             <i class="fa-solid fa-clipboard-list mr-1"></i>
             <span class="italic">
-                {{ store.project.name }}
+                {{ store.working_project.name }}
             </span>
         </div>
 

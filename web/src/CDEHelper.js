@@ -15,11 +15,11 @@ export const getSelectedResult = function(term) {
 
 export const makeSampleData = function() {
     const concepts = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 25; i++) {
         let concept = {
             "_id": "675cee40077e19647d1e9c02" + i,
             "element": "Hospital transport type " + i,
-            "description": "Type of transport to hospital from home/scene" + i,
+            "description": "Type of transport to hospital from home/scene " + i + " (e.g. Mobile Stroke Unit, EMS, private transportation, unknown, other) and other details",
             "values": "Mobile Stroke Unit |  EMS from home/scene |  Private transportation/taxi/other from home/scene |  Unknown |  Other, specify",
             "user_id": "kp_c541b01bc33e4c5d8f4a2f70184f993a",
             "file_id": "7ee9f754-d2fe-4439-84e1-34a56755fbc8",
@@ -30,14 +30,15 @@ export const makeSampleData = function() {
             "results": []
         }
 
+        // add some results
         for (let j=0; j<10; j++) {
             concept['results'].push({
                 "score": 125.087036 - j,
                 "conceptId": "z3jbnCdyaqE" + j,
                 "conceptCode": "z3jbnCdyaqE" + j,
                 "conceptSource": "NINDS",
-                "standardConcept": "Hospital transport type " + j,
-                "description": "Type of transportation from injury scene to hospital",
+                "standardConcept": "Hospital transport type " + i + '-' + j,
+                "description": "Type of transportation from injury scene to hospital" + i + '-' + j,
                 "valueDomain": {
                     "identifiers": [],
                     "ids": [],
@@ -52,6 +53,11 @@ export const makeSampleData = function() {
                 },
                 "index": j
             })
+        }
+
+        if (concept.activeIndex < 0) {
+            // set some to empty
+            concept['results'] = [];
         }
 
         concepts.push(concept);

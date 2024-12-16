@@ -8,7 +8,6 @@ import { onMounted, ref } from 'vue';
 import { Button } from 'primevue';
 
 import * as CDEHelper from '../CDEHelper';
-import Footer from '../components/Footer.vue';
 
 const store = useDataStore();
 
@@ -77,11 +76,18 @@ const sort_term_options = [
 ];
 
 function onClickTerm(item) {
-    console.log('Clicked term:', item);
+    console.log('* clicked term:', item);
+
+    store.working_term_idx = store.working_file.indexOf(item);
+    console.log('* clicked working_term_idx:', store.working_term_idx);
+}
+
+function fmtScore(score) {
+    return score.toFixed(2);
 }
 
 onMounted(() => {
-    console.log('MappingView mounted');
+    console.log('* mounted MappingView');
 });
 </script>
 
@@ -253,8 +259,9 @@ onMounted(() => {
 
 </div>
 
-
+<!-- main -->
 <div class="main flex-row">
+
 <!-- term list -->
 <div class="term-list">
     <Panel class="h-full">
@@ -267,9 +274,9 @@ onMounted(() => {
                             Term List
                         </div>
                         <div class="panel-subtitle text-sm">
-                            <b>{{ store.file.length }}</b>
+                            <b>{{ store.working_file.length }}</b>
                             /
-                            {{ store.file.length }}  
+                            {{ store.working_file.length }}  
                             mapped
                         </div>
                     </div>
@@ -290,13 +297,13 @@ onMounted(() => {
                 </div>
             </div>
         </template>
+
         <div class="term-list-box">
-            <VirtualScroller :items="store.file" 
-                class="term-list-scroller"
-                :style="{ height: 'calc(100vh - 18rem)'}"
-                :itemSize="50">
-                <template v-slot:item="{ item, options }">
+            <div class="term-list-scroller"
+                :style="{ height: 'calc(100vh - 18rem)'}">
+                <template v-for="item in store.working_file">
                     <div class="term-line"
+                        :class="{ 'working-term': store.isWorkingTerm(item) }"
                         @click="onClickTerm(item)">
                         <div class="term-name">
                             <div class="mr-1">
@@ -312,17 +319,20 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="term-concept">
-                            <div>
-                                <span v-if="CDEHelper.hasSelectedResult(item)">
-                                    {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
-                                </span>
-                                <span v-else>
+                            <div class="flex items-center">
+                                <template v-if="CDEHelper.hasSelectedResult(item)">
+                                    <Badge :value="CDEHelper.getSelectedResult(item)?.conceptSource" severity="info" />
+                                    <span>
+                                        {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
+                                    </span>
+                                </template>
+                                <template v-else>
                                     <i class="fa fa-exclamation-triangle"></i>
                                     No concept selected
-                                </span>
+                                </template>
                             </div>
                             <div>
-                                <Button
+                                <Button v-if="CDEHelper.hasSelectedResult(item)"
                                     size="small"
                                     icon="pi pi-times"
                                     label="De-select"
@@ -332,9 +342,13 @@ onMounted(() => {
                                 </Button>
                             </div>
                         </div>
+                        <div class="term-detail">
+                            Description:
+                            {{ item.description }}
+                        </div>
                     </div>
                 </template>
-            </VirtualScroller>
+            </div>
 
         </div>
     </Panel>
@@ -349,7 +363,10 @@ onMounted(() => {
                     <div class="flex-col">
                         <div class="text-lg font-bold">
                             <i class="fa-solid fa-cubes"></i>
-                            CDE Mapping
+                            CDE Mapping 
+                            <b>
+                                [{{ store.working_term?.[store.mapping.data_col_name] }}]
+                            </b>
                         </div>
                         <div class="panel-subtitle text-sm">
                             CDEs
@@ -372,12 +389,67 @@ onMounted(() => {
                 </div>
             </div>
         </template>
+
+        <div class="result-list-box">
+            <div class="result-list-scroller"
+                :style="{ height: 'calc(100vh - 18rem)'}">
+                <template v-for="item, item_idx in store.working_term?.results">
+                    <div class="result-line">
+                        <div class="result-tags">
+                            <div class="flex flex-row">
+                                <div class="pr-3">
+                                    {{ item_idx + 1 }}
+                                </div>
+                                <Badge :value="fmtScore(item.score)" 
+                                    class="mr-1 badge-score"
+                                    severity="info" />
+                                <Badge :value="item.conceptSource" severity="info" />
+                            </div>
+
+                            <div>
+
+                            </div>
+                        </div>
+                        <div class="result-name">
+                            <div class="flex items-center">
+                                <div>
+                                    {{ item.standardConcept }}
+                                </div>
+                                <Divider layout="vertical" class="!mx-2" />
+                                <div class="text-base">
+                                    <a :href="'https://cde.nlm.nih.gov/deView?tinyId=' + item.conceptId"
+                                        target="_blank">
+                                        <i class="fa fa-globe"></i>
+                                        {{ item.conceptId }}
+                                    </a>
+                                </div>
+                            </div>
+                            <div>
+                                <Button
+                                    size="small"
+                                    icon="pi pi-check"
+                                    label="Select"
+                                    class="mr-1"
+                                    v-tooltip.right="'Select this concept.'"
+                                    @click="store.showGuide()">
+                                </Button>
+                            </div>  
+                        </div>
+
+                        <div class="result-detail">
+                            Question Text:
+                            {{ item.description }}
+                        </div>
+                        
+                    </div>
+                </template>
+            </div>
+        </div>
     </Panel>
 </div>
 
 </div>
 
-<Footer />
 
 </template>
 
@@ -405,13 +477,13 @@ onMounted(() => {
     width: 120px;
 }
 .term-list-scroller {
-    width: 100%;
+    width: calc(100% + 1rem);
+    overflow-y: auto;
 }
 .term-line {
     width: 100%;
     border-bottom: 1px solid var(--bd-color);
     padding: 0.5rem 0;
-    margin: 0.5rem 0;
     display: flex;
     flex-direction: column;
     cursor: pointer;
@@ -423,6 +495,7 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
+    align-items: center;
     font-size: 1.2rem;
 }
 .term-concept {
@@ -430,5 +503,40 @@ onMounted(() => {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+.working-term {
+    background-color: var(--bg-color-menu-hover);
+}
+
+.result-list-box {
+    height: 100%;
+}
+.result-list-scroller {
+    width: calc(100% + 1rem);
+    overflow-y: auto;
+}
+.result-line {
+    width: 100%;
+    border-bottom: 1px solid var(--bd-color);
+    padding: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+}
+.result-tags {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.result-name {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.2rem;
+}
+.badge-score {
+    background-color: #857100;
 }
 </style>
