@@ -3,7 +3,7 @@ import { useDataStore } from '../DataStore';
 const store = useDataStore();
 
 function onClickSave() {
-    console.log('* clicked Save my profile');
+    console.log('* clicked Save');
 }
 </script>
 
@@ -13,16 +13,25 @@ function onClickSave() {
         <div class="menu-group-box">
             <Button text
                 class="menu-button"
-                v-tooltip.right="'Save my profile information.'"
+                v-tooltip.right="'Add a new member to your team.'"
                 @click="onClickSave">
-                <i class="fa-regular fa-save menu-icon"></i>
+                <i class="fa-solid fa-user-plus menu-icon"></i>
                 <span>
-                    Save Profile
+                    Add Member
+                </span>
+            </Button>
+            <Button text
+                class="menu-button"
+                v-tooltip.bottom="'Update member list.'"
+                @click="onClickSave">
+                <i class="fa-solid fa-users menu-icon"></i>
+                <span>
+                    Update List
                 </span>
             </Button>
         </div>
         <div class="menu-group-title">
-            Profile
+            Team
         </div>
     </div>
 
@@ -45,16 +54,17 @@ function onClickSave() {
 
 </div>
 
+
 <div class="main">
 
-<Panel class="h-full personal-panel">
+<Panel class="h-full team-panel">
     <template #header>
         <div class="w-full flex justify-between">
             <div class="flex">
                 <div class="flex-col">
                     <div class="text-lg font-bold">
-                        <i class="fa-solid fa-user"></i>
-                        Personal Information
+                        <i class="fa-solid fa-users"></i>
+                        Team Members
                     </div>
                     <div class="panel-subtitle text-sm">
                     </div>
@@ -66,38 +76,13 @@ function onClickSave() {
         </div>
     </template>
 </Panel>
-
-
-<Panel class="h-full stats-panel">
-    <template #header>
-        <div class="w-full flex justify-between">
-            <div class="flex">
-                <div class="flex-col">
-                    <div class="text-lg font-bold">
-                        <i class="fa-solid fa-briefcase"></i>
-                        Statistics
-                    </div>
-                    <div class="panel-subtitle text-sm">
-                    </div>
-                </div>
-            </div>
-            <div>
-
-            </div>
-        </div>
-    </template>
-</Panel>
-
 </div>
+
 
 </template>
 
 <style scoped>
-.personal-panel {
-    width: 50%;
-    margin: 0 0.5rem 0 0;
-}
-.stats-panel {
-    width: 50%;
+.team-panel {
+    width: 400px;
 }
 </style>

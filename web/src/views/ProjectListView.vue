@@ -36,29 +36,32 @@ function onClickSave() {
         </div>
     </div>
 
+
     <div class="menu-group">
         <div class="menu-group-box">
+
             <Button text
                 class="menu-button"
-                v-tooltip.bottom="'Add a new member to your team.'"
-                @click="onClickSave">
-                <i class="fa-solid fa-user-plus menu-icon"></i>
+                v-tooltip.bottom="'Import a new data file.'"
+                @click="onClickNewFile">
+                <i class="fa-regular fa-file menu-icon"></i>
                 <span>
-                    Add Member
+                    Add File
                 </span>
             </Button>
+
             <Button text
                 class="menu-button"
-                v-tooltip.bottom="'Update member list.'"
+                v-tooltip.bottom="'Update project list.'"
                 @click="onClickSave">
-                <i class="fa-solid fa-users menu-icon"></i>
+                <i class="fa-solid fa-rotate menu-icon"></i>
                 <span>
                     Update List
                 </span>
             </Button>
         </div>
         <div class="menu-group-title">
-            Team
+            File
         </div>
     </div>
 
@@ -80,7 +83,51 @@ function onClickSave() {
     </div>
 
 </div>
+
+
 <div class="main">
+
+<Panel class="h-full project-list">
+    <template #header>
+        <div class="w-full flex justify-between">
+            <div class="flex">
+                <div class="flex-col">
+                    <div class="text-lg font-bold">
+                        <i class="fa-solid fa-list"></i>
+                        All Projects
+                    </div>
+                    <div class="panel-subtitle text-sm">
+                    </div>
+                </div>
+            </div>
+            <div>
+
+            </div>
+        </div>
+    </template>
+</Panel>
+
+
+<Panel class="h-full project-detail">
+    <template #header>
+        <div class="w-full flex justify-between">
+            <div class="flex">
+                <div class="flex-col">
+                    <div class="text-lg font-bold">
+                        <i class="fa-solid fa-briefcase"></i>
+                        Project Detail
+                    </div>
+                    <div class="panel-subtitle text-sm">
+                    </div>
+                </div>
+            </div>
+            <div>
+
+            </div>
+        </div>
+    </template>
+</Panel>
+
 
 </div>
 
@@ -88,4 +135,11 @@ function onClickSave() {
 </template>
 
 <style scoped>
+.project-list {
+    width: 400px;
+    margin: 0 0.5rem 0 0;
+}
+.project-detail {
+    width: calc(100% - 400px);
+}
 </style>

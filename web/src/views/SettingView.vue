@@ -17,12 +17,12 @@ function onClickSave() {
                 @click="onClickSave">
                 <i class="fa-regular fa-save menu-icon"></i>
                 <span>
-                    Save Profile
+                    Save Settings
                 </span>
             </Button>
         </div>
         <div class="menu-group-title">
-            Profile
+            Settings
         </div>
     </div>
 
@@ -47,14 +47,14 @@ function onClickSave() {
 
 <div class="main">
 
-<Panel class="h-full personal-panel">
+<Panel class="h-full w-1/2 mr-2">
     <template #header>
         <div class="w-full flex justify-between">
             <div class="flex">
                 <div class="flex-col">
                     <div class="text-lg font-bold">
-                        <i class="fa-solid fa-user"></i>
-                        Personal Information
+                        <i class="fa-solid fa-flask"></i>
+                        Features
                     </div>
                     <div class="panel-subtitle text-sm">
                     </div>
@@ -68,14 +68,14 @@ function onClickSave() {
 </Panel>
 
 
-<Panel class="h-full stats-panel">
+<Panel class="h-full w-1/2">
     <template #header>
         <div class="w-full flex justify-between">
             <div class="flex">
                 <div class="flex-col">
                     <div class="text-lg font-bold">
-                        <i class="fa-solid fa-briefcase"></i>
-                        Statistics
+                        <i class="fa-solid fa-server"></i>
+                        Server Settings
                     </div>
                     <div class="panel-subtitle text-sm">
                     </div>
@@ -93,11 +93,4 @@ function onClickSave() {
 </template>
 
 <style scoped>
-.personal-panel {
-    width: 50%;
-    margin: 0 0.5rem 0 0;
-}
-.stats-panel {
-    width: 50%;
-}
 </style>

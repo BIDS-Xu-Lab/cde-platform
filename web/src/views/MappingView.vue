@@ -276,213 +276,209 @@ onMounted(() => {
 <div class="main flex-row">
 
 <!-- term list -->
-<div class="term-list">
-    <Panel class="h-full">
-        <template #header>
-            <div class="w-full flex justify-between">
-                <div class="flex">
-                    <div class="flex-col">
-                        <div class="text-lg font-bold">
-                            <i class="fa fa-list "></i>
-                            Term List
-                        </div>
-                        <div class="panel-subtitle text-sm">
-                            <b>{{ store.working_file.length }}</b>
-                            /
-                            {{ store.working_file.length }}  
-                            mapped
-                        </div>
+<Panel class="h-full term-list">
+    <template #header>
+        <div class="w-full flex justify-between">
+            <div class="flex">
+                <div class="flex-col">
+                    <div class="text-lg font-bold">
+                        <i class="fa fa-list "></i>
+                        Term List
+                    </div>
+                    <div class="panel-subtitle text-sm">
+                        <b>{{ store.working_file.length }}</b>
+                        /
+                        {{ store.working_file.length }}  
+                        mapped
                     </div>
                 </div>
-                
-                <div class="flex justify-end" style="height: 2rem; line-height: 1rem;">
-                    <InputText v-model="store.mapping.filter_terms_by"
-                        type="text" 
-                        placeholder="Filter keyword ..."
-                        class="term-filter"/>
-                    <Divider layout="vertical" class="!mx-2" />
-                    <Select v-model="store.mapping.sort_terms_by" 
-                        :options="sort_term_options" 
-                        optionLabel="name" 
-                        placeholder="Sort by" 
-                        class="term-sort"/>
-    
-                </div>
             </div>
-        </template>
+            
+            <div class="flex justify-end" style="height: 2rem; line-height: 1rem;">
+                <InputText v-model="store.mapping.filter_terms_by"
+                    type="text" 
+                    placeholder="Filter keyword ..."
+                    class="term-filter"/>
+                <Divider layout="vertical" class="!mx-2" />
+                <Select v-model="store.mapping.sort_terms_by" 
+                    :options="sort_term_options" 
+                    optionLabel="name" 
+                    placeholder="Sort by" 
+                    class="term-sort"/>
 
-        <div class="term-list-box">
-            <div class="term-list-scroller"
-                :style="{ height: 'calc(100vh - 18rem)'}">
-                <template v-for="item in store.working_file">
-                    <div class="term-line"
-                        :class="{ 'working-term': store.isWorkingTerm(item) }"
-                        @click="onClickTerm(item)">
-                        <div class="term-name">
-                            <div class="mr-1">
-                                <template v-if="CDEHelper.hasSelectedResult(item)">
-                                    <Badge :value="item.id" severity="success" />
-                                </template>
-                                <template v-else>
-                                    <Badge :value="item.id" severity="warning" />
-                                </template>
-                            </div>
-                            <div>
-                                {{ item[store.mapping.data_col_name] }}
-                            </div>
-                        </div>
-                        <div class="term-concept">
-                            <div class="flex items-center">
-                                <template v-if="CDEHelper.hasSelectedResult(item)">
-                                    <Badge :value="CDEHelper.getSelectedResult(item)?.conceptSource" severity="info" />
-                                    <span>
-                                        {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
-                                    </span>
-                                </template>
-                                <template v-else>
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    No concept selected
-                                </template>
-                            </div>
-                            <div>
-                                <Button v-if="CDEHelper.hasSelectedResult(item)"
-                                    size="small"
-                                    icon="pi pi-times"
-                                    label="De-select"
-                                    class="mr-1"
-                                    v-tooltip.right="'De-select this concept.'"
-                                    @click="store.showGuide()">
-                                </Button>
-                            </div>
-                        </div>
-                        <div class="term-detail">
-                            Description:
-                            {{ item.description }}
-                        </div>
-
-                        <div class="term-additional">
-                            <div class="w-full text-right pr-2">
-                                <i class="fa fa-info-circle"></i>
-                                Additional Info
-                            </div>
-                            <div class="term-additional-info">
-
-                            </div>
-                        </div>
-                    </div>
-                </template>
             </div>
-
         </div>
-    </Panel>
-</div>
+    </template>
+
+    <div class="term-list-box">
+        <div class="term-list-scroller"
+            :style="{ height: 'calc(100vh - 18rem)'}">
+            <template v-for="item in store.working_file">
+                <div class="term-line"
+                    :class="{ 'working-term': store.isWorkingTerm(item) }"
+                    @click="onClickTerm(item)">
+                    <div class="term-name">
+                        <div class="mr-1">
+                            <template v-if="CDEHelper.hasSelectedResult(item)">
+                                <Badge :value="item.id" severity="success" />
+                            </template>
+                            <template v-else>
+                                <Badge :value="item.id" severity="warning" />
+                            </template>
+                        </div>
+                        <div>
+                            {{ item[store.mapping.data_col_name] }}
+                        </div>
+                    </div>
+                    <div class="term-concept">
+                        <div class="flex items-center">
+                            <template v-if="CDEHelper.hasSelectedResult(item)">
+                                <Badge :value="CDEHelper.getSelectedResult(item)?.conceptSource" severity="info" />
+                                <span>
+                                    {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
+                                </span>
+                            </template>
+                            <template v-else>
+                                <i class="fa fa-exclamation-triangle"></i>
+                                No concept selected
+                            </template>
+                        </div>
+                        <div>
+                            <Button v-if="CDEHelper.hasSelectedResult(item)"
+                                size="small"
+                                icon="pi pi-times"
+                                label="De-select"
+                                class="mr-1"
+                                v-tooltip.right="'De-select this concept.'"
+                                @click="store.showGuide()">
+                            </Button>
+                        </div>
+                    </div>
+                    <div class="term-detail">
+                        Description:
+                        {{ item.description }}
+                    </div>
+
+                    <div class="term-additional">
+                        <div class="w-full text-right pr-2">
+                            <i class="fa fa-info-circle"></i>
+                            Additional Info
+                        </div>
+                        <div class="term-additional-info">
+
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+    </div>
+</Panel>
 
 <!-- result list -->
-<div class="result-list">
-    <Panel class="h-full">
-        <template #header>
-            <div class="w-full flex justify-between">
-                <div class="flex">
-                    <div class="flex-col">
-                        <div class="text-lg font-bold">
-                            <i class="fa-solid fa-cubes"></i>
-                            CDE Mapping 
-                            <b>
-                                [{{ store.working_term?.[store.mapping.data_col_name] }}]
-                            </b>
-                        </div>
-                        <div class="panel-subtitle text-sm">
-                            CDEs
-                        </div>
+<Panel class="h-full result-list">
+    <template #header>
+        <div class="w-full flex justify-between">
+            <div class="flex">
+                <div class="flex-col">
+                    <div class="text-lg font-bold">
+                        <i class="fa-solid fa-cubes"></i>
+                        CDE Mapping 
+                        <b>
+                            [{{ store.working_term?.[store.mapping.data_col_name] }}]
+                        </b>
                     </div>
-                </div>
-                
-                <div class="flex justify-end" style="height: 2rem; line-height: 1rem;">
-                    <InputText v-model="store.mapping.filter_terms_by"
-                        type="text" 
-                        placeholder="Filter keyword ..."
-                        class="term-filter"/>
-                    <Divider layout="vertical" class="!mx-2" />
-                    <Select v-model="store.mapping.sort_terms_by" 
-                        :options="sort_term_options" 
-                        optionLabel="name" 
-                        placeholder="Sort by" 
-                        class="term-sort"/>
-    
+                    <div class="panel-subtitle text-sm">
+                        CDEs
+                    </div>
                 </div>
             </div>
-        </template>
+            
+            <div class="flex justify-end" style="height: 2rem; line-height: 1rem;">
+                <InputText v-model="store.mapping.filter_terms_by"
+                    type="text" 
+                    placeholder="Filter keyword ..."
+                    class="term-filter"/>
+                <Divider layout="vertical" class="!mx-2" />
+                <Select v-model="store.mapping.sort_terms_by" 
+                    :options="sort_term_options" 
+                    optionLabel="name" 
+                    placeholder="Sort by" 
+                    class="term-sort"/>
 
-        <div class="result-list-box">
-            <div class="result-list-scroller"
-                :style="{ height: 'calc(100vh - 18rem)'}">
-                <template v-for="item, item_idx in store.working_term?.results">
-                    <div class="result-line">
-                        <div class="result-tags">
-                            <div class="flex flex-row">
-                                <div class="pr-3">
-                                    {{ item_idx + 1 }}
-                                </div>
-                                <Badge :value="fmtScore(item.score)" 
-                                    class="mr-1 badge-score"
-                                    severity="info" />
-                                <Badge :value="item.conceptSource" severity="info" />
-                            </div>
-
-                            <div>
-
-                            </div>
-                        </div>
-                        <div class="result-name">
-                            <div class="flex items-center">
-                                <div>
-                                    {{ item.standardConcept }}
-                                </div>
-                                <Divider layout="vertical" class="!mx-2" />
-                                <div class="text-base">
-                                    <a :href="'https://cde.nlm.nih.gov/deView?tinyId=' + item.conceptId"
-                                        target="_blank">
-                                        <i class="fa fa-globe"></i>
-                                        {{ item.conceptId }}
-                                    </a>
-                                </div>
-                            </div>
-                            <div>
-                                <Button
-                                    size="small"
-                                    icon="pi pi-check"
-                                    label="Select"
-                                    class="mr-1"
-                                    v-tooltip.right="'Select this concept.'"
-                                    @click="store.showGuide()">
-                                </Button>
-                            </div>  
-                        </div>
-
-                        <div class="result-detail">
-                            Question Text:
-                            {{ item.description }}
-                        </div>
-
-                        <div class="result-valueset">
-                            <div>
-                                <Button
-                                    size="small"
-                                    icon="pi pi-list"
-                                    label="Value Mapping"
-                                    class="btn-mini"
-                                    v-tooltip.right="'Map values for this concept.'"
-                                    @click="store.showGuide()">
-                                </Button>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </template>
             </div>
         </div>
-    </Panel>
-</div>
+    </template>
+
+    <div class="result-list-box">
+        <div class="result-list-scroller"
+            :style="{ height: 'calc(100vh - 18rem)'}">
+            <template v-for="item, item_idx in store.working_term?.results">
+                <div class="result-line">
+                    <div class="result-tags">
+                        <div class="flex flex-row">
+                            <div class="pr-3">
+                                {{ item_idx + 1 }}
+                            </div>
+                            <Badge :value="fmtScore(item.score)" 
+                                class="mr-1 badge-score"
+                                severity="info" />
+                            <Badge :value="item.conceptSource" severity="info" />
+                        </div>
+
+                        <div>
+
+                        </div>
+                    </div>
+                    <div class="result-name">
+                        <div class="flex items-center">
+                            <div>
+                                {{ item.standardConcept }}
+                            </div>
+                            <Divider layout="vertical" class="!mx-2" />
+                            <div class="text-base">
+                                <a :href="'https://cde.nlm.nih.gov/deView?tinyId=' + item.conceptId"
+                                    target="_blank">
+                                    <i class="fa fa-globe"></i>
+                                    {{ item.conceptId }}
+                                </a>
+                            </div>
+                        </div>
+                        <div>
+                            <Button
+                                size="small"
+                                icon="pi pi-check"
+                                label="Select"
+                                class="mr-1"
+                                v-tooltip.right="'Select this concept.'"
+                                @click="store.showGuide()">
+                            </Button>
+                        </div>  
+                    </div>
+
+                    <div class="result-detail">
+                        Question Text:
+                        {{ item.description }}
+                    </div>
+
+                    <div class="result-valueset">
+                        <div>
+                            <Button
+                                size="small"
+                                icon="pi pi-list"
+                                label="Value Mapping"
+                                class="btn-mini"
+                                v-tooltip.right="'Map values for this concept.'"
+                                @click="store.showGuide()">
+                            </Button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </template>
+        </div>
+    </div>
+</Panel>
 
 </div>
 

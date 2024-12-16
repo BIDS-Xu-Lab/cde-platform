@@ -30,16 +30,16 @@ onMounted(() => {
             Dashboard
         </div>
         <div class="navi-item"
-            @click="store.changeView('profile')"
-            :class="{'active-page': store.current_view=='profile'}">
-            <i class="fa-regular fa-user"></i>
-            My Profile
-        </div>
-        <div class="navi-item"
             @click="store.changeView('project_list')"
             :class="{'active-page': store.current_view=='project_list'}">
             <i class="fa-solid fa-briefcase"></i>
             Projects
+        </div>
+        <div class="navi-item"
+            @click="store.changeView('team')"
+            :class="{'active-page': store.current_view=='team'}">
+            <i class="fa-solid fa-users"></i>
+            Team
         </div>
         <div class="navi-item"
             @click="store.changeView('mapping')"
@@ -64,6 +64,18 @@ onMounted(() => {
             :class="{'active-page': store.current_view=='vis'}">
             <i class="fa-brands fa-uncharted"></i>
             Visualization
+        </div>
+        <div class="navi-item"
+            @click="store.changeView('profile')"
+            :class="{'active-page': store.current_view=='profile'}">
+            <i class="fa-regular fa-user"></i>
+            My Profile
+        </div>
+        <div class="navi-item"
+            @click="store.changeView('setting')"
+            :class="{'active-page': store.current_view=='setting'}">
+            <i class="fa-solid fa-gears"></i>
+            Settings
         </div>
     </div>
 

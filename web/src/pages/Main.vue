@@ -9,6 +9,8 @@ import { useDataStore } from '../DataStore';
 import ProjectListView from '../views/ProjectListView.vue';
 import ReviewView from '../views/ReviewView.vue';
 import VisView from '../views/VisView.vue';
+import TeamView from '../views/TeamView.vue';
+import SettingView from '../views/SettingView.vue';
 const store = useDataStore();
 
 </script>
@@ -31,11 +33,18 @@ const store = useDataStore();
 <!-- Project list view -->
 <ProjectListView v-if="store.current_view == 'project_list'" />
 
+<!-- Team view -->
+<TeamView v-if="store.current_view == 'team'" />
+
 <!-- Review view -->
 <ReviewView v-if="store.current_view == 'review'" />
 
 <!-- Vis view -->
 <VisView v-if="store.current_view == 'vis'" />
+
+<!-- Setting view -->
+<SettingView v-if="store.current_view == 'setting'" />
+
 </div>
 
 <Footer />

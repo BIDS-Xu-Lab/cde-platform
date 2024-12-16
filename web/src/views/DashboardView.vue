@@ -14,16 +14,15 @@ function onClickNewFile() {
         <div class="menu-group-box">
             <Button text
                 class="menu-button"
-                v-tooltip.right="'Import a new data file.'"
-                @click="onClickNewFile">
-                <i class="fa-regular fa-file menu-icon"></i>
+                @click="onClickRefreshList">
+                <i class="fa-solid fa-rotate menu-icon"></i>
                 <span>
-                    New File
+                    Refresh
                 </span>
             </Button>
         </div>
         <div class="menu-group-title">
-            Data Files
+            Data
         </div>
     </div>
 
@@ -49,7 +48,7 @@ function onClickNewFile() {
 
 <div class="main flex-row">
 
-    
+
 </div>
 
 </template>
