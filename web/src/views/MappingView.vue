@@ -10,6 +10,9 @@ import { Button } from 'primevue';
 import * as CDEHelper from '../CDEHelper';
 
 const store = useDataStore();
+function onClickRefreshList() {
+    console.log('* clicked Refresh List');
+}
 
 function onClickSearch() {
     console.log('* clicked Search ');
@@ -95,6 +98,16 @@ onMounted(() => {
 <div class="menu">
     <div class="menu-group !ml-2">
         <div class="menu-group-box">
+            <Button text
+                class="menu-button"
+                v-tooltip.bottom="'Refresh list.'"
+                @click="onClickRefreshList">
+                <i class="fa-solid fa-rotate menu-icon"></i>
+                <span>
+                    Refresh
+                </span>
+            </Button>
+
             <div class="flex flex-col mr-2">
                 <label class="text-sm">
                     <i class="fa fa-database"></i>
@@ -483,7 +496,7 @@ onMounted(() => {
 
 .term-list {
     width: 460px;
-    min-width: 360px;
+    min-width: 460px;
     height: 100%;
 }
 

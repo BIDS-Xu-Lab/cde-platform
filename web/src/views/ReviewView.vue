@@ -20,6 +20,16 @@ function onClickSave() {
                     Load All Mappings
                 </span>
             </Button>
+
+            <Button text
+                class="menu-button"
+                v-tooltip.right="'Create a new project.'"
+                @click="onClickSave">
+                <i class="fa-solid fa-calculator menu-icon"></i>
+                <span>
+                    Evaluate Agreement 
+                </span>
+            </Button>
         </div>
         <div class="menu-group-title">
             Mappings
@@ -44,11 +54,86 @@ function onClickSave() {
     </div>
 
 </div>
+
+
 <div class="main">
+<Panel class="h-full term-list">
+    <template #header>
+        <div class="w-full flex justify-between">
+            <div class="flex">
+                <div class="flex-col">
+                    <div class="text-lg font-bold">
+                        <i class="fa fa-list "></i>
+                        File List
+                    </div>
+                    <div class="panel-subtitle text-sm">
+                    </div>
+                </div>
+            </div>
+            <div>
+
+            </div>
+        </div>
+    </template>
+</Panel>
+
+<Panel class="h-full mapping-list">
+    <template #header>
+        <div class="w-full flex justify-between">
+            <div class="flex">
+                <div class="flex-col">
+                    <div class="text-lg font-bold">
+                        <i class="fa fa-list "></i>
+                        Mapping List
+                    </div>
+                    <div class="panel-subtitle text-sm">
+                    </div>
+                </div>
+            </div>
+            <div>
+
+            </div>
+        </div>
+    </template>
+</Panel>
+
+<Panel class="h-full reviewer-panel">
+    <template #header>
+        <div class="w-full flex justify-between">
+            <div class="flex">
+                <div class="flex-col">
+                    <div class="text-lg font-bold">
+                        <i class="fa fa-list "></i>
+                        Reviewer
+                    </div>
+                    <div class="panel-subtitle text-sm">
+                    </div>
+                </div>
+            </div>
+            <div>
+
+            </div>
+        </div>
+    </template>
+</Panel>
+
 
 </div>
 
 </template>
 
 <style scoped>
+.term-list {
+    width: 460px;
+    min-width: 460px;
+    margin: 0 0.5rem 0 0;
+}
+.mapping-list {
+    min-width: 500px;
+    margin: 0 0.5rem 0 0;
+}
+.reviewer-panel {
+    min-width: 500px;
+    margin: 0 0.5rem 0 0;
+}
 </style>

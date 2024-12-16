@@ -47,8 +47,9 @@ function onClickNewFile() {
 </div>
 
 
-<div class="main">
+<div class="main flex-row">
 
+    
 </div>
 
 </template>

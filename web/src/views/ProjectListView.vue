@@ -20,9 +20,45 @@ function onClickSave() {
                     New Project
                 </span>
             </Button>
+
+            <Button text
+                class="menu-button"
+                v-tooltip.bottom="'Update project list.'"
+                @click="onClickSave">
+                <i class="fa-solid fa-rotate menu-icon"></i>
+                <span>
+                    Update List
+                </span>
+            </Button>
         </div>
         <div class="menu-group-title">
             Project
+        </div>
+    </div>
+
+    <div class="menu-group">
+        <div class="menu-group-box">
+            <Button text
+                class="menu-button"
+                v-tooltip.bottom="'Add a new member to your team.'"
+                @click="onClickSave">
+                <i class="fa-solid fa-user-plus menu-icon"></i>
+                <span>
+                    Add Member
+                </span>
+            </Button>
+            <Button text
+                class="menu-button"
+                v-tooltip.bottom="'Update member list.'"
+                @click="onClickSave">
+                <i class="fa-solid fa-users menu-icon"></i>
+                <span>
+                    Update List
+                </span>
+            </Button>
+        </div>
+        <div class="menu-group-title">
+            Team
         </div>
     </div>
 
