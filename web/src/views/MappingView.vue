@@ -353,7 +353,7 @@ onMounted(() => {
                                 Additional Info
                             </div>
                             <div class="term-additional-info">
-                                
+
                             </div>
                         </div>
                     </div>
@@ -452,7 +452,16 @@ onMounted(() => {
                         </div>
 
                         <div class="result-valueset">
-
+                            <div>
+                                <Button
+                                    size="small"
+                                    icon="pi pi-list"
+                                    label="Value Mapping"
+                                    class="btn-mini"
+                                    v-tooltip.right="'Map values for this concept.'"
+                                    @click="store.showGuide()">
+                                </Button>
+                            </div>
                         </div>
                         
                     </div>

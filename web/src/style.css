@@ -122,6 +122,9 @@ body {
   user-select: none; /* Standard syntax */
 }
 
+.btn-mini {
+  padding: 0.1rem 0.5rem !important;
+}
 @media (prefers-color-scheme: dark) {
   :root {
     color: #cecece;
