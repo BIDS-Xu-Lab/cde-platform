@@ -83,6 +83,6 @@ function onClickSave() {
 
 <style scoped>
 .team-panel {
-    width: 400px;
+    width: 100%;
 }
 </style>
