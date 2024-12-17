@@ -6,6 +6,9 @@ function onClickNewFile() {
     console.log('* clicked New file ');
 }
 
+function onClickRefreshList() {
+    console.log('* clicked Refresh list');
+}
 </script>
 
 <template>
