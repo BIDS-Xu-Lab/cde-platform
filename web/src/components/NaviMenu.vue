@@ -90,7 +90,13 @@ onMounted(() => {
 
         <Divider layout="vertical"/>
 
-        <div>
+        <div v-if="store.user == null">
+            <i class="fa-solid fa-user mr-1"></i>
+            <span @click="store.gotoLogin()">
+                Login
+            </span>
+        </div>
+        <div v-else>
             <i class="fa-solid fa-user mr-1"></i>
             <span>
                 {{ store.user.name }}

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { useToast } from "primevue/usetoast";
 import { hasResults } from './CDEHelper';
+import router from './router';
 
 export const useDataStore = defineStore('jarvis', {
 
@@ -8,12 +9,13 @@ state: () => ({
     version: '0.7.2',
 
     // current user
-    user: {
-        id: 1,
-        name: 'Luke Skywalker',
-        role: 'admin',
-        email: "luke.skywalker@yale.edu"
-    },
+    // {
+    //     id: 1,
+    //     name: 'Luke Skywalker',
+    //     role: 'admin',
+    //     email: "luke.skywalker@yale.edu"
+    // }
+    user: null,
 
     // current current_view
     current_view: 'dashboard',
@@ -85,6 +87,9 @@ state: () => ({
 
     // other system related data
     toast: useToast(),
+
+    // for the router
+    router: router,
 }),
 
 getters: {
@@ -106,6 +111,19 @@ actions: {
             detail: 'This is a guide to the application',
             life: 5000
         });
+    },
+
+    gotoMain(new_view) {
+        this.changeView(new_view);
+        this.router.push('/main');
+    },
+
+    gotoLogin() {
+        this.router.push('/login');
+    },
+
+    isLoggedIn() {
+        return this.user != null;
     },
 
     ///////////////////////////////////////////////////////

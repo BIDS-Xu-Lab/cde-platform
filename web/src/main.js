@@ -13,6 +13,13 @@ import { definePreset } from '@primevue/themes';
 import Tooltip from 'primevue/tooltip';
 import * as CDEHelper from './CDEHelper';
 import { theme } from './theme';
+import { Jimin } from './Jimin';
+
+// initialize Jimin
+Jimin.init({
+    endpoint: 'http://localhost:8001'
+});
+window.Jimin = Jimin;
 
 // create the app
 const app = createApp(App)

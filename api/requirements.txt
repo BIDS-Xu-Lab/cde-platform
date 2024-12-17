@@ -5,3 +5,5 @@ motor
 uvicorn
 python-multipart
 pymongo
+python-dotenv
+PyJWT==2.10.1

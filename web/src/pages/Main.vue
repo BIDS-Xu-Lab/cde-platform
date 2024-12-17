@@ -13,6 +13,18 @@ import TeamView from '../views/TeamView.vue';
 import SettingView from '../views/SettingView.vue';
 const store = useDataStore();
 
+import { onMounted } from 'vue';
+
+onMounted(() => {
+    console.log('* mounted Main');
+
+    if (store.isLoggedIn()) {
+
+    } else {
+        store.gotoLogin();
+    }
+});
+
 </script>
 <template>
 <!-- Navigation menu -->
