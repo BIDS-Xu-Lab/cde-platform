@@ -446,7 +446,7 @@ async def get_projects(
     projects = await db.projects.find({
         "user_id": current_user['user_id']
     }).to_list(length=None)
-    
+
     return {
         'success': True,
         'projects': formatProjects(projects)
@@ -518,6 +518,28 @@ async def upload_file(
     return {
         'success': True,
         'message': 'User document created or updated successfully'
+    }
+
+
+@app.get('/get_files_by_project', tags=["file"])
+async def get_files_by_project(
+    request: Request,
+    project_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get all files by project
+    '''
+    logging.info("get files by project")
+
+    # get all files
+    files = await db.files.find({
+        "project_id": project_id
+    }).to_list(length=None)
+
+    return {
+        'success': True,
+        'files': formatFiles(files)
     }
 
 # @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
@@ -797,6 +819,17 @@ def formatProjects(projects):
         project.pop('_id', None)
 
     return projects
+
+def formatFile(file):
+    file.pop('_id', None)
+
+    return file
+
+def formatFiles(files):
+    for file in files:
+        file.pop('_id', None)
+
+    return files
 
 if __name__ == '__main__':
     import uvicorn

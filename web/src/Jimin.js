@@ -92,4 +92,19 @@ export const Jimin = {
 
         return rsp.data;
     },
+
+    getFilesByProject: async function (project_id) {
+        console.log('* get files by project', project_id);
+
+        const rsp = await this.axios_instance.get(
+            '/get_files_by_project',
+            {
+                params: {
+                    project_id: project_id
+                }
+            }
+        );
+
+        return rsp.data.files;
+    }
 }

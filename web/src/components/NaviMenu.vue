@@ -36,12 +36,12 @@ onMounted(() => {
             <i class="fa-solid fa-briefcase"></i>
             Projects
         </div>
-        <div class="navi-item"
+        <!-- <div class="navi-item"
             @click="store.changeView('team')"
             :class="{'active-page': store.current_view=='team'}">
             <i class="fa-solid fa-users"></i>
             Team
-        </div>
+        </div> -->
         <div class="navi-item"
             @click="store.changeView('mapping')"
             :class="{'active-page': store.current_view=='mapping'}">
@@ -60,7 +60,7 @@ onMounted(() => {
             <i class="fa-regular fa-pen-to-square"></i>
             Create CDE
         </div> -->
-        <div class="navi-item"
+        <!-- <div class="navi-item"
             @click="store.changeView('vis')"
             :class="{'active-page': store.current_view=='vis'}">
             <i class="fa-brands fa-uncharted"></i>
@@ -77,7 +77,7 @@ onMounted(() => {
             :class="{'active-page': store.current_view=='setting'}">
             <i class="fa-solid fa-gears"></i>
             Settings
-        </div>
+        </div> -->
     </div>
 
     <div class="navi-right">
@@ -85,7 +85,7 @@ onMounted(() => {
         <div class="mr-2">
             <i class="fa-solid fa-clipboard-list mr-1"></i>
             <span class="italic">
-                {{ store.working_project.name }}
+                {{ store.working_project?.name }}
             </span>
         </div>
 

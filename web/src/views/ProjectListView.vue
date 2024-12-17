@@ -27,9 +27,15 @@ async function onClickUpdateProjectList() {
     store.projects = projects;
 }
 
-function onClickProjectItem(project) {
+async function onClickProjectItem(project) {
     console.log('* clicked Project Item', project);
     store.currentProject = project;
+
+    // get all files for this project
+    let files = await Jimin.getFilesByProject(project.project_id);
+    console.log('* got project files:', files);
+
+    store.files = files;
 }
 
 const fileupload = ref();
@@ -212,23 +218,33 @@ onMounted(() => {
             </div>
         </div>
     </template>
+
+    <div>
+        <template v-for="file in store.files">
+            <div class="w-full project-item">
+                <div class="project-name">
+                    {{ file.filename }}
+                </div>
+            </div>
+        </template>
+    </div>
 </Panel>
 
 
 </div>
 <Dialog v-model:visible="visible" modal header="Edit Profile" :style="{ width: '25rem' }">
-            <span class="text-surface-500 dark:text-surface-400 block mb-8">Upload your .csv file.</span>
-            <div class="flex flex-col justify-start gap-4 mb-4">
-                <label for="select_file" class="font-semibold w-24">Select File</label>
-                <FileUpload ref="fileupload" 
-                    mode="basic" name="demo[]" 
-                    url="/api/upload" 
-                    accept="text/csv" 
-                    @upload="onUpload" />
-            </div>
-            <div class="flex justify-end gap-2">
-                <Button label="Upload" @click="onClickUpload" severity="secondary" />
-            </div>
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">Upload your .csv file.</span>
+    <div class="flex flex-col justify-start gap-4 mb-4">
+        <label for="select_file" class="font-semibold w-24">Select File</label>
+        <FileUpload ref="fileupload" 
+            mode="basic" name="demo[]" 
+            url="/api/upload" 
+            accept="text/csv" 
+            @upload="onUpload" />
+    </div>
+    <div class="flex justify-end gap-2">
+        <Button label="Upload" @click="onClickUpload" severity="secondary" />
+    </div>
 </Dialog>
 
 </template>

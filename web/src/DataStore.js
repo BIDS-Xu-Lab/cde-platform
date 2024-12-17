@@ -19,18 +19,22 @@ state: () => ({
     user: null,
 
     // current current_view
-    current_view: 'dashboard',
+    current_view: 'project_list',
 
     // all projects belong to the current user
     projects: [],
 
+    // all files belong to the selected project
+    files: [],
+
     // working project
-    working_project: {
-        id: 1,
-        name: 'My Project',
-        description: 'This is a project description',
-        created: '2021-06-01',
-    },
+    working_project: null,
+    // {
+    //     id: 1,
+    //     name: 'My Project',
+    //     description: 'This is a project description',
+    //     created: '2021-06-01',
+    // },
 
     // working file
     working_file: [],
