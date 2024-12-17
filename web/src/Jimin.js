@@ -78,6 +78,28 @@ export const Jimin = {
         return rsp.data.projects;
     },
 
+    createProject: async function (project) {
+        console.log('* create project', project);
+
+        const rsp = await this.axios_instance.post(
+            '/create_project',
+            project
+        );
+
+        return rsp.data.project;
+    },
+
+    deleteProject: async function (project_id) {
+        console.log('* delete project', project_id);
+
+        const rsp = await this.axios_instance.post(
+            '/delete_project',
+            { project_id: project_id }
+        );
+
+        return rsp.data;
+    },
+
     ///////////////////////////////////////////////////////
     // File related
     ///////////////////////////////////////////////////////

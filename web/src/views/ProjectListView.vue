@@ -7,7 +7,7 @@ import { Jimin } from '../Jimin';
 import * as toolbox from '../toolbox';
 
 const store = useDataStore();
-const visible = ref(false);
+const visible_dialog_upload_file = ref(false);
 
 function getSelectionOptions(file) {
     return file.columns.map((col) => {
@@ -59,7 +59,7 @@ function onClickSave() {
 
 function onClickNewFile() {
     console.log('* clicked New File');
-    visible.value = true;
+    visible_dialog_upload_file.value = true;
 }
 
 async function onClickUpdateProjectList() {
@@ -74,7 +74,7 @@ async function onClickUpdateProjectList() {
 
 async function onClickProjectItem(project) {
     console.log('* clicked Project Item', project);
-    store.currentProject = project;
+    store.current_project = project;
 
     // get all files for this project
     let files = await Jimin.getFilesByProject(project.project_id);
@@ -93,7 +93,7 @@ async function onClickMapping(file) {
     store.msg(ret.message);
 
     // set working project to this project
-    store.working_project = store.currentProject;
+    store.working_project = store.current_project;
 
     // set working file to this file
     store.working_file = file;
@@ -110,6 +110,47 @@ async function onClickDeleteFile() {
     console.log('* clicked Delete File');
 }
 
+async function onClickDeleteProject(project) {
+    console.log('* clicked Delete Project', project);
+
+    // delete this project
+    let ret = await Jimin.deleteProject(project.project_id);
+    console.log('* deleted project:', ret);
+
+    store.msg(ret.message);
+
+    // update project list
+    onClickUpdateProjectList();
+}
+
+///////////////////////////////////////////////////////////
+// Create project
+///////////////////////////////////////////////////////////
+const new_project = ref({
+    name: '',
+    description: '',
+})
+const visible_dialog_create_project = ref();
+
+async function onClickCreate() {
+    console.log('* clicked Create Project', new_project.value);
+
+    // send this project to backend
+    let project = await Jimin.createProject(new_project.value);    
+    console.log('* created project:', project);
+
+    store.msg('Created a new project: ' + project.name);
+
+    // update project list
+    onClickUpdateProjectList();
+
+    // close the dialog
+    visible_dialog_create_project.value = false;
+}
+
+///////////////////////////////////////////////////////////
+// Upload file
+///////////////////////////////////////////////////////////
 const fileupload = ref();
 store.fileupload = fileupload;
 const selected_project_for_file = ref();
@@ -154,10 +195,10 @@ const onClickUpload = () => {
                 store.msg(data.message);
 
                 // update file list
-                onClickProjectItem(store.currentProject);
+                onClickProjectItem(store.current_project);
 
                 // close the dialog
-                visible.value = false;
+                visible_dialog_upload_file.value = false;
             });
 
             
@@ -181,7 +222,7 @@ onMounted(() => {
             <Button text
                 class="menu-button"
                 v-tooltip.right="'Create a new project.'"
-                @click="onClickSave">
+                @click="visible_dialog_create_project = true">
                 <i class="fa-regular fa-save menu-icon"></i>
                 <span>
                     New Project
@@ -262,6 +303,9 @@ onMounted(() => {
                     <div class="text-lg font-bold">
                         <i class="fa-solid fa-list"></i>
                         All Projects
+                        <span v-if="store.projects.length > 0">
+                            ({{ store.projects.length }})
+                        </span>
                     </div>
                     <div class="panel-subtitle text-sm">
                     </div>
@@ -275,10 +319,28 @@ onMounted(() => {
 
     <div>
         <template v-for="project in store.projects">
-            <div class="w-full project-item"
-                @click="onClickProjectItem(project)">
-                <div class="project-name">
-                    {{ project.name }}
+            <div class="w-full project-item flex flex-row justify-between py-2 items-center">
+                <div class="flex flex-row"
+                    @click="onClickProjectItem(project)">
+                    <div class="project-name">
+                        <i class="fa-solid fa-suitcase mr-2"></i>
+                        <span v-if="project.project_id == store.current_project?.project_id"
+                            class="font-bold">
+                            {{ project.name }}
+                        </span>
+                        <span v-else>
+                            {{ project.name }}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <Button 
+                        severity="secondary"
+                        size="small"
+                        v-tooltip.bottom="'Delete this project.'"
+                        @click="onClickDeleteProject(project)">
+                        <i class="fa-solid fa-trash"></i>
+                    </Button>
                 </div>
             </div>
         </template>
@@ -293,7 +355,11 @@ onMounted(() => {
                 <div class="flex-col">
                     <div class="text-lg font-bold">
                         <i class="fa-solid fa-briefcase"></i>
-                        Project Detail
+                        Project Files
+
+                        <span v-if="store.files.length > 0">
+                            ({{ store.files.length }})
+                        </span>
                     </div>
                     <div class="panel-subtitle text-sm">
                     </div>
@@ -408,7 +474,7 @@ onMounted(() => {
 </div>
 
 <!-- Dialog for uploading a new file -->
-<Dialog v-model:visible="visible" 
+<Dialog v-model:visible="visible_dialog_upload_file" 
     modal 
     header="Upload file" 
     :style="{ width: '25rem' }">
@@ -438,11 +504,45 @@ onMounted(() => {
     </div>
 </Dialog>
 
+
+
+<!-- Dialog for create a new project -->
+<Dialog v-model:visible="visible_dialog_create_project" 
+    modal 
+    header="Create a new project" 
+    :style="{ width: '35rem' }">
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">
+        Create a new project with the following information.
+    </span>
+    <div class="flex flex-col justify-start gap-4 mb-4">
+        <div>
+            <label for="name" class="font-semibold w-24">
+                Project Name
+            </label>
+            <InputText v-model="new_project.name" 
+                placeholder="Enter a project name" 
+                class="w-full" />
+        </div>
+        
+        <div>
+            <label for="name" class="font-semibold w-24">
+                Project Description (optional)
+            </label>
+            <InputText v-model="new_project.description" 
+                placeholder="Enter a project description" 
+                class="w-full" />
+        </div>
+    </div>
+    <div class="flex justify-end gap-2">
+        <Button label="Create" @click="onClickCreate" severity="secondary" />
+    </div>
+</Dialog>
+
 </template>
 
 <style scoped>
 .project-list {
-    width: 400px;
+    width: 500px;
     margin: 0 0.5rem 0 0;
 }
 .project-detail {

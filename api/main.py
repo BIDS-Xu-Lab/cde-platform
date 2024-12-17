@@ -452,6 +452,61 @@ async def get_projects(
         'projects': formatProjects(projects)
     }
 
+@app.post('/create_project', tags=["project"])
+async def create_project(
+    request: Request,
+    project_data: Dict[str, Any],
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Create a project
+    '''
+    logging.info("create project")
+
+    project_data['user_id'] = current_user['user_id']
+    project_data['created'] = datetime.datetime.now()
+    project_data['updated'] = datetime.datetime.now()
+
+    # create project_id
+    project_data['project_id'] = str(uuid.uuid4())
+
+    result = await db.projects.insert_one(project_data)
+
+    return {
+        'success': True,
+        'message': 'Project created successfully',
+        'project': formatProject(project_data)
+    }
+
+@app.post('/delete_project', tags=["project"])
+async def delete_project(
+    request: Request,
+    project_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Delete a project
+    '''
+    logging.info("delete project")
+
+    project = await db.projects.find_one({
+        "project_id": project_id,
+        "user_id": current_user['user_id']
+    })
+
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    result = await db.projects.delete_one({
+        "project_id": project_id,
+        "user_id": current_user['user_id']
+    })
+
+    return {
+        'success': True,
+        'message': 'Project deleted successfully'
+    }
+
 
 ###########################################################
 # File related APIs
