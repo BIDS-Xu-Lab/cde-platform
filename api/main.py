@@ -437,6 +437,13 @@ async def upload_file(
     '''
     logging.debug('* got file data %s' % str(file_data))
 
+    # if project_id is not in the file_data, we will link the default project
+    if 'project_id' not in file_data:
+        file_data['project_id'] = 'default_project_id'
+
+    # save the file data
+    result = await db.files.insert_one(file_data)
+
     return {
         'success': True,
         'message': 'User document created or updated successfully'
