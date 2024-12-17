@@ -305,7 +305,9 @@ onMounted(() => {
         </div>
     </template>
 
-    <div>
+    <div class="flex flex-col h-full pr-2" 
+        :style="{ height: 'calc(100vh - 18rem)'}"
+        style="width: calc(100% + 1rem); overflow-y: auto;">
         <template v-for="file in store.files">
             <div class="w-full file-item flex flex-col py-2">
                 <div class="file-name flex flex-row justify-between">
