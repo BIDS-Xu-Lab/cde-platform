@@ -57,5 +57,12 @@ export const Jimin = {
 
     uploadFile: async function (file) {
         console.log('* upload file', file);
+
+        const rsp = await this.axios_instance.post(
+            '/upload_file', 
+            file
+        );
+
+        return rsp.data;
     },
 }

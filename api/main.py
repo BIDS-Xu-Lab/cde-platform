@@ -191,7 +191,9 @@ async def user_login(
         if os.environ['DEBUG_MODE']:
             # for debug mode, we can use any email
             _user = {
+                "user_id": user_login.email,
                 "email": user_login.email,
+                "role": "admin",
                 "name": "[Debug] " + user_login.email
             }
         else:
@@ -419,6 +421,26 @@ async def user_register(
 #     job["_id"] = str(job["_id"])  # Convert ObjectId to string for JSON compatibility
 #     return job
 
+
+###########################################################
+# File related APIs
+###########################################################
+
+@app.post("/upload_file", tags=["file"])
+async def upload_file(
+    request: Request,
+    file_data: Dict[str, Any],
+    current_user: dict = Depends(authJWTCookie), 
+):
+    '''
+    Upload a file
+    '''
+    logging.debug('* got file data %s' % str(file_data))
+
+    return {
+        'success': True,
+        'message': 'User document created or updated successfully'
+    }
 
 @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
 async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):

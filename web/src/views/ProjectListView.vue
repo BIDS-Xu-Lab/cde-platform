@@ -4,6 +4,7 @@ import Papa from 'papaparse'
 import { ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { Jimin } from '../Jimin';
+import * as toolbox from '../toolbox';
 
 const store = useDataStore();
 const visible = ref(false);
@@ -21,23 +22,23 @@ store.fileupload = fileupload;
 
 const onClickUpload = () => {
     // fileupload.value.upload();
-    let file = fileupload.files[0];
+    let file = fileupload.value.files[0];
     Papa.parse(file, {
         complete: (result) => {
             // Create an object representing the file to add to the store
             const csv = {
                 filename: file.name,
                 concepts: result.data,
-                created: formatDate(new Date()),
-                updated: formatDate(new Date()),
+                created: toolbox.formatDate(new Date()),
+                updated: toolbox.formatDate(new Date()),
                 // Add any additional properties you need
             };
             
-            csv["columns"] = Object.keys(file.concepts[0]);
+            csv["columns"] = Object.keys(csv.concepts[0]);
             csv["file_id"] = uuidv4();
             csv['user_id'] = store.user.user_id | 0;
             csv["currentConceptId"] = 0;
-            csv["updated"] = formatDate(new Date());
+            csv["updated"] = toolbox.formatDate(new Date());
             csv["concepts"] = csv.concepts.map((concept, index) => {
                 return {
                     ...concept,
