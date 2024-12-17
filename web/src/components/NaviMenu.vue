@@ -42,13 +42,15 @@ onMounted(() => {
             <i class="fa-solid fa-users"></i>
             Team
         </div> -->
-        <div class="navi-item"
+        <div v-show="store.working_file != null"
+            class="navi-item"
             @click="store.changeView('mapping')"
             :class="{'active-page': store.current_view=='mapping'}">
             <i class="fa-solid fa-arrows-left-right-to-line"></i>
             Mapping
         </div>
-        <div class="navi-item"
+        <div v-show="store.working_file != null" 
+            class="navi-item"
             @click="store.changeView('review')"
             :class="{'active-page': store.current_view=='review'}">
             <i class="fa-solid fa-code-compare"></i>

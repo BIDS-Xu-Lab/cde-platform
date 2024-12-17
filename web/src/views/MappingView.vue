@@ -81,7 +81,7 @@ const sort_term_options = [
 function onClickTerm(item) {
     console.log('* clicked term:', item);
 
-    store.working_term_idx = store.working_file.indexOf(item);
+    store.working_term_idx = store.working_file_concepts.indexOf(item);
     console.log('* clicked working_term_idx:', store.working_term_idx);
 }
 
@@ -286,9 +286,9 @@ onMounted(() => {
                         Term List
                     </div>
                     <div class="panel-subtitle text-sm">
-                        <b>{{ store.working_file.length }}</b>
+                        <b>{{ store.working_file_concepts.length }}</b>
                         /
-                        {{ store.working_file.length }}  
+                        {{ store.working_file_concepts.length }}  
                         mapped
                     </div>
                 </div>
@@ -313,7 +313,7 @@ onMounted(() => {
     <div class="term-list-box">
         <div class="term-list-scroller"
             :style="{ height: 'calc(100vh - 18rem)'}">
-            <template v-for="item in store.working_file">
+            <template v-for="item in store.working_file_concepts">
                 <div class="term-line"
                     :class="{ 'working-term': store.isWorkingTerm(item) }"
                     @click="onClickTerm(item)">

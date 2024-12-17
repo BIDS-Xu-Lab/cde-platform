@@ -37,7 +37,10 @@ state: () => ({
     // },
 
     // working file
-    working_file: [],
+    working_file: null,
+
+    // working file
+    working_file_concepts: [],
 
     // working term
     working_term_idx: -1,

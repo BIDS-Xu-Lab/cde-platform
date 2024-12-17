@@ -38,6 +38,18 @@ async function onClickProjectItem(project) {
     store.files = files;
 }
 
+async function onClickMapping() {
+    console.log('* clicked Mapping');
+}
+
+async function onClickDownload() {
+    console.log('* clicked Download');
+}
+
+async function onClickDeleteFile() {
+    console.log('* clicked Delete File');
+}
+
 const fileupload = ref();
 store.fileupload = fileupload;
 
@@ -221,9 +233,73 @@ onMounted(() => {
 
     <div>
         <template v-for="file in store.files">
-            <div class="w-full project-item">
-                <div class="project-name">
-                    {{ file.filename }}
+            <div class="w-full file-item flex flex-col py-2">
+                <div class="file-name flex flex-row justify-between">
+                    <div>
+                        {{ file.filename }}
+                    </div>
+                    <div>
+                        <Button 
+                            severity="secondary"
+                            size="small"
+                            class="mr-2"
+                            v-tooltip.bottom="'Mapping concepts for this file.'"
+                            @click="onClickMapping">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Mapping
+                        </Button>
+
+                        <Button 
+                            severity="info"
+                            size="small"
+                            class="mr-2"
+                            v-tooltip.bottom="'Download this file.'"
+                            @click="onClickDownload">
+                            <i class="fa-solid fa-download"></i>
+                            Download
+                        </Button>
+
+                        <Button 
+                            severity="danger"
+                            size="small"
+                            v-tooltip.bottom="'Delete this file.'"
+                            @click="onClickDeleteFile">
+                            <i class="fa-solid fa-trash"></i>
+                            Delete
+                        </Button>
+                    </div>
+                </div>
+                <div class="file-column flex flex-row">
+                    <div class="flex flex-col mr-2 w-col-select-box">
+                        <label for="">Term</label>
+                        <Select v-model="selectedCity" 
+                            :options="cities" 
+                            optionLabel="name" 
+                            placeholder="Select a term column" 
+                            class="w-full" />
+                    </div>
+
+                    <div class="flex flex-col w-col-select-box mr-2">
+                        <label for="">Description</label>
+                        <Select v-model="selectedCity" 
+                            :options="cities" 
+                            optionLabel="name" 
+                            placeholder="Select a description column" 
+                            class="w-full" />
+                    </div>
+
+                    <div class="flex flex-col w-col-select-box">
+                        <label for="">Value</label>
+                        <Select v-model="selectedCity" 
+                            :options="cities" 
+                            optionLabel="name" 
+                            placeholder="Select a value column" 
+                            class="w-full" />
+                    </div>
+                </div>
+                <div class="file-reviewers mt-2 py-2">
+                    Assigned Reviewers: 
+                    <i class="fa fa-user"></i>
                 </div>
             </div>
         </template>
@@ -265,5 +341,18 @@ onMounted(() => {
 }
 .project-item:hover {
     background-color: var(--bg-color-menu-hover);
-}   
+}
+
+.file-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bd-color);
+}
+
+.file-item:hover {
+    background-color: var(--bg-color-menu-hover);
+}
+
+.w-col-select-box {
+    width: 180px !important;
+}
 </style>
