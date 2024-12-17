@@ -39,7 +39,9 @@ async function onClickLogin() {
 
       <Card>
           <template #title>
-            User Login
+            <b>
+              User Login
+            </b>
           </template>
           <template #content>
               <div v-if="store.user == null"
