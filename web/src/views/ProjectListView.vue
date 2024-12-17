@@ -110,6 +110,9 @@ async function onClickMapping(file) {
 
     store.msg(ret.message);
 
+    // set working project to this project
+    store.working_project = store.currentProject;
+
     // set working file to this file
     store.working_file = file;
 

@@ -497,7 +497,7 @@ onMounted(() => {
 
 <style scoped>
 .select-sources {
-    width: 15rem;
+    width: 10rem;
 }
 
 .term-list {
