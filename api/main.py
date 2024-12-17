@@ -11,7 +11,7 @@ import sys
 import logging
 
 from fastapi import FastAPI, HTTPException, Request, Response, Body, Path, Depends, status, Security, APIRouter
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import APIKeyHeader, HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.security import APIKeyCookie
@@ -66,9 +66,15 @@ app.add_middleware(
 app.add_exception_handler(Exception, unhandled_exception_handler)
 
 # Create the Elasticsearch and MongoDB clients
-# es = Elasticsearch(os.environ['ES_PATH'])
-# mongo_client = AsyncIOMotorClient(os.environ['MONGODB_URI'])
-# db = mongo_client.get_database()
+es = Elasticsearch(os.environ['ES_PATH'])
+logging.info('* connected to elasticsearch at %s' % os.environ['ES_PATH'])
+
+mongo_client = AsyncIOMotorClient(os.environ['MONGODB_URI'])
+db = mongo_client.get_database()
+logging.info('* connected to mongodb at %s' % os.environ['MONGODB_URI'])
+
+
+
 # jobs_collection = db.jobs
 
 ###########################################################
@@ -125,6 +131,9 @@ def decode_jwt(token: str) -> dict:
         return None
     
 
+###########################################################
+# Authentication related scheme
+###########################################################
 cookie_scheme = APIKeyCookie(name="access_token", auto_error=True)
 async def authJWTCookie(access_token: str = Security(cookie_scheme)):
     '''
@@ -142,6 +151,24 @@ async def authJWTCookie(access_token: str = Security(cookie_scheme)):
         )
     
     return user
+
+
+x_token_header_scheme = APIKeyHeader(
+    name="x-token", 
+    auto_error=True
+)
+async def authXTokenHeader(x_token: str = Security(x_token_header_scheme)):
+    if os.environ['DEBUG_MODE']:
+        # you can any x-token if the debug mode is on
+        return 'debug_mode'
+    
+    if x_token not in os.environ['SECRET_TOKEN']:
+        raise HTTPException(
+            status_code=400, 
+            detail="X-Token header invalid"
+        )
+    
+    return x_token
 
 ###########################################################
 # User session related APIs
@@ -260,6 +287,116 @@ async def show_me(
     }
 
 
+@app.post("/refresh_token", tags=["user"])
+async def refresh_token(
+    request: Request,
+    response: Response,
+    current_user: dict = Depends(authJWTCookie), 
+):
+    '''
+    Refresh access token
+    '''
+    # _user = await users_repo.get_user_by_email(db_session, current_user['email'])
+    _user = current_user
+
+    # sign a new token
+    new_token = sign_jwt(_user)
+
+    response.set_cookie(
+        'access_token',
+        new_token,
+        httponly=True,
+        # secure=True,
+        samesite='strict',
+    )
+
+    return {
+        'success': True,
+    }
+
+
+###########################################################
+# Test related APIs
+###########################################################
+@app.get('/test/es', tags=["test"])
+async def test_es():
+    return es.info()
+
+@app.get('/test/mongo', tags=["test"])
+async def test_mongo():
+    return db.list_collection_names()
+
+
+
+###########################################################
+# Admin related APIs
+###########################################################
+
+@app.post("/init_database", tags=["admin"])
+async def init_database(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Initialize the database
+    '''
+    # create collection `users` if not exist
+    existing_collections = await db.list_collection_names()
+
+    for collection_name in ['users', 'jobs', 'projects']:
+        if collection_name in existing_collections:
+            logging.info(f"* found collection `{collection_name}` exists")
+        else:
+            # await db[collection_name].insert_one({"init": True})
+            await db.create_collection(collection_name)
+            logging.info(f"* created collection `{collection_name}`")
+
+    return {
+        'success': True,
+        'message': 'database initialized'
+    }
+
+
+class UserRegisterModel(BaseModel):
+    email: str | None
+    name: str | None
+    password: str | None
+
+@app.post("/register", tags=["user"])
+async def user_register(
+    request: Request,
+    user_register: UserRegisterModel,
+):
+    '''
+    User register
+    '''
+    if user_register.email is None or \
+        user_register.name == None or \
+        user_register.password == None:
+
+        raise HTTPException(status_code=400, detail="email, name, and password are required")
+    
+    # find user by email
+    _user = await db.users.get_user_by_email(db_session, email)
+
+    if _user is not None:
+        return {
+            'success': False,
+            'message': 'email already exists'
+        }
+
+    # ok, create a new user    
+    user = await users_repo.create_user(db_session, email, name)
+
+    return {
+        'success': False,
+        'message': 'user created',
+        'user': user
+    }
+
+###########################################################
+# OpenAI related APIs
+###########################################################
 # @app.post('/openai/job')
 # async def create_job(requests: Dict[str, Any] = Body(...)):
 #     request_data = {

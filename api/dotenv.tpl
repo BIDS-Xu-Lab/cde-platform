@@ -11,3 +11,9 @@ LOGGING_CONF='logging.conf'
 # For admin
 ADMIN_USERNAME='admin'
 ADMIN_PASSWORD='j29j-asdf-9234@jzz1'
+
+# For elasticsearch
+ES_PATH='http://elasticsearch:9200'
+
+# For mongodb
+MONGODB_URI='mongodb://mongo:27017/'
