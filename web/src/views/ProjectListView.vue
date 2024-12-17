@@ -8,26 +8,8 @@ import * as toolbox from '../toolbox';
 
 const store = useDataStore();
 const visible = ref(false);
-const selected_value = {"term": store.files.term, "description":store.files.description, "valueColumn": store.files.value}
-console.log(selected_value)
 
 function getSelectionOptions(file) {
-    // let selected_columns = [];
-    // // get all selected columns
-    // if (file.term) selected_columns.push(file.term);
-    // if (file.description) selected_columns.push(file.description);
-    // if (file.value) selected_columns.push(file.value);
-
-    // let options = [];
-    // for (let col of file.columns) {
-    //     if (selected_columns.includes(col)) continue;
-    //     options.push({
-    //         label: '[' + col + '] column',
-    //         code: col
-    //     });
-    // }
-    // return options;
-
     return file.columns.map((col) => {
         return {
             label: '[' + col + ']',
@@ -130,6 +112,7 @@ async function onClickDeleteFile() {
 
 const fileupload = ref();
 store.fileupload = fileupload;
+const selected_project_for_file = ref();
 
 const onClickUpload = () => {
     // fileupload.value.upload();
@@ -144,7 +127,7 @@ const onClickUpload = () => {
                 updated: toolbox.formatDate(new Date()),
                 // Add any additional properties you need
             };
-            
+            csv['project_id'] = selected_project_for_file.value | '';
             csv["columns"] = Object.keys(csv.concepts[0]);
             csv["file_id"] = uuidv4();
             csv['user_id'] = store.user.user_id | 0;
@@ -163,16 +146,14 @@ const onClickUpload = () => {
             csv["description"] = '';
             csv["value"] = '';
 
+            console.log('* generated csv:', csv);
+
             // send this csv to backend
             Jimin.uploadFile(csv);
         },
         header: true, // Set to true if your CSV has a header row
         skipEmptyLines: true,
     });
-};
-
-const onUpload = () => {
-    store.toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
 };
 
 onMounted(() => {
@@ -412,15 +393,32 @@ onMounted(() => {
 
 
 </div>
-<Dialog v-model:visible="visible" modal header="Edit Profile" :style="{ width: '25rem' }">
-    <span class="text-surface-500 dark:text-surface-400 block mb-8">Upload your .csv file.</span>
+
+<!-- Dialog for uploading a new file -->
+<Dialog v-model:visible="visible" 
+    modal 
+    header="Upload file" 
+    :style="{ width: '25rem' }">
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">
+        Upload your .csv file for the following project.
+    </span>
     <div class="flex flex-col justify-start gap-4 mb-4">
+        <div>
+            <label for="select_project" class="font-semibold w-24">
+                Select a Project
+            </label>
+            <Select v-model="selected_project_for_file" 
+                :options="store.projects"
+                optionLabel="name" 
+                optionValue="project_id"
+                placeholder="Select a project" 
+                class="w-full" />
+        </div>
         <label for="select_file" class="font-semibold w-24">Select File</label>
         <FileUpload ref="fileupload" 
             mode="basic" name="demo[]" 
             url="/api/upload" 
-            accept="text/csv" 
-            @upload="onUpload" />
+            accept="text/csv" />
     </div>
     <div class="flex justify-end gap-2">
         <Button label="Upload" @click="onClickUpload" severity="secondary" />

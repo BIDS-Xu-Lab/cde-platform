@@ -469,25 +469,19 @@ async def upload_file(
     logging.debug('* got file data %s' % str(file_data))
 
     # if project_id is not in the file_data, we will link the default project
-    if 'project_id' in file_data:
         # ok, so we already have the project specified from the upload
         # we can check this project exists
-        project = await db.projects.find_one({
-            "project_id": file_data['project_id']
-        })
-        logging.debug(f"* found project {project}")
+    project = await db.projects.find_one({
+        "project_id": file_data['project_id']
+    })
 
-    else:
-        # the submited file does not have a project_id
-        # we will add this file to the default project
-        file_data['project_id'] = 'default_project_id'
-
-        # get the project
-        project = await db.projects.find_one({
-            "project_id": file_data['project_id']
+    if project is None:
+        # try to find the default project
+        default_project = await db.projects.find_one({
+            "project_id": 'default_project_id'
         })
 
-        if project is None:
+        if default_project is None:
             # insert a default
             project = {
                 "project_id": 'default_project_id',
@@ -498,8 +492,16 @@ async def upload_file(
             }
 
             await db.projects.insert_one(project)
-            logging.debug(f"* saved default project {project['project_id']}")
-            
+            logging.debug(f"* created a default project {project['project_id']}")
+        else:
+            project = default_project
+            logging.debug(f"* use the default project {project['project_id']}")
+    else:
+        logging.debug(f"* found project {project['project_id']}")
+
+    # set the project_id using the project we found or created
+    file_data['project_id'] = project['project_id']
+        
     # get all the concepts from this file
     concepts = file_data.pop('concepts', None)
 
