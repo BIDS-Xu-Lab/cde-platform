@@ -24,6 +24,9 @@ async function onClickLogin() {
     store.user = data.user;
     store.gotoMain('dashboard');
 
+    // let store start refreshing token to remain session
+    store.startRefreshToken();
+
   } catch (error) {
     console.log('error:', error);
     msg.value = 'Login failed. Please check your email and password.';

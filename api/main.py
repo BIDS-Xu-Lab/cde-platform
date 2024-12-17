@@ -1,7 +1,9 @@
 import datetime
+import hashlib
 import time
 import os
 import asyncio
+import uuid
 from elasticsearch import Elasticsearch
 import jwt
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -9,6 +11,7 @@ import json
 import httpx
 import sys
 import logging
+from bson import json_util
 
 from fastapi import FastAPI, HTTPException, Request, Response, Body, Path, Depends, status, Security, APIRouter
 from fastapi.security import APIKeyHeader, HTTPBearer, HTTPAuthorizationCredentials
@@ -81,16 +84,16 @@ logging.info('* connected to mongodb at %s' % os.environ['MONGODB_URI'])
 # User authentication related functions
 ###########################################################
 # authentication for user related APIs
-auth_scheme = HTTPBearer()
-async def validate_token(http_auth: HTTPAuthorizationCredentials = Security(auth_scheme)):
-    token = http_auth.credentials
-    try:
-        return {
-            "user_id": "test_user",
-            "token": '123'
-        }
-    except Exception as e:
-        raise e
+# auth_scheme = HTTPBearer()
+# async def validate_token(http_auth: HTTPAuthorizationCredentials = Security(auth_scheme)):
+#     token = http_auth.credentials
+#     try:
+#         return {
+#             "user_id": "test_user",
+#             "token": '123'
+#         }
+#     except Exception as e:
+#         raise e
 
 
 def sign_jwt(user) -> Dict[str, str]:
@@ -188,40 +191,31 @@ async def user_login(
     '''
     try:
         # check whether this user is in the database
-        if os.environ['DEBUG_MODE']:
-            # for debug mode, we can use any email
-            _user = {
-                "user_id": user_login.email,
-                "email": user_login.email,
-                "role": "admin",
-                "name": "[Debug] " + user_login.email
-            }
-        else:
-            # find user by email
-            _user = await db.users.find_one({
-                "email": user_login.email
-            })
+        _user = await db.users.find_one({
+            "email": user_login.email
+        })
 
         logging.debug(f"User login: get user {_user}")
 
         if _user is None:
-            # create a new user
-            new_user = _user
-
-            # sign a jwt for this session
-            token = sign_jwt(new_user)
-            flag_new_user = True
-            
-            # fix new user bug
-            _user = new_user
-            
-            logging.info(f"User login: new user created {_user['email']}")
+            return {
+                "success": False,
+                "message": "User not found"
+            }
 
         else:
-            # update the session
-            token = sign_jwt(_user)
-            flag_new_user = False
-            logging.info(f"User login: existing user {_user['email']}")
+            # check password
+            if _user['password'] == hashlib.md5(user_login.password.encode()).hexdigest():
+                # ok, password is correct
+                user2 = formatUser(_user)
+                token = sign_jwt(user2)
+                logging.info(f"User login: existing user {user2['email']}")
+
+            else:
+                return {
+                    "success": False,
+                    "message": "Username or password incorrect"
+                }
 
         # set the cookie
         response.set_cookie(
@@ -235,9 +229,8 @@ async def user_login(
         return {
             "success": True,
             "message": "Login successfully",
-            "flag_new_user": flag_new_user,
             "access_token": token,
-            "user": _user
+            "user": formatUser(_user)
         }
 
     except Exception as e:
@@ -276,17 +269,15 @@ async def show_me(
     '''
     Get user private datasets
     '''
-    logging.info("get user private datasets")
+    logging.info("get myself")
 
-    # _user = await db.users.find_one({
-    #     "email": current_user['email']
-    # })
-
-    _user = current_user
+    _user = await db.users.find_one({
+        "email": current_user['email']
+    })
 
     return {
         'success': True,
-        'user': _user
+        'user': formatUser(_user)
     }
 
 
@@ -299,8 +290,8 @@ async def refresh_token(
     '''
     Refresh access token
     '''
-    # _user = await users_repo.get_user_by_email(db_session, current_user['email'])
     _user = current_user
+    logging.debug('* refresh token for user %s' % _user)
 
     # sign a new token
     new_token = sign_jwt(_user)
@@ -346,7 +337,14 @@ async def init_database(
     # create collection `users` if not exist
     existing_collections = await db.list_collection_names()
 
-    for collection_name in ['users', 'jobs', 'projects']:
+    for collection_name in [
+        'users',
+        'projects',
+        'files', 
+        'concepts',
+        'file_users',
+        'jobs',
+    ]:
         if collection_name in existing_collections:
             logging.info(f"* found collection `{collection_name}` exists")
         else:
@@ -380,21 +378,33 @@ async def user_register(
         raise HTTPException(status_code=400, detail="email, name, and password are required")
     
     # find user by email
-    _user = await db.users.get_user_by_email(db_session, email)
+    _user = await db.users.find_one({
+        "email": user_register.email
+    })
+    logging.debug(f"User register: get user {_user}")
 
-    if _user is not None:
-        return {
-            'success': False,
-            'message': 'email already exists'
+    if _user is None:
+        # create this user
+        new_user = {
+            "user_id": str(uuid.uuid4()),
+            "email": user_register.email,
+            "name": user_register.name,
+            "role": "user",
+            # hash the password to avoid saving plain text
+            "password": hashlib.md5(user_register.password.encode()).hexdigest()
         }
+        await db.users.insert_one(new_user)
 
-    # ok, create a new user    
-    user = await users_repo.create_user(db_session, email, name)
+        return {
+            'success': True,
+            'message': 'user created',
+            'user': formatUser(new_user)
+        }
 
     return {
         'success': False,
-        'message': 'user created',
-        'user': user
+        'message': 'user exists',
+        'user': formatUser(_user)
     }
 
 ###########################################################
@@ -420,6 +430,27 @@ async def user_register(
 #         raise HTTPException(status_code=404, detail="Job not found")
 #     job["_id"] = str(job["_id"])  # Convert ObjectId to string for JSON compatibility
 #     return job
+###########################################################
+# Project related APIs
+###########################################################
+@app.get('/get_projects', tags=["project"])
+async def get_projects(
+    request: Request,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get all projects of the current user
+    '''
+    logging.info("get projects")
+
+    projects = await db.projects.find({
+        "user_id": current_user['user_id']
+    }).to_list(length=None)
+    
+    return {
+        'success': True,
+        'projects': formatProjects(projects)
+    }
 
 
 ###########################################################
@@ -438,30 +469,70 @@ async def upload_file(
     logging.debug('* got file data %s' % str(file_data))
 
     # if project_id is not in the file_data, we will link the default project
-    if 'project_id' not in file_data:
+    if 'project_id' in file_data:
+        # ok, so we already have the project specified from the upload
+        # we can check this project exists
+        project = await db.projects.find_one({
+            "project_id": file_data['project_id']
+        })
+        logging.debug(f"* found project {project}")
+
+    else:
+        # the submited file does not have a project_id
+        # we will add this file to the default project
         file_data['project_id'] = 'default_project_id'
+
+        # get the project
+        project = await db.projects.find_one({
+            "project_id": file_data['project_id']
+        })
+
+        if project is None:
+            # insert a default
+            project = {
+                "project_id": 'default_project_id',
+                "name": "Default Project",
+                "user_id": current_user['user_id'], 
+                "created": datetime.datetime.now(),
+                "updated": datetime.datetime.now(),
+            }
+
+            await db.projects.insert_one(project)
+            logging.debug(f"* saved default project {project['project_id']}")
+            
+    # get all the concepts from this file
+    concepts = file_data.pop('concepts', None)
+
+    # save all concepts
+    if concepts:
+        for concept in concepts:
+            concept['file_id'] = file_data['file_id']
+            concept['user_id'] = current_user['user_id']
+            await db.concepts.insert_one(concept)
+        logging.debug(f"* saved {len(concepts)} concepts")
 
     # save the file data
     result = await db.files.insert_one(file_data)
+    logging.debug(f"* saved file {file_data['file_id']}")
 
     return {
         'success': True,
         'message': 'User document created or updated successfully'
     }
 
-@app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
-async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):
-    # Ensure the user_id in the body matches the user_id in the path
-    user_data['user_id'] = user_id
+# @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
+# async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):
+#     # Ensure the user_id in the body matches the user_id in the path
+#     user_data['user_id'] = user_id
     
-    result = await db.user_files.update_one(
-        {"user_id": user_id},
-        {"$set": user_data},
-        upsert=True
-    )
+#     result = await db.user_files.update_one(
+#         {"user_id": user_id},
+#         {"$set": user_data},
+#         upsert=True
+#     )
 
-    return {"message": "User document created or updated successfully", "user_data": user_data}
-    # raise HTTPException(status_code=500, detail="An error occurred while updating the user document.")
+#     return {"message": "User document created or updated successfully", "user_data": user_data}
+#     # raise HTTPException(status_code=500, detail="An error occurred while updating the user document.")
 
 
 # @app.get("/users/{user_id}", response_model=Dict[str, Any], summary="Retrieve User Document", dependencies=[Depends(validate_token)])
@@ -707,6 +778,25 @@ class BulkSearchRequest(BaseModel):
 #         return sources
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
+###########################################################
+# Helper functions
+###########################################################
+def formatUser(user):
+    user.pop('_id', None)
+    user.pop('password', None)
+
+    return user
+
+def formatProject(project):
+    project.pop('_id', None)
+
+    return project
+
+def formatProjects(projects):
+    for project in projects:
+        project.pop('_id', None)
+
+    return projects
 
 if __name__ == '__main__':
     import uvicorn

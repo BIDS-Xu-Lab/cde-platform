@@ -51,6 +51,29 @@ export const Jimin = {
         return rsp.data;
     },
 
+    refreshToken: async function () {
+        console.log('* refresh token');
+
+        const rsp = await this.axios_instance.post(
+            '/refresh_token'
+        );
+
+        return rsp.data;
+    },
+
+    ///////////////////////////////////////////////////////
+    // Project related
+    ///////////////////////////////////////////////////////
+    getProjects: async function() {
+        console.log('* get projects');
+
+        const rsp = await this.axios_instance.get(
+            '/get_projects'
+        );
+
+        return rsp.data;
+    },
+
     ///////////////////////////////////////////////////////
     // File related
     ///////////////////////////////////////////////////////

@@ -11,7 +11,6 @@ state: () => ({
 
     // current user
     // {
-    //     id: 1,
     //     user_id: 'aksl-123-12--123',
     //     name: 'Luke Skywalker',
     //     role: 'admin',
@@ -126,6 +125,15 @@ actions: {
 
     isLoggedIn() {
         return this.user != null;
+    },
+
+    startRefreshToken() {
+        // refresh the token every 10 minutes
+        setInterval(async () => {
+            if (this.isLoggedIn()) {
+                await Jimin.refreshToken();
+            }
+        }, 2 * 60 * 1000);
     },
 
     ///////////////////////////////////////////////////////
