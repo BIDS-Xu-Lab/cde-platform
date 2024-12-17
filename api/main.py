@@ -188,16 +188,17 @@ async def user_login(
     '''
     try:
         # check whether this user is in the database
-        _user = dict(
-            email=user_login.email, 
-            name=user_login.email + " name",
-        )
-
-        if user_login.password != "123":
-            raise HTTPException(
-                status_code=401, 
-                detail="Invalid password"
-            )
+        if os.environ['DEBUG_MODE']:
+            # for debug mode, we can use any email
+            _user = {
+                "email": user_login.email,
+                "name": "[Debug] " + user_login.email
+            }
+        else:
+            # find user by email
+            _user = await db.users.find_one({
+                "email": user_login.email
+            })
 
         logging.debug(f"User login: get user {_user}")
 
