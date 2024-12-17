@@ -15,7 +15,8 @@ onMounted(() => {
 </script>
 
 <template>
-<div id="navi">
+<div id="navi"
+    v-if="store.user != null">
     <div class="navi-left prevent-select">
         <div class="navi-item home"
             @click="onClickGoHome"
@@ -101,9 +102,8 @@ onMounted(() => {
             <span>
                 {{ store.user.name }}
             </span>
-            ,
             <span>
-                logout
+                <Button label="Logout" variant="link" @click="store.logout();" />
             </span>
         </div>
     </div>

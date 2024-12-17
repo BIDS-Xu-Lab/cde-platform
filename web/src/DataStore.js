@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { useToast } from "primevue/usetoast";
 import { hasResults } from './CDEHelper';
 import router from './router';
+import { Jimin } from './Jimin';
 
 export const useDataStore = defineStore('jarvis', {
 
@@ -124,6 +125,24 @@ actions: {
 
     isLoggedIn() {
         return this.user != null;
+    },
+
+    ///////////////////////////////////////////////////////
+    // User File
+    ///////////////////////////////////////////////////////
+    setUser(user) {
+        this.user = user;
+    },
+
+    async logout() {
+        // send a request to the server to logout
+        await Jimin.logout();
+
+        // then clear the user
+        this.user = null;
+
+        // redirect to the login page
+        this.gotoLogin();
     },
 
     ///////////////////////////////////////////////////////

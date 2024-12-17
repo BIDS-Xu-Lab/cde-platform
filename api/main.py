@@ -125,7 +125,7 @@ def decode_jwt(token: str) -> dict:
         return None
     
 
-cookie_scheme = APIKeyCookie(name="access_token", auto_error=False)
+cookie_scheme = APIKeyCookie(name="access_token", auto_error=True)
 async def authJWTCookie(access_token: str = Security(cookie_scheme)):
     '''
     This is the blocking version of the JWT authentication.
@@ -144,7 +144,7 @@ async def authJWTCookie(access_token: str = Security(cookie_scheme)):
     return user
 
 ###########################################################
-# User Related APIs
+# User session related APIs
 ###########################################################
 class UserLoginModel(BaseModel):
     email: str
@@ -165,6 +165,12 @@ async def user_login(
             email=user_login.email, 
             name=user_login.email + " name",
         )
+
+        if user_login.password != "123":
+            raise HTTPException(
+                status_code=401, 
+                detail="Invalid password"
+            )
 
         logging.debug(f"User login: get user {_user}")
 
@@ -213,7 +219,6 @@ async def user_login(
 async def user_logout(
     request: Request,
     response: Response,
-    req: dict,
 ):
     '''
     User logout

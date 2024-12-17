@@ -14,6 +14,7 @@ import SettingView from '../views/SettingView.vue';
 const store = useDataStore();
 
 import { onMounted } from 'vue';
+import { Jimin } from '../Jimin';
 
 onMounted(() => {
     console.log('* mounted Main');
@@ -21,7 +22,18 @@ onMounted(() => {
     if (store.isLoggedIn()) {
 
     } else {
-        store.gotoLogin();
+        // send a request to server to check if the user is still logged in
+        try {
+            Jimin.me().then((data) => {
+                store.setUser(data.user);
+            }).catch((error) => {
+                console.log('error:', error);
+                store.gotoLogin();
+            });
+        } catch (error) {
+            console.log('error:', error);
+            store.gotoLogin();
+        }
     }
 });
 
@@ -31,7 +43,8 @@ onMounted(() => {
 <NaviMenu />
 
 <!-- Main content -->
-<div id="main">
+<div id="main"
+    v-if="store.user != null">
 
 <!-- Dashboard view -->
 <DashboardView v-if="store.current_view == 'dashboard'" />

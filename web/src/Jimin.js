@@ -29,6 +29,17 @@ export const Jimin = {
         return rsp.data;
     },
 
+    logout: async function () {
+        console.log('* logout');
+
+        const rsp = await this.axios_instance.post(
+            '/logout'
+        );
+        // console.log(rsp.data);
+        
+        return rsp.data;
+    },
+
     me: async function () {
         console.log('* get me');
 
@@ -36,7 +47,7 @@ export const Jimin = {
             '/me'
         );
         // console.log(rsp.data);
-        
+
         return rsp.data;
     },
 }

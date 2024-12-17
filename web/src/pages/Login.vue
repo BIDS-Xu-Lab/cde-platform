@@ -9,30 +9,26 @@ const store = useDataStore();
 const email = ref('');
 const password = ref('');
 
+// server message
+const msg = ref('');
+
 // count down
 const count_down = ref(5);
 let interval = null;
 
 async function onClickLogin() {
-  // send 
-  let data = await Jimin.login(email.value, password.value);
+  // login
+  try {
+    let data = await Jimin.login(email.value, password.value);
+    // update username
+    store.user = data.user;
+    store.gotoMain('dashboard');
 
-  // update username
-  store.user = data.user;
+  } catch (error) {
+    console.log('error:', error);
+    msg.value = 'Login failed. Please check your email and password.';
+  }
 
-  // welcome message
-  count_down.value = 5;
-
-  interval = setInterval(() => {
-    count_down.value -= 1;
-    if (count_down.value == 0) {
-      // clear interval
-      clearInterval(interval);
-
-      // redirect to dashboard
-      store.changeView('dashboard');
-    }
-  }, 1000);
 }
 
 </script>
@@ -48,6 +44,11 @@ async function onClickLogin() {
           <template #content>
               <div v-if="store.user == null"
                 class="login-info">
+                <div v-if="msg != ''">
+                  <Message severity="warn">
+                    {{ msg }}
+                  </Message>
+                </div>
                 <label for="">Email:</label>
                 <InputText v-model="email" type="text" placeholder="Email" />
 
@@ -61,8 +62,9 @@ async function onClickLogin() {
                   Welcome, {{ store.user.name }}
                 </p>
                 <p>
-                  Redirecting to dashboard ... If not, you can click <br>
-                  <Button @click="store.gotoMain('dashboard')">
+                  Redirecting to dashboard ... <br>
+                  If not, you can click 
+                  <Button @click="store.gotoMain('dashboard')" variant="link">
                     <i class="fa fa-dashboard"></i>
                     Dashboard
                   </Button>
