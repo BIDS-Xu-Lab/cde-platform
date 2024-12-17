@@ -106,5 +106,16 @@ export const Jimin = {
         );
 
         return rsp.data.files;
-    }
+    },
+
+    updateFile: async function (file) {
+        console.log('* update file', file);
+
+        const rsp = await this.axios_instance.post(
+            '/update_file',
+            file
+        );
+
+        return rsp.data;
+    },
 }

@@ -145,6 +145,15 @@ actions: {
         }, 3 * 60 * 1000);
     },
 
+    msg(message, title='Message', type='info') {
+        this.toast.add({
+            severity: type,
+            summary: title,
+            detail: message,
+            life: 3000
+        });
+    },
+
     ///////////////////////////////////////////////////////
     // User File
     ///////////////////////////////////////////////////////

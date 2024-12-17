@@ -542,6 +542,40 @@ async def get_files_by_project(
         'files': formatFiles(files)
     }
 
+@app.post('/update_file', tags=["file"])
+async def update_file(
+    request: Request,
+    file_data: Dict[str, Any],
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Update a file
+    '''
+    logging.info("update file")
+
+    # get the file_id
+    file_id = file_data['file_id']
+
+    # get the file
+    file = await db.files.find_one({
+        "file_id": file_id
+    })
+
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # update the file
+    result = await db.files.update_one(
+        {"file_id": file_id},
+        {"$set": file_data},
+    )
+
+    return {
+        'success': True,
+        'message': 'File updated successfully',
+        'file': formatFile(file_data)
+    }
+
 # @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
 # async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):
 #     # Ensure the user_id in the body matches the user_id in the path

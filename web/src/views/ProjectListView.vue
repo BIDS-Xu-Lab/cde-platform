@@ -8,6 +8,69 @@ import * as toolbox from '../toolbox';
 
 const store = useDataStore();
 const visible = ref(false);
+const selected_value = {"term": store.files.term, "description":store.files.description, "valueColumn": store.files.value}
+console.log(selected_value)
+
+function getSelectionOptions(file) {
+    // let selected_columns = [];
+    // // get all selected columns
+    // if (file.term) selected_columns.push(file.term);
+    // if (file.description) selected_columns.push(file.description);
+    // if (file.value) selected_columns.push(file.value);
+
+    // let options = [];
+    // for (let col of file.columns) {
+    //     if (selected_columns.includes(col)) continue;
+    //     options.push({
+    //         label: '[' + col + '] column',
+    //         code: col
+    //     });
+    // }
+    // return options;
+
+    return file.columns.map((col) => {
+        return {
+            label: '[' + col + ']',
+            code: col
+        };
+    });
+}
+
+function hasDuplicateColumns(file, column) {
+    // TODO: optimize this function
+    if (file[column] == '') return null;
+
+    if (column == 'term') {
+        if (file.description == file.term) {
+            return 'description';
+        }
+        if (file.value == file.term) {
+            return 'value';
+        }
+        return null;
+    }
+
+    if (column == 'description') {
+        if (file.term == file.description) {
+            return 'term';
+        }
+        if (file.value == file.description) {
+            return 'value';
+        }
+        return null;
+    }
+
+    if (column == 'value') {
+        if (file.term == file.value) {
+            return 'term';
+        }
+        if (file.description == file.value) {
+            return 'description';
+        }
+        return null;
+    }
+}
+
 function onClickSave() {
     console.log('* clicked Save');
 }
@@ -38,8 +101,20 @@ async function onClickProjectItem(project) {
     store.files = files;
 }
 
-async function onClickMapping() {
+async function onClickMapping(file) {
     console.log('* clicked Mapping');
+
+    // first, update the selected columns
+    let ret = await Jimin.updateFile(file);
+    console.log('* updated file:', ret);
+
+    store.msg(ret.message);
+
+    // set working file to this file
+    store.working_file = file;
+
+    // then, switch to the mapping view
+    store.changeView('mapping');
 }
 
 async function onClickDownload() {
@@ -80,6 +155,10 @@ const onClickUpload = () => {
                     id: index,
                 };
             });
+            // Empty preselected items
+            csv["term"] = '';
+            csv["description"] = '';
+            csv["value"] = '';
 
             // send this csv to backend
             Jimin.uploadFile(csv);
@@ -235,72 +314,94 @@ onMounted(() => {
         <template v-for="file in store.files">
             <div class="w-full file-item flex flex-col py-2">
                 <div class="file-name flex flex-row justify-between">
-                    <div>
+                    <div class="text-lg font-bold">
                         {{ file.filename }}
                     </div>
-                    <div>
-                        <Button 
-                            severity="secondary"
-                            size="small"
-                            class="mr-2"
-                            v-tooltip.bottom="'Mapping concepts for this file.'"
-                            @click="onClickMapping">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            Mapping
-                        </Button>
-
-                        <Button 
-                            severity="info"
-                            size="small"
-                            class="mr-2"
-                            v-tooltip.bottom="'Download this file.'"
-                            @click="onClickDownload">
-                            <i class="fa-solid fa-download"></i>
-                            Download
-                        </Button>
-
-                        <Button 
-                            severity="danger"
-                            size="small"
-                            v-tooltip.bottom="'Delete this file.'"
-                            @click="onClickDeleteFile">
-                            <i class="fa-solid fa-trash"></i>
-                            Delete
-                        </Button>
-                    </div>
+                    <div class="file-reviewers mt-2 py-2">
+                    Assigned Reviewers: 
+                    <i class="fa fa-user"></i>
                 </div>
-                <div class="file-column flex flex-row">
+                </div>
+                <div class="file-column flex flex-row mb-2">
                     <div class="flex flex-col mr-2 w-col-select-box">
                         <label for="">Term</label>
-                        <Select v-model="selectedCity" 
-                            :options="cities" 
-                            optionLabel="name" 
+                        <Select v-model="file.term" 
+                            :options="getSelectionOptions(file)"
+                            optionLabel="label" 
+                            optionValue="code"
                             placeholder="Select a term column" 
                             class="w-full" />
+                        <div>
+                            <span v-if="hasDuplicateColumns(file, 'term')" 
+                                class="text-xs text-red-500">
+                                Duplicate columns
+                            </span>
+                        </div>
                     </div>
 
                     <div class="flex flex-col w-col-select-box mr-2">
                         <label for="">Description</label>
-                        <Select v-model="selectedCity" 
-                            :options="cities" 
-                            optionLabel="name" 
+                        <Select v-model="file.description" 
+                            :options="getSelectionOptions(file)"
+                            optionLabel="label" 
+                            optionValue="code"
                             placeholder="Select a description column" 
                             class="w-full" />
+                        <div>
+                            <span v-if="hasDuplicateColumns(file, 'description')" 
+                                class="text-xs text-red-500">
+                                Duplicate columns
+                            </span>
+                        </div>
                     </div>
 
                     <div class="flex flex-col w-col-select-box">
                         <label for="">Value</label>
-                        <Select v-model="selectedCity" 
-                            :options="cities" 
-                            optionLabel="name" 
+                        <Select v-model="file.value" 
+                            :options="getSelectionOptions(file)"
+                            optionLabel="label" 
+                            optionValue="code"
                             placeholder="Select a value column" 
                             class="w-full" />
+                        <div>
+                            <span v-if="hasDuplicateColumns(file, 'value')" 
+                                class="text-xs text-red-500">
+                                Duplicate columns
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="file-reviewers mt-2 py-2">
-                    Assigned Reviewers: 
-                    <i class="fa fa-user"></i>
+                <div class="file-name flex flex-row justify-end">
+                    <Button 
+                        severity="secondary"
+                        size="small"
+                        class="mr-2"
+                        v-tooltip.bottom="'Mapping concepts for this file.'"
+                        @click="onClickMapping(file)">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Mapping
+                    </Button>
+
+                    <Button 
+                        severity="info"
+                        size="small"
+                        class="mr-2"
+                        v-tooltip.bottom="'Download this file.'"
+                        @click="onClickDownload">
+                        <i class="fa-solid fa-download"></i>
+                        Download
+                    </Button>
+
+                    <Button 
+                        severity="danger"
+                        size="small"
+                        v-tooltip.bottom="'Delete this file.'"
+                        @click="onClickDeleteFile">
+                        <i class="fa-solid fa-trash"></i>
+                        Delete
+                    </Button>
                 </div>
+
             </div>
         </template>
     </div>
