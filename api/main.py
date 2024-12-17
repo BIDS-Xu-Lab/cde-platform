@@ -420,19 +420,19 @@ async def user_register(
 #     return job
 
 
-# @app.put("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
-# async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):
-#     # Ensure the user_id in the body matches the user_id in the path
-#     user_data['user_id'] = user_id
+@app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
+async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):
+    # Ensure the user_id in the body matches the user_id in the path
+    user_data['user_id'] = user_id
     
-#     result = await db.user_files.update_one(
-#         {"user_id": user_id},
-#         {"$set": user_data},
-#         upsert=True
-#     )
+    result = await db.user_files.update_one(
+        {"user_id": user_id},
+        {"$set": user_data},
+        upsert=True
+    )
 
-#     return {"message": "User document created or updated successfully", "user_data": user_data}
-#     # raise HTTPException(status_code=500, detail="An error occurred while updating the user document.")
+    return {"message": "User document created or updated successfully", "user_data": user_data}
+    # raise HTTPException(status_code=500, detail="An error occurred while updating the user document.")
 
 
 # @app.get("/users/{user_id}", response_model=Dict[str, Any], summary="Retrieve User Document", dependencies=[Depends(validate_token)])

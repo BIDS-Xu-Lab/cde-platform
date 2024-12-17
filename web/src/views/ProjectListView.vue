@@ -1,10 +1,64 @@
 <script setup>
 import { useDataStore } from '../DataStore';
-const store = useDataStore();
+import Papa from 'papaparse'
+import { ref } from 'vue';
+import { v4 as uuidv4 } from 'uuid';
+import { Jimin } from '../Jimin';
 
+const store = useDataStore();
+const visible = ref(false);
 function onClickSave() {
     console.log('* clicked Save');
 }
+
+function onClickNewFile() {
+    console.log('* clicked New File');
+    visible.value = true;
+}
+
+const fileupload = ref();
+store.fileupload = fileupload;
+
+const onClickUpload = () => {
+    // fileupload.value.upload();
+    let file = fileupload.files[0];
+    Papa.parse(file, {
+        complete: (result) => {
+            // Create an object representing the file to add to the store
+            const csv = {
+                filename: file.name,
+                concepts: result.data,
+                created: formatDate(new Date()),
+                updated: formatDate(new Date()),
+                // Add any additional properties you need
+            };
+            
+            csv["columns"] = Object.keys(file.concepts[0]);
+            csv["file_id"] = uuidv4();
+            csv['user_id'] = store.user.user_id | 0;
+            csv["currentConceptId"] = 0;
+            csv["updated"] = formatDate(new Date());
+            csv["concepts"] = csv.concepts.map((concept, index) => {
+                return {
+                    ...concept,
+                    // user_id: this.userId,
+                    file_id: csv["file_id"],
+                    id: index,
+                };
+            });
+
+            // send this csv to backend
+            Jimin.uploadFile(csv);
+        },
+        header: true, // Set to true if your CSV has a header row
+        skipEmptyLines: true,
+    });
+};
+
+const onUpload = () => {
+    store.toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+};
+
 </script>
 
 <template>
@@ -130,7 +184,20 @@ function onClickSave() {
 
 
 </div>
-
+<Dialog v-model:visible="visible" modal header="Edit Profile" :style="{ width: '25rem' }">
+            <span class="text-surface-500 dark:text-surface-400 block mb-8">Upload your .csv file.</span>
+            <div class="flex flex-col justify-start gap-4 mb-4">
+                <label for="select_file" class="font-semibold w-24">Select File</label>
+                <FileUpload ref="fileupload" 
+                    mode="basic" name="demo[]" 
+                    url="/api/upload" 
+                    accept="text/csv" 
+                    @upload="onUpload" />
+            </div>
+            <div class="flex justify-end gap-2">
+                <Button label="Upload" @click="onClickUpload" severity="secondary" />
+            </div>
+</Dialog>
 
 </template>
 

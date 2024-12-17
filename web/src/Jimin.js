@@ -50,4 +50,12 @@ export const Jimin = {
 
         return rsp.data;
     },
+
+    ///////////////////////////////////////////////////////
+    // File related
+    ///////////////////////////////////////////////////////
+
+    uploadFile: async function (file) {
+        console.log('* upload file', file);
+    },
 }

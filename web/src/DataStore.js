@@ -12,6 +12,7 @@ state: () => ({
     // current user
     // {
     //     id: 1,
+    //     user_id: 'aksl-123-12--123',
     //     name: 'Luke Skywalker',
     //     role: 'admin',
     //     email: "luke.skywalker@yale.edu"
