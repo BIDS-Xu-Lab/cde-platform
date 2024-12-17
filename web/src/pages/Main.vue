@@ -26,6 +26,7 @@ onMounted(() => {
         try {
             Jimin.me().then((data) => {
                 store.setUser(data.user);
+                store.startRefreshToken();
             }).catch((error) => {
                 console.log('error:', error);
                 store.gotoLogin();

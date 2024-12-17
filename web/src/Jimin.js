@@ -71,7 +71,11 @@ export const Jimin = {
             '/get_projects'
         );
 
-        return rsp.data;
+        if (rsp.data.success === false) {
+            return [];
+        }
+
+        return rsp.data.projects;
     },
 
     ///////////////////////////////////////////////////////

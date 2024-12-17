@@ -21,6 +21,9 @@ state: () => ({
     // current current_view
     current_view: 'dashboard',
 
+    // all projects belong to the current user
+    projects: [],
+
     // working project
     working_project: {
         id: 1,
@@ -128,12 +131,11 @@ actions: {
     },
 
     startRefreshToken() {
+        console.log('* start refreshing token');
         // refresh the token every 10 minutes
         setInterval(async () => {
-            if (this.isLoggedIn()) {
-                await Jimin.refreshToken();
-            }
-        }, 2 * 60 * 1000);
+            Jimin.refreshToken();
+        }, 3 * 60 * 1000);
     },
 
     ///////////////////////////////////////////////////////

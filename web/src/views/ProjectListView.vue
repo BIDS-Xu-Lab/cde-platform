@@ -1,7 +1,7 @@
 <script setup>
 import { useDataStore } from '../DataStore';
 import Papa from 'papaparse'
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { Jimin } from '../Jimin';
 import * as toolbox from '../toolbox';
@@ -15,6 +15,21 @@ function onClickSave() {
 function onClickNewFile() {
     console.log('* clicked New File');
     visible.value = true;
+}
+
+async function onClickUpdateProjectList() {
+    console.log('* clicked Update Project List');
+
+    // get all projects
+    let projects = await Jimin.getProjects();
+
+    // update store
+    store.projects = projects;
+}
+
+function onClickProjectItem(project) {
+    console.log('* clicked Project Item', project);
+    store.currentProject = project;
 }
 
 const fileupload = ref();
@@ -60,6 +75,11 @@ const onUpload = () => {
     store.toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
 };
 
+onMounted(() => {
+    console.log('* mounted ProjectListView');
+    onClickUpdateProjectList();
+});
+
 </script>
 
 <template>
@@ -79,7 +99,7 @@ const onUpload = () => {
             <Button text
                 class="menu-button"
                 v-tooltip.bottom="'Update project list.'"
-                @click="onClickSave">
+                @click="onClickUpdateProjectList">
                 <i class="fa-solid fa-rotate menu-icon"></i>
                 <span>
                     Update List
@@ -160,6 +180,17 @@ const onUpload = () => {
             </div>
         </div>
     </template>
+
+    <div>
+        <template v-for="project in store.projects">
+            <div class="w-full project-item"
+                @click="onClickProjectItem(project)">
+                <div class="project-name">
+                    {{ project.name }}
+                </div>
+            </div>
+        </template>
+    </div>
 </Panel>
 
 
@@ -210,4 +241,13 @@ const onUpload = () => {
 .project-detail {
     width: calc(100% - 400px);
 }
+
+.project-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bd-color);
+    cursor: pointer;
+}
+.project-item:hover {
+    background-color: var(--bg-color-menu-hover);
+}   
 </style>
