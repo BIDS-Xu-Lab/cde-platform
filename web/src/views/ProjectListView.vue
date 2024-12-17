@@ -149,7 +149,18 @@ const onClickUpload = () => {
             console.log('* generated csv:', csv);
 
             // send this csv to backend
-            Jimin.uploadFile(csv);
+            Jimin.uploadFile(csv).then((data) => {
+                console.log('* uploaded file:', data);
+                store.msg(data.message);
+
+                // update file list
+                onClickProjectItem(store.currentProject);
+
+                // close the dialog
+                visible.value = false;
+            });
+
+            
         },
         header: true, // Set to true if your CSV has a header row
         skipEmptyLines: true,
