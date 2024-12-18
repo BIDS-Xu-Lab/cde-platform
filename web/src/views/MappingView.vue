@@ -125,7 +125,9 @@ onMounted(() => {
     console.log('* mounted MappingView');
 
     // load source data
-    onClickRefreshList();
+    if (store.mapping.sources.length == 0) {
+        onClickRefreshList();
+    }
 });
 </script>
 
