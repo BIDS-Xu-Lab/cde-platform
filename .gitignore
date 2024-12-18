@@ -308,3 +308,6 @@ settings.toml
 # dev data
 mongo-data/
 es-data/
+
+# logs
+app.log.*
