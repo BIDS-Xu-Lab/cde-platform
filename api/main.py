@@ -663,7 +663,13 @@ async def upload_file(
     # save all concepts
     if concepts:
         for concept in concepts:
+            # add a concept_id
+            concept['concept_id'] = str(uuid.uuid4())
+            # add the project_id
+            concept['project_id'] = project['project_id']
+            # add the file_id
             concept['file_id'] = file_data['file_id']
+            # add the user_id
             concept['user_id'] = current_user['user_id']
             await db.concepts.insert_one(concept)
         logging.debug(f"* saved {len(concepts)} concepts")

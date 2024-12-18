@@ -390,20 +390,22 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="term-concept">
-                        <div class="flex items-center text-small">
-                            <template v-if="CDEHelper.hasSelectedResult(item)">
-                                <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>
-                                <span>
-                                    {{ CDEHelper.getSelectedResult(item)?.conceptSource }} / 
-                                    {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
-                                </span>
-                            </template>
-                            <template v-else>
-                                <i class="fa fa-exclamation-triangle mr-1"></i>
-                                No concept selected
-                            </template>
+                        <div class="flex flex-col text-small">
+                            <div class="flex items-center">
+                                <template v-if="CDEHelper.hasSelectedResult(item)">
+                                    <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>
+                                    <span>
+                                        {{ CDEHelper.getSelectedResult(item)?.conceptSource }} / 
+                                        {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
+                                    </span>
+                                </template>
+                                <template v-else>
+                                    <i class="fa fa-exclamation-triangle mr-1"></i>
+                                    No concept selected
+                                </template>
+                            </div>
                         </div>
-                        <div>
+                        <div class="mr-1">
                             <Button v-if="CDEHelper.hasSelectedResult(item)"
                                 size="small"
                                 icon="pi pi-times"
@@ -603,7 +605,7 @@ onMounted(() => {
 .term-concept {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
 }
 .term-additional {

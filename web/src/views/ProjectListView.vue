@@ -292,7 +292,7 @@ onMounted(() => {
                 </span>
             </Button>
 
-            <Button text
+            <!-- <Button text
                 class="menu-button"
                 v-tooltip.bottom="'Update project list.'"
                 @click="onClickSave">
@@ -300,7 +300,7 @@ onMounted(() => {
                 <span>
                     Update List
                 </span>
-            </Button>
+            </Button> -->
         </div>
         <div class="menu-group-title">
             File
