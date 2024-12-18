@@ -55,7 +55,7 @@ state: () => ({
         sort_terms_by: null,
         filter_terms_by: '',
 
-        data_col_name: 'element',
+        data_col_term: 'element',
         data_col_description: 'description',
         data_col_value: 'value',
     },

@@ -8,6 +8,9 @@ import * as toolbox from '../toolbox';
 
 const store = useDataStore();
 const visible_dialog_upload_file = ref(false);
+// const visible_dialog_move_file = ref(false);
+// const selected_project_for_move = ref();
+// const selected_file_for_move = ref();
 
 function getSelectionOptions(file) {
     return file.columns.map((col) => {
@@ -19,38 +22,27 @@ function getSelectionOptions(file) {
 }
 
 function anyDuplicateColumns(file, column) {
-    // TODO: optimize this function
-    if (file[column] == '' || file[column] == null) return null;
+    // Return null if the column is empty
+    if (!file[column]) return null;
 
-    if (column == 'term') {
-        if (file.description == file.term) {
-            return 'description';
+    // Define the columns to check against
+    const columnsToCheck = {
+        term: ['description', 'value'],
+        description: ['term', 'value'],
+        value: ['term', 'description']
+    };
+
+    // Get the columns we need to compare with
+    const comparisons = columnsToCheck[column];
+
+    // Check if the current column value matches any other column
+    for (const compareColumn of comparisons) {
+        if (file[column] === file[compareColumn]) {
+            return compareColumn;
         }
-        if (file.value == file.term) {
-            return 'value';
-        }
-        return null;
     }
 
-    if (column == 'description') {
-        if (file.term == file.description) {
-            return 'term';
-        }
-        if (file.value == file.description) {
-            return 'value';
-        }
-        return null;
-    }
-
-    if (column == 'value') {
-        if (file.term == file.value) {
-            return 'term';
-        }
-        if (file.description == file.value) {
-            return 'description';
-        }
-        return null;
-    }
+    return null;
 }
 
 function onClickSave() {
@@ -85,11 +77,28 @@ async function onClickProjectItem(project) {
 
 async function onClickMapping(file) {
     console.log('* clicked Mapping');
+    // Check if any required column is empty
+    if (!file.term || !file.description || !file.value) {
+        store.msg('Please select all required columns (term, description, and value).', 'Error', 'error');
+        return;
+    }
 
+    // Check for duplicates using existing anyDuplicateColumns function
+    const duplicateColumn = anyDuplicateColumns(file, 'term') || 
+                          anyDuplicateColumns(file, 'description') || 
+                          anyDuplicateColumns(file, 'value');
+    if (duplicateColumn) {
+        store.msg("Found duplicate column", 'Error', 'error');
+        return;
+    }
     // first, update the selected columns
     let ret = await Jimin.updateFile(file);
-    console.log('* updated file:', ret);
+    store.mapping.data_col_term = file["term"]
+    store.mapping.data_col_description = file["description"]
+    store.mapping.data_col_value = file["value"]
 
+    console.log('* updated file:', ret);
+    console.log('* updated mapping:', store.mapping);
     store.msg(ret.message);
 
     // set working project to this project
@@ -118,6 +127,18 @@ async function onClickDownload(file) {
     console.log('* clicked Download');
 }
 
+// async function onClickMove() {
+//     console.log('* clicked Move');
+//     visible_dialog_move_file.value = true;
+//     await Jimin.moveFile(selected_file_for_move.file_id, selected_project_for_move.project_id);
+//     store.msg('Moved file to ' + project.name);
+//     selected_file_for_move = null;
+//     selected_project_for_move = null;
+//     onClickProjectItem(project);
+    
+    
+//     // move this file to selected project
+// }
 async function onClickDeleteFile(file) {
     console.log('* clicked Delete File');
 
@@ -128,6 +149,12 @@ async function onClickDeleteFile(file) {
 
     // delete this file
     let ret = await Jimin.deleteFile(file.file_id);
+    // if this file is the working file, reset the working file
+    if (file.file_id == store.working_file.file_id) {
+        store.working_file = null;
+        store.working_file_concepts = [];
+        store.working_concept = null;
+    }
 
     store.msg(ret.message);
 
@@ -443,7 +470,7 @@ onMounted(() => {
                         <div>
                             <span v-if="anyDuplicateColumns(file, 'term') != null" 
                                 class="text-xs text-red-500">
-                                Duplicate columns
+                                Duplicated with {{ anyDuplicateColumns(file, 'term') }}
                             </span>
                         </div>
                     </div>
@@ -459,7 +486,7 @@ onMounted(() => {
                         <div>
                             <span v-if="anyDuplicateColumns(file, 'description') != null" 
                                 class="text-xs text-red-500">
-                                Duplicate columns
+                                Duplicated with {{ anyDuplicateColumns(file, 'description') }}
                             </span>
                         </div>
                     </div>
@@ -475,7 +502,7 @@ onMounted(() => {
                         <div>
                             <span v-if="anyDuplicateColumns(file, 'value') != null" 
                                 class="text-xs text-red-500">
-                                Duplicate columns
+                                Duplicated with {{ anyDuplicateColumns(file, 'value') }}
                             </span>
                         </div>
                     </div>
@@ -501,6 +528,16 @@ onMounted(() => {
                         <i class="fa-solid fa-download"></i>
                         Download
                     </Button>
+
+                    <!-- <Button 
+                        severity="help"
+                        size="small"
+                        class="mr-2"
+                        v-tooltip.bottom="'Move this file.'"
+                        @click="visible_dialog_move_file = true; selected_file_for_move = file">
+                        <i class="fa-solid fa-angles-right"></i>
+                        move
+                    </Button> -->
 
                     <Button 
                         severity="danger"
@@ -584,6 +621,32 @@ onMounted(() => {
         <Button label="Create" @click="onClickCreate" severity="secondary" />
     </div>
 </Dialog>
+
+<!-- <Dialog v-model:visible="visible_dialog_move_file" 
+    modal 
+    header="Move file" 
+    :style="{ width: '25rem' }">
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">
+        Move this file to another project.
+    </span>
+    <div class="flex flex-col justify-start gap-4 mb-4">
+        <div>
+            <label for="select_project" class="font-semibold w-24">
+                Select Target Project
+            </label>
+            <Select v-model="selected_project_for_move" 
+                :options="store.projects"
+                optionLabel="name" 
+                optionValue="project_id"
+                placeholder="Select a project" 
+                class="w-full" />
+        </div>
+    </div>
+    <div class="flex justify-end gap-2">
+        <Button label="Move" @click="onClickMove()" severity="secondary" />
+    </div>
+</Dialog> -->
+
 
 </template>
 

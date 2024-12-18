@@ -386,7 +386,7 @@ onMounted(() => {
                             </template>
                         </div>
                         <div>
-                            {{ item[store.mapping.data_col_name] }}
+                            {{ item[store.mapping.data_col_term] }}
                         </div>
                     </div>
                     <div class="term-concept">
@@ -419,7 +419,7 @@ onMounted(() => {
                     </div>
                     <div class="term-detail">
                         Description:
-                        {{ item.description }}
+                        {{ item[store.mapping.data_col_description] }}
                     </div>
 
                     <div class="term-additional">
@@ -448,7 +448,7 @@ onMounted(() => {
                         <i class="fa-solid fa-cubes"></i>
                         CDE Mapping 
                         <b v-if="store.working_term">
-                            {{ store.working_term?.[store.mapping.data_col_name] }}
+                            {{ store.working_term?.[store.mapping.data_col_term] }}
                         </b>
                     </div>
                     <div class="panel-subtitle text-sm">

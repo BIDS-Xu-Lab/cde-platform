@@ -54,12 +54,12 @@ async function onClickLogout() {
     <div style="font-size: 1rem; font-style: italic;">
         Create, share, and visualize Common Data Elements (CDEs) in a collaborative environment
     </div>
-    <div id="logged_out_view">
+    <!-- <div id="logged_out_view">
         <button type="button" 
         @click="onClickSignin">Sign in</button>
         <button type="button">Register</button>
         <button type="button" @click="onClickLogout">Logout</button>
-    </div>
+    </div> -->
     <div class="py-3">
         <RouterLink to="/main">
             Get Started!
