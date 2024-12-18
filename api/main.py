@@ -404,12 +404,7 @@ async def admin_init_elasticsearch(
                     "mappings": {
                         "properties": {
                             "source": {
-                                "type": "text",
-                                "fields": {
-                                    "keyword": {
-                                        "type": "keyword"
-                                    }
-                                }
+                                "type": "keyword",
                             },
                             "term": {
                                 "type": "text",
@@ -869,7 +864,7 @@ async def get_collections_by_source(
             "aggs": {
                 "unique_sources": {
                     "terms": {
-                        "field": "source.keyword",  # Adjust if your field name is different
+                        "field": "source",  # Adjust if your field name is different
                         "size": 1000  # Adjust the size as needed
                     }
                 }
