@@ -111,7 +111,15 @@ actions: {
         console.log('* start refreshing token');
         // refresh the token every 10 minutes
         setInterval(async () => {
-            Jimin.refreshToken();
+            try {
+                await Jimin.refreshToken();
+            } catch (error) {
+                console.log('Error refreshing token:', error);
+                this.msg('Error refreshing token', 'Error', 'error');
+
+                // logout the user
+                this.logout();
+            }
         }, 3 * 60 * 1000);
     },
 
