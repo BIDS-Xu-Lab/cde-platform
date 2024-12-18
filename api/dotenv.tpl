@@ -23,4 +23,4 @@ ADMIN_PASSWORD='j29j-asdf-9234@jzz1'
 ES_PATH='http://elasticsearch:9200'
 
 # For mongodb
-MONGODB_URI='mongodb://mongodb:27017/cdeDatabase'
+MONGODB_URI='mongodb://localhost:27017/cdeDatabase'
