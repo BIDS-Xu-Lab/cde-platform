@@ -45,8 +45,14 @@ state: () => ({
     // working concept
     working_concept: null,
 
-    // search results
-    search_results: {},
+    // working mappings
+    // {
+    //     concept_id: {
+    //         selected_results: [],
+    //         search_results: [],
+    //     }
+    // }
+    working_mappings: {},
 
     // for mapping
     mapping: {
@@ -164,7 +170,7 @@ actions: {
     },
 
     clearMappingData() { 
-        this.search_results = {};
+        this.working_mappings = {};
         this.working_concept = null;
         this.working_file_concepts = [];
     },

@@ -1027,19 +1027,18 @@ async def search(
                 logging.debug(f"* saved mapping {mapping['mapping_id']}")
             else:
                 # update the mapping
-                mapping = {
+                _mapping = {
                     "source": search_data.source,
                     "collections": search_data.collections,
                     "search_results": results,
                     "updated": datetime.datetime.now(),
                 }
-                result = await db.mappings.update_one(
+                mapping = await db.mappings.update_one(
                     {"mapping_id": m['mapping_id']},
-                    {"$set": mapping},
+                    {"$set": _mapping},
                 )
                 logging.debug(f"* updated mapping {m['mapping_id']}")
 
-        
         return {
             'success': True,
             'results': all_results

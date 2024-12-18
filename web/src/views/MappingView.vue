@@ -69,8 +69,16 @@ async function onClickSearch() {
     );
 
     console.log('* search results:', results);
-    store.search_results[store.working_concept.id] = results[0];
-    // console.log('* search store results:', store.search_results);
+
+    // check whether store.working_concept.id is in store.working_mappings
+    if (store.working_concept.concept_id in store.working_mappings) {
+        store.working_mappings[store.working_concept.concept_id].search_results = results[0];
+    } else {
+        store.working_mappings[store.working_concept.concept_id] = {
+            search_results: results[0],
+            selected_results: []
+        }
+    }
 }
 
 function onClickSearchAll() {
@@ -144,6 +152,17 @@ function onClickConcept(concept) {
 
 function fmtScore(score) {
     return score.toFixed(2);
+}
+
+///////////////////////////////////////////////////////////
+// Selection related
+///////////////////////////////////////////////////////////
+
+async function onClickSelectResult(result) {
+    console.log('* clicked Select Result:', result);
+
+    // update store
+    store.addSelectedResult(result);
 }
 
 onMounted(() => {
@@ -458,8 +477,8 @@ onMounted(() => {
                         </b>
                     </div>
                     <div class="panel-subtitle text-sm">
-                        <template v-if="store.search_results[store.working_concept?.id]?.length > 0">
-                            <b>{{ store.search_results[store.working_concept?.id]?.length }}</b>
+                        <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
+                            <b>{{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length }}</b>
                             potential matches found
                         </template>
                         <template v-else>
@@ -494,7 +513,7 @@ onMounted(() => {
     <div class="result-list-box">
         <div class="result-list-scroller"
             :style="{ height: 'calc(100vh - 18rem)'}">
-            <template v-for="item, item_idx in store.search_results[store.working_concept?.id]">
+            <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.search_results">
                 <div class="result-line">
                     <div class="result-tags">
                         <div class="flex flex-row">
@@ -533,7 +552,7 @@ onMounted(() => {
                                 label="Select"
                                 class="mr-1"
                                 v-tooltip.right="'Select this concept.'"
-                                @click="store.showGuide()">
+                                @click="onClickSelectResult(item)">
                             </Button>
                         </div>  
                     </div>
