@@ -66,6 +66,12 @@ async function onClickUpdateProjectList() {
 
 async function onClickProjectItem(project) {
     console.log('* clicked Project Item', project);
+
+    // if project is null or undefined, return
+    if (!project) {
+        return;
+    }
+
     store.current_project = project;
 
     // get all files for this project
@@ -86,8 +92,8 @@ async function onClickMapping(file) {
 
     // Check for duplicates using existing anyDuplicateColumns function
     const duplicateColumn = anyDuplicateColumns(file, 'term') || 
-                          anyDuplicateColumns(file, 'description') || 
-                          anyDuplicateColumns(file, 'value');
+                            anyDuplicateColumns(file, 'description') || 
+                            anyDuplicateColumns(file, 'value');
     if (duplicateColumn) {
         store.msg("Found duplicate column", 'Error', 'error');
         return;
@@ -222,11 +228,21 @@ store.fileupload = fileupload;
 const selected_project_for_file = ref();
 window.selected_project_for_file = selected_project_for_file;
 
-const onClickUpload = () => {
-    // fileupload.value.upload();
+async function onClickUpload() {
+    try {
+        if (!fileupload.value.files.length) {
+            store.msg('Please select a file to upload.', 'Error', 'error');
+            return;
+        }
+    } catch (err) {
+        store.msg('Please select a file to upload.', 'Error', 'error');
+        return;
+    }
+    
     let file = fileupload.value.files[0];
+
     Papa.parse(file, {
-        complete: (result) => {
+        complete: async (result) => {
             // Create an object representing the file to add to the store
             const csv = {
                 filename: file.name,
@@ -257,17 +273,23 @@ const onClickUpload = () => {
             console.log('* generated csv:', csv);
 
             // send this csv to backend
-            Jimin.uploadFile(csv).then((data) => {
-                console.log('* uploaded file:', data);
-                store.msg(data.message);
+            let data = await Jimin.uploadFile(csv)
+            
+            console.log('* uploaded file:', data);
+            store.msg(data.message);
 
+            // update project list if no projects
+            if (store.projects.length == 0) {
+                await onClickUpdateProjectList();
+                onClickProjectItem(store.projects[0]);
+
+            } else {
                 // update file list
                 onClickProjectItem(store.current_project);
+            }
 
-                // close the dialog
-                visible_dialog_upload_file.value = false;
-            });
-
+            // close the dialog
+            visible_dialog_upload_file.value = false;
             
         },
         header: true, // Set to true if your CSV has a header row
