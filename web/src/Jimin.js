@@ -261,5 +261,20 @@ export const Jimin = {
         );
 
         return rsp.data;
+    },
+
+    async getMapping(concept_id) {
+        console.log('* get mapping', concept_id);
+
+        const rsp = await this.axios_instance.get(
+            '/get_mapping',
+            {
+                params: {
+                    concept_id: concept_id
+                }
+            }
+        );
+
+        return rsp.data.mapping;
     }
 }

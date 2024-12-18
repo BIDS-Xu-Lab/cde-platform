@@ -145,9 +145,22 @@ const sort_order_options = [
     { name: 'Ascent', code: 'asc' }
 ];
 
-function onClickConcept(concept) {
+async function onClickConcept(concept) {
     console.log('* clicked concept:', concept);
     store.working_concept = concept;
+
+    // if local store has the concept, then do nothing
+    if (concept.concept_id in store.working_mappings) {
+        return;
+    } 
+    // if not, get selected results and search results (i.e., mappings)
+    // from database
+    let mapping = await Jimin.getMapping(concept.concept_id);
+
+    // update this mapping to the store
+    store.working_mappings[concept.concept_id] = mapping;
+
+    store.msg('* loaded mapping results.');
 }
 
 function fmtScore(score) {

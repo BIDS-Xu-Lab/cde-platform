@@ -1049,6 +1049,31 @@ async def search(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get('/get_mapping', tags=["mapping"])
+async def get_mapping(
+    request: Request,
+    concept_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get mapping by concept_id
+    '''
+    logging.info("get mapping")
+
+    m = await db.mappings.find_one({
+        "concept_id": concept_id,
+        "user_id": current_user['user_id']
+    })
+
+    if m is None:
+        raise HTTPException(status_code=404, detail="Mapping not found")
+    
+    return {
+        'success': True,
+        'mapping': formatMapping(m)
+    }
+
+
 class UpdateSelectedResultsModel(BaseModel):
     concept_id: str
     selected_results: List[Dict[str, Any]]
@@ -1388,6 +1413,17 @@ def formatConcepts(concepts):
         concept.pop('_id', None)
 
     return concepts
+
+def formatMapping(mapping):
+    mapping.pop('_id', None)
+
+    return mapping
+
+def formatMappings(mappings):
+    for mapping in mappings:
+        mapping.pop('_id', None)
+
+    return mappings
 
 if __name__ == '__main__':
     import uvicorn
