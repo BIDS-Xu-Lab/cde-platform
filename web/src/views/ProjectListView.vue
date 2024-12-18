@@ -188,6 +188,7 @@ async function onClickCreate() {
 const fileupload = ref();
 store.fileupload = fileupload;
 const selected_project_for_file = ref();
+window.selected_project_for_file = selected_project_for_file;
 
 const onClickUpload = () => {
     // fileupload.value.upload();
@@ -202,7 +203,7 @@ const onClickUpload = () => {
                 updated: toolbox.formatDate(new Date()),
                 // Add any additional properties you need
             };
-            csv['project_id'] = selected_project_for_file.value | '';
+            csv['project_id'] = selected_project_for_file.value? selected_project_for_file.value : 'default_project_id';
             csv["columns"] = Object.keys(csv.concepts[0]);
             csv["file_id"] = uuidv4();
             csv['user_id'] = store.user.user_id | 0;
@@ -546,7 +547,7 @@ onMounted(() => {
             accept="text/csv" />
     </div>
     <div class="flex justify-end gap-2">
-        <Button label="Upload" @click="onClickUpload" severity="secondary" />
+        <Button label="Upload" @click="onClickUpload()" severity="secondary" />
     </div>
 </Dialog>
 
