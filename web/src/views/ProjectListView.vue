@@ -114,12 +114,25 @@ async function onClickMapping(file) {
     store.changeView('mapping');
 }
 
-async function onClickDownload() {
+async function onClickDownload(file) {
     console.log('* clicked Download');
 }
 
-async function onClickDeleteFile() {
+async function onClickDeleteFile(file) {
     console.log('* clicked Delete File');
+
+    // ask for confirmation
+    if (!confirm('Are you sure to delete this file?')) {
+        return;
+    }
+
+    // delete this file
+    let ret = await Jimin.deleteFile(file.file_id);
+
+    store.msg(ret.message);
+
+    // update file list
+    onClickProjectItem(store.current_project);
 }
 
 async function onClickDeleteProject(project) {
@@ -465,7 +478,7 @@ onMounted(() => {
                         size="small"
                         class="mr-2"
                         v-tooltip.bottom="'Download this file.'"
-                        @click="onClickDownload">
+                        @click="onClickDownload(file)">
                         <i class="fa-solid fa-download"></i>
                         Download
                     </Button>
@@ -474,7 +487,7 @@ onMounted(() => {
                         severity="danger"
                         size="small"
                         v-tooltip.bottom="'Delete this file.'"
-                        @click="onClickDeleteFile">
+                        @click="onClickDeleteFile(file)">
                         <i class="fa-solid fa-trash"></i>
                         Delete
                     </Button>

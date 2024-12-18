@@ -556,6 +556,9 @@ async def upload_file(
 
     # set the project_id using the project we found or created
     file_data['project_id'] = project['project_id']
+
+    # set the user_id using the current user
+    file_data['user_id'] = current_user['user_id']
         
     # get all the concepts from this file
     concepts = file_data.pop('concepts', None)
@@ -633,6 +636,41 @@ async def update_file(
         'file': formatFile(file_data)
     }
 
+class DeleteFileModel(BaseModel):
+    file_id: str
+    
+@app.post('/delete_file', tags=["file"])
+async def delete_file(
+    request: Request,
+    delete_file_data: DeleteFileModel,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Delete a file
+    '''
+    file_id = delete_file_data.file_id
+    logging.info("delete file %s" % file_id)
+
+    # get the file
+    file = await db.files.find_one({
+        "file_id": file_id,
+        "user_id": current_user['user_id']
+    })
+
+    if file is None:
+        logging.error(f"* not found delete file {file_id} owned by {current_user['user_id']}")
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # delete the file
+    result = await db.files.delete_one({
+        "file_id": file_id,
+        "user_id": current_user['user_id']
+    })
+
+    return {
+        'success': True,
+        'message': 'File deleted successfully'
+    }
 
 
 ###########################################################

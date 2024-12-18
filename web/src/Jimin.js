@@ -141,6 +141,17 @@ export const Jimin = {
         return rsp.data;
     },
 
+    deleteFile: async function (file_id) {
+        console.log('* delete file', file_id);
+
+        const rsp = await this.axios_instance.post(
+            '/delete_file',
+            { file_id: file_id }
+        );
+
+        return rsp.data;
+    },
+
     ///////////////////////////////////////////////////////
     // File related
     ///////////////////////////////////////////////////////
