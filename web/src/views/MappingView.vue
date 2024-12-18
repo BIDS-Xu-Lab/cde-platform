@@ -130,6 +130,10 @@ const sort_term_options = [
     { name: 'Type', code: 'type' },
     { name: 'Status', code: 'status' }
 ];
+const sort_order_options = [
+    { name: 'Descent', code: 'desc' },
+    { name: 'Ascent', code: 'asc' }
+];
 
 function onClickConcept(concept) {
     console.log('* clicked concept:', concept);
@@ -473,6 +477,12 @@ onMounted(() => {
                     :options="sort_term_options" 
                     optionLabel="name" 
                     placeholder="Sort by" 
+                    class="term-sort"/>
+                <Divider layout="vertical" class="!mx-2" />
+                <Select v-model="store.mapping.sort_order_by" 
+                    :options="sort_order_options" 
+                    optionLabel="name" 
+                    placeholder="Order by" 
                     class="term-sort"/>
 
             </div>

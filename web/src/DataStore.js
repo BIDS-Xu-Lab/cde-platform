@@ -53,6 +53,7 @@ state: () => ({
         selected_source: null,
         selected_collections: [],
         sort_terms_by: null,
+        sort_order_by: null,
         filter_terms_by: '',
 
         data_col_term: 'element',
