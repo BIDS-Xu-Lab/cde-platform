@@ -149,6 +149,15 @@ async function onClickDeleteProject(project) {
 }
 
 ///////////////////////////////////////////////////////////
+// Reviewers
+///////////////////////////////////////////////////////////
+
+async function onClickAssignReviewers(file) {
+    console.log('* clicked Assign Reviewers', file);
+    store.msg('Assign reviewers for this file.');
+}
+
+///////////////////////////////////////////////////////////
 // Create project
 ///////////////////////////////////////////////////////////
 const new_project = ref({
@@ -359,7 +368,7 @@ onMounted(() => {
                     </div>
                 </div>
                 <div>
-                    <Button 
+                    <Button v-if="project.project_id != 'default_project_id'"
                         severity="secondary"
                         size="small"
                         v-tooltip.bottom="'Delete this project.'"
@@ -409,6 +418,15 @@ onMounted(() => {
                     <div class="file-reviewers mt-2 py-2">
                         Assigned Reviewers: 
                         <i class="fa fa-user"></i>
+
+                        <Button severity="info"
+                            size="small"
+                            class="ml-2 btn-mini"
+                            @click="onClickAssignReviewers(file)"
+                            v-tooltip.bottom="'Assign reviewers for this file.'">
+                            <i class="fa-solid fa-user-plus"></i>
+                            Assign
+                        </Button>
                     </div>
                 </div>
 
