@@ -39,11 +39,14 @@ state: () => ({
     // working file for mapping or other tasks
     working_file: null,
 
-    // working file
+    // all the concepts in the current working file
     working_file_concepts: [],
 
     // working concept
     working_concept: null,
+
+    // search results
+    search_results: {},
 
     // for mapping
     mapping: {
@@ -160,8 +163,10 @@ actions: {
         return this.working_concept?.id == concept.id;
     },
 
-    reset() {
+    clearMappingData() { 
+        this.search_results = {};
         this.working_concept = null;
-    }
+        this.working_file_concepts = [];
+    },
 }
 });

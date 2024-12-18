@@ -16,6 +16,7 @@
   --bg-color-menu: #f5f6f7;
   --bg-color-menu-hover: #f9f9f9;
   --bd-color: #dadbdc;
+  --bg-color-selected: #c2d6e7;
 
   font-size: 14px;
 }
@@ -133,7 +134,8 @@ body {
     --bg-color-menu: #323232;
     --bg-color-menu-hover: #5c5c5c;
     --bd-color: #444444;
-  }
+    --bg-color-selected: #252e54;
+}
   a:hover {
     color: #91c9fd;
   }

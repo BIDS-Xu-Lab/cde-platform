@@ -69,6 +69,8 @@ async function onClickSearch() {
     );
 
     console.log('* search results:', results);
+    store.search_results[store.working_concept.id] = results[0];
+    // console.log('* search store results:', store.search_results);
 }
 
 function onClickSearchAll() {
@@ -451,13 +453,13 @@ onMounted(() => {
                     <div class="text-lg font-bold">
                         <i class="fa-solid fa-cubes"></i>
                         CDE Mapping 
-                        <b v-if="store.working_term">
-                            {{ store.working_term?.[store.mapping.data_col_term] }}
+                        <b v-if="store.working_concept">
+                            {{ store.working_concept?.[store.mapping.data_col_term] }}
                         </b>
                     </div>
                     <div class="panel-subtitle text-sm">
-                        <template v-if="store.working_term?.results.length > 0">
-                            <b>{{ store.working_term?.results.length }}</b>
+                        <template v-if="store.search_results[store.working_concept?.id]?.length > 0">
+                            <b>{{ store.search_results[store.working_concept?.id]?.length }}</b>
                             potential matches found
                         </template>
                         <template v-else>
@@ -492,7 +494,7 @@ onMounted(() => {
     <div class="result-list-box">
         <div class="result-list-scroller"
             :style="{ height: 'calc(100vh - 18rem)'}">
-            <template v-for="item, item_idx in store.working_term?.results">
+            <template v-for="item, item_idx in store.search_results[store.working_concept?.id]">
                 <div class="result-line">
                     <div class="result-tags">
                         <div class="flex flex-row">
@@ -512,7 +514,7 @@ onMounted(() => {
                     <div class="result-name">
                         <div class="flex items-center">
                             <div>
-                                {{ item.standardConcept }}
+                                {{ item.term }}
                             </div>
                             <Divider layout="vertical" class="!mx-2" />
                             <div class="text-base">
@@ -625,7 +627,7 @@ onMounted(() => {
 }
 
 .working-term {
-    background-color: var(--bg-color-menu-hover);
+    background-color: var(--bg-color-selected);
 }
 
 

@@ -77,6 +77,7 @@ async function onClickProjectItem(project) {
 
 async function onClickMapping(file) {
     console.log('* clicked Mapping');
+
     // Check if any required column is empty
     if (!file.term || !file.description || !file.value) {
         store.msg('Please select all required columns (term, description, and value).', 'Error', 'error');
@@ -91,6 +92,10 @@ async function onClickMapping(file) {
         store.msg("Found duplicate column", 'Error', 'error');
         return;
     }
+
+    // clear the existing mapping data
+    store.clearMappingData();
+
     // first, update the selected columns
     let ret = await Jimin.updateFile(file);
     store.mapping.data_col_term = file["term"]
