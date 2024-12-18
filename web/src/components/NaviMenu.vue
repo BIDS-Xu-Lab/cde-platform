@@ -84,11 +84,18 @@ onMounted(() => {
 
     <div class="navi-right">
 
-        <div class="mr-2">
-            <i class="fa-solid fa-clipboard-list mr-1"></i>
-            <span class="italic">
-                {{ store.working_project?.name }}
-            </span>
+        <div>
+            <template v-if="store.working_project != null">
+                <i class="fa-solid fa-briefcase mr-1"></i>
+                <span class="italic">
+                    {{ store.working_project?.name }}
+                </span>
+                - 
+                <i class="fa fa-file mr-1"></i>
+                <span class="italic">
+                    {{ store.working_file?.filename }}
+                </span>
+            </template>
         </div>
 
         <Divider layout="vertical"/>

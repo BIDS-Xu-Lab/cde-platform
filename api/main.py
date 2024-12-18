@@ -326,8 +326,8 @@ async def test_mongo():
 # Admin related APIs
 ###########################################################
 
-@app.post("/init_database", tags=["admin"])
-async def init_database(
+@app.post("/admin/init_database", tags=["admin"])
+async def admin_init_database(
     request: Request,
     x_token: str = Depends(authXTokenHeader)
 ):
@@ -357,14 +357,116 @@ async def init_database(
         'message': 'database initialized'
     }
 
+@app.post("/admin/clear_elasticsearch", tags=["admin"])
+async def admin_clear_elasticsearch(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Clear the elasticsearch
+    '''
+    indices = es.indices.get_alias(index="*")
+    index_names = [val for val in list(indices.keys()) if val[0] != '.']
+    for index_name in index_names:
+        es.indices.delete(index=index_name)
+        logging.info(f"* deleted index `{index_name}`")
+
+    return {
+        'success': True,
+        'message': 'elasticsearch cleared'
+    }
+
+@app.post("/admin/init_elasticsearch", tags=["admin"])
+async def admin_init_elasticsearch(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Initialize the elasticsearch
+    '''
+    indexes = [
+        { "filename": "cde-sample-cancer", "index_name": "nih-cde-cancer" },
+        { "filename": "cde-sample-general", "index_name": "nih-cde-general" },
+        { "filename": "cde-sample-covid19", "index_name": "nih-cde-covid19" },
+    ]
+
+    for idx in indexes:
+        index_name = idx['index_name']
+        filename = idx['filename']
+
+        if es.indices.exists(index=index_name):
+            logging.info(f"* found index `{index_name}` exists")
+            continue
+        else:
+            es.indices.create(
+                index=index_name,
+                body={
+                    "mappings": {
+                        "properties": {
+                            "source": {
+                                "type": "text",
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword"
+                                    }
+                                }
+                            },
+                            "term": {
+                                "type": "text",
+                            },
+                            "description": {
+                                "type": "text",
+                            },
+                            "value": {
+                                "type": "text",
+                            },
+                        }
+                    }
+                }
+            )
+            logging.info(f"* created index `{index_name}`")
+
+        # get the current file location based __FILE__
+        current_file = os.path.realpath(__file__)
+        current_dir = os.path.dirname(current_file)
+        data_file = os.path.join(current_dir, f"./samples/{filename}.json")
+        logging.info(f"* loading data from {data_file}")
+
+        # load data from the file
+        with open(data_file, 'r') as f:
+            data = json.load(f)
+            logging.info(f"* loaded {len(data)} data from {data_file}")
+
+            # insert data into the index
+            for item in data:
+                # add a column called source
+                item['source'] = item['stewardOrg']['name']
+
+                # add term, description to the source
+                item['term'] = item['designations'][0]['designation']
+                item['description'] = item['definitions'][0]['definition'] if len(item['definitions']) > 0 else ""
+
+                # add value if it has
+                if len(item['valueDomain']['permissibleValues']) > 0:
+                    item['value'] = "|".join(map(lambda x: x['permissibleValue'], item['valueDomain']['permissibleValues']))
+
+                # insert the item
+                es.index(index=index_name, body=item)
+            
+            logging.info(f"* inserted {len(data)} data into {index_name}")
+
+    return {
+        'success': True,
+        'message': 'elasticsearch initialized'
+    }
 
 class UserRegisterModel(BaseModel):
     email: str | None
     name: str | None
     password: str | None
 
-@app.post("/register", tags=["user"])
-async def user_register(
+@app.post("/admin/register_user", tags=["admin"])
+async def admin_register_user(
     request: Request,
     user_register: UserRegisterModel,
 ):
@@ -730,6 +832,59 @@ async def get_concepts_by_file(
         'concepts': formatConcepts(concepts)
     }
 
+###########################################################
+# Mapping data related APIs
+###########################################################
+
+@app.get('/get_sources', tags=["mapping"])
+async def get_sources(
+    request: Request
+):
+    '''
+    Get all sources for mapping
+    '''
+    logging.info("get sources and collections")
+
+    indices = es.indices.get_alias(index="*")
+    index_names = [val for val in list(indices.keys()) if val[0] != '.']
+    return {
+        'success': True,
+        'sources': index_names
+    }
+
+@app.get('/get_collections_by_source', tags=["mapping"])
+async def get_collections_by_source(
+    request: Request,
+    source: str
+):
+    '''
+    Get all collections for mapping
+    '''
+    logging.info("get collections")
+
+    try:
+        # Elasticsearch query for Terms Aggregation on the "source" field
+        query_body = {
+            "size": 0,  # We don't need actual documents, just the aggregation
+            "aggs": {
+                "unique_sources": {
+                    "terms": {
+                        "field": "source.keyword",  # Adjust if your field name is different
+                        "size": 1000  # Adjust the size as needed
+                    }
+                }
+            }
+        }
+
+        response = es.search(index=source, body=query_body)
+        sources = [bucket['key'] for bucket in response['aggregations']['unique_sources']['buckets']]
+        return {
+            'success': True,
+            'collections': sources
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
 # async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):

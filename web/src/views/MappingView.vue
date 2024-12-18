@@ -8,10 +8,42 @@ import { onMounted, ref } from 'vue';
 import { Button } from 'primevue';
 
 import * as CDEHelper from '../CDEHelper';
+import { Jimin } from '../Jimin';
 
 const store = useDataStore();
-function onClickRefreshList() {
+
+async function onClickRefreshList() {
     console.log('* clicked Refresh List');
+
+    // load source data
+    let sources = await Jimin.getSources();
+
+    store.msg('Loaded ' + sources.length + ' sources.');
+
+    // update store
+    store.mapping.sources = sources.map((item) => {
+        return {
+            name: item,
+            code: item
+        };
+    });
+}
+
+async function onChangeSource() {
+    console.log('* changed Source:', store.mapping.selected_source);
+
+    // load collections
+    let collections = await Jimin.getCollectionsBySource(store.mapping.selected_source);
+
+    store.msg('Loaded ' + collections.length + ' collections.');
+
+    // update store
+    store.mapping.collections = collections.map((item) => {
+        return {
+            name: item,
+            code: item
+        };
+    });
 }
 
 function onClickSearch() {
@@ -78,7 +110,7 @@ const sort_term_options = [
     { name: 'Status', code: 'status' }
 ];
 
-function onClickTerm(item) {
+function onClickConcept(item) {
     console.log('* clicked term:', item);
 
     store.working_term_idx = store.working_file_concepts.indexOf(item);
@@ -91,6 +123,9 @@ function fmtScore(score) {
 
 onMounted(() => {
     console.log('* mounted MappingView');
+
+    // load source data
+    onClickRefreshList();
 });
 </script>
 
@@ -113,11 +148,13 @@ onMounted(() => {
                     <i class="fa fa-database"></i>
                     Sources
                 </label>
-                <Select v-model="store.mapping.selected_sources" 
+                <Select v-model="store.mapping.selected_source" 
                     :options="store.mapping.sources" 
+                    @change="onChangeSource"
                     variant="in"
                     filter 
                     optionLabel="name" 
+                    optionValue="code" 
                     placeholder="Select a data source" 
                     class="select-sources">
                     <template #header>
@@ -131,17 +168,18 @@ onMounted(() => {
                     <i class="fa-solid fa-book-bookmark"></i>
                     Collections
                 </label>
-                <Select v-model="store.mapping.selected_sources" 
-                    :options="store.mapping.sources" 
+                <MultiSelect v-model="store.mapping.selected_collection" 
+                    :options="store.mapping.collections" 
                     variant="in"
                     filter 
                     optionLabel="name" 
-                    placeholder="Select a data source" 
+                    optionValue="code" 
+                    placeholder="Select data collections" 
                     class="select-sources">
                     <template #header>
                         <div class="font-bold px-3">Available Collections</div>
                     </template>
-                </Select>
+                </MultiSelect>
             </div>
 
             <Button text
@@ -315,8 +353,8 @@ onMounted(() => {
             :style="{ height: 'calc(100vh - 18rem)'}">
             <template v-for="item in store.working_file_concepts">
                 <div class="term-line"
-                    :class="{ 'working-term': store.isWorkingTerm(item) }"
-                    @click="onClickTerm(item)">
+                    :class="{ 'working-term': store.isWorkingConcept(item) }"
+                    @click="onClickConcept(item)">
                     <div class="term-name">
                         <div class="mr-1">
                             <template v-if="CDEHelper.hasSelectedResult(item)">
@@ -537,8 +575,9 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    align-items: center;
+    align-items: top;
     font-size: 1.2rem;
+    line-height: 1.5rem;
 }
 .term-concept {
     display: flex;

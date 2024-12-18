@@ -47,36 +47,10 @@ state: () => ({
 
     // for mapping
     mapping: {
-        sources: [
-            { value: "umls_train_clinical_document", name: "UMLS (Clinical Document)"},
-            { value: "nih-v3-cde", name: "NIH CDE v3"},
-            { value: "nih-cde", name: "NIH CDE"},
-            { value: "nda-demo1-cde", name: "NDA CDE Demo 1"},
-            { value: "nda-demo2-cde", name: "NDA CDE Demo 2"},
-        ],
-        collections: {
-            "nih-cde": [
-                "NINDS",
-                "LOINC",
-                "NHLBI",
-                "PROMIS / Neuro-QOL",
-                "NLM",
-                "NICHD",
-                "RADx-UP",
-                "NIH-Endorsed",
-                "NEI",
-                "Project 5 (COVID-19)",
-                "NCI",
-                "GRDR",
-                "NINR",
-                "TEST",
-                "Women's CRN",
-                "ONC",
-                "NIDA"
-            ],
-        },
+        sources: [],
+        collections: [],
 
-        selected_sources: null,
+        selected_source: null,
         selected_collections: null,
         sort_terms_by: null,
         filter_terms_by: '',
@@ -175,7 +149,7 @@ actions: {
     ///////////////////////////////////////////////////////
     // Working File
     ///////////////////////////////////////////////////////
-    isWorkingTerm(term) {
+    isWorkingConcept(term) {
         // check if the term is the working term by indexOf
         // working file is a list of term objects, need to use id to compare
         return this.working_term_idx == term.id;

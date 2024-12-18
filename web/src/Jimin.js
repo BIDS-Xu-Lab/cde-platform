@@ -153,7 +153,7 @@ export const Jimin = {
     },
 
     ///////////////////////////////////////////////////////
-    // File related
+    // Concepts related
     ///////////////////////////////////////////////////////
 
     getConceptsByFile: async function (file_id) {
@@ -169,5 +169,35 @@ export const Jimin = {
         );
 
         return rsp.data.concepts;
+    },
+
+
+
+    ///////////////////////////////////////////////////////
+    // Mapping related
+    ///////////////////////////////////////////////////////
+    getSources: async function () {
+        console.log('* get sources');
+
+        const rsp = await this.axios_instance.get(
+            '/get_sources'
+        );
+
+        return rsp.data.sources;
+    },
+
+    getCollectionsBySource: async function (source) {
+        console.log('* get collections by source', source);
+
+        const rsp = await this.axios_instance.get(
+            '/get_collections_by_source',
+            {
+                params: {
+                    source: source
+                }
+            }
+        );
+
+        return rsp.data.collections;
     }
 }
