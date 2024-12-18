@@ -247,5 +247,19 @@ export const Jimin = {
         );
 
         return rsp.data.results;
+    },
+
+    async updateSelectedResults(concept_id, selected_results) {
+        console.log('* update selected results', concept_id, selected_results);
+
+        const rsp = await this.axios_instance.post(
+            '/update_selected_results',
+            {
+                concept_id: concept_id,
+                selected_results: selected_results
+            }
+        );
+
+        return rsp.data;
     }
 }

@@ -174,5 +174,43 @@ actions: {
         this.working_concept = null;
         this.working_file_concepts = [];
     },
+
+    addSelectedResultToWorkingConcept(result) {
+        if (!this.working_concept) {
+            return;
+        }
+
+        if (!this.working_mappings[this.working_concept.concept_id]) {
+            return;
+        }
+
+        // if the result is already in the selected results, skip
+        if (this.working_mappings[this.working_concept.concept_id].selected_results.includes(result)) {
+            return;
+        }
+
+        // save the result
+        this.working_mappings[this.working_concept.concept_id].selected_results.push(result);
+    },
+
+    ///////////////////////////////////////////////////////
+    // User File
+    ///////////////////////////////////////////////////////
+    hasSelectedResults(concept) {
+        if (this.working_mappings[concept.concept_id]) {
+            false;
+        }
+        if (this.working_mappings[concept.concept_id]?.selected_results) {
+            return this.working_mappings[concept.concept_id].selected_results.length > 0;
+        }
+        return false;
+    },
+
+    getSelectedResults(concept) {
+        if (this.working_mappings[concept.concept_id]) {
+            return this.working_mappings[concept.concept_id].selected_results;
+        }
+        return [];
+    }
 }
 });

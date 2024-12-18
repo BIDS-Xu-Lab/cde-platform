@@ -995,9 +995,10 @@ async def search(
             hits = response['hits']['hits']
             results = [{
                 'score': hit['_score'],
-                'conceptId': hit['_source'].get('concept_id'),
-                'conceptCode': hit['_source'].get('code'),
-                'conceptSource': hit['_source'].get('source'),
+                'term_id': hit['_source'].get('concept_id'),
+                'term_code': hit['_source'].get('code'),
+                'term_source': hit['_source'].get('source'),
+
                 'term': hit['_source'].get('term'),
                 'description': hit['_source'].get('description'),
                 'value': hit['_source'].get('value'),
@@ -1047,7 +1048,46 @@ async def search(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    # get the search data
+
+class UpdateSelectedResultsModel(BaseModel):
+    concept_id: str
+    selected_results: List[Dict[str, Any]]
+
+@app.post('/update_selected_results', tags=["mapping"])
+async def update_selected_results(
+    request: Request,
+    update_data: UpdateSelectedResultsModel,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Update selected results
+    '''
+    logging.info("update selected results")
+
+    # update the mapping by concept_id and user_id
+    m = await db.mappings.find_one({
+        "concept_id": update_data.concept_id,
+        "user_id": current_user['user_id']
+    })
+
+    if m is None:
+        raise HTTPException(status_code=404, detail="Mapping not found")
+    
+    # update the selected results
+    _mapping = {
+        "selected_results": update_data.selected_results,
+        "updated": datetime.datetime.now(),
+    }
+    mapping = await db.mappings.update_one(
+        {"mapping_id": m['mapping_id']},
+        {"$set": _mapping},
+    )
+
+    return {
+        'success': True,
+        'message': 'Selected results updated successfully',
+    }
+
 
 # @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
 # async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):

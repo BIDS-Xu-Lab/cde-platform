@@ -162,7 +162,18 @@ async function onClickSelectResult(result) {
     console.log('* clicked Select Result:', result);
 
     // update store
-    store.addSelectedResult(result);
+    store.addSelectedResultToWorkingConcept(result);
+
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_mappings[store.working_concept.concept_id].selected_results
+    );
+
+    console.log('* updated selected results:', ret);
+
+    // show a message
+    store.msg(ret.message);
 }
 
 onMounted(() => {
@@ -403,7 +414,7 @@ onMounted(() => {
                     @click="onClickConcept(item)">
                     <div class="term-name">
                         <div class="mr-1">
-                            <template v-if="CDEHelper.hasSelectedResult(item)">
+                            <template v-if="true">
                                 <Badge :value="item.id" severity="success" />
                             </template>
                             <template v-else>
@@ -417,12 +428,9 @@ onMounted(() => {
                     <div class="term-concept">
                         <div class="flex flex-col text-small">
                             <div class="flex items-center">
-                                <template v-if="CDEHelper.hasSelectedResult(item)">
+                                <template v-if="store.hasSelectedResults(item)">
                                     <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>
-                                    <span>
-                                        {{ CDEHelper.getSelectedResult(item)?.conceptSource }} / 
-                                        {{ CDEHelper.getSelectedResult(item)?.standardConcept }}
-                                    </span>
+                                    {{ store.getSelectedResults(item).length }} selected
                                 </template>
                                 <template v-else>
                                     <i class="fa fa-exclamation-triangle mr-1"></i>
@@ -431,7 +439,7 @@ onMounted(() => {
                             </div>
                         </div>
                         <div class="mr-1">
-                            <Button v-if="CDEHelper.hasSelectedResult(item)"
+                            <Button v-if="false"
                                 size="small"
                                 icon="pi pi-times"
                                 label="De-select"
@@ -523,7 +531,7 @@ onMounted(() => {
                             <Badge :value="fmtScore(item.score)" 
                                 class="mr-1 badge-score"
                                 severity="info" />
-                            <Badge :value="item.conceptSource" severity="info" />
+                            <Badge :value="item.term_source" severity="info" />
                         </div>
 
                         <div>
@@ -537,10 +545,10 @@ onMounted(() => {
                             </div>
                             <Divider layout="vertical" class="!mx-2" />
                             <div class="text-base">
-                                <a :href="'https://cde.nlm.nih.gov/deView?tinyId=' + item.conceptId"
+                                <a :href="'https://cde.nlm.nih.gov/deView?tinyId=' + item.term_id"
                                     target="_blank">
                                     <i class="fa fa-globe"></i>
-                                    {{ item.conceptId }}
+                                    {{ item.term_id }}
                                 </a>
                             </div>
                         </div>
