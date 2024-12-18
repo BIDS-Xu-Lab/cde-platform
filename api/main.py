@@ -344,6 +344,7 @@ async def admin_init_database(
         'concepts',
         'file_users',
         'jobs',
+        'mappings'
     ]:
         if collection_name in existing_collections:
             logging.info(f"* found collection `{collection_name}` exists")
@@ -945,6 +946,7 @@ class SearchModel(BaseModel):
 async def search(
     request: Request,
     search_data: SearchModel,
+    current_user: dict = Depends(authJWTCookie),
 ):
     '''
     Search data
@@ -1001,6 +1003,42 @@ async def search(
                 'value': hit['_source'].get('value'),
             } for hit in hits]
             all_results.append(results)
+
+            # check whether we already have this in mappings 
+            m = await db.mappings.find_one({
+                "concept_id": search_data.queries[i]['concept_id'],
+                "user_id": current_user['user_id']
+            })
+
+            if m is None:
+                # save the mapping
+                mapping = {
+                    "mapping_id": str(uuid.uuid4()),
+                    "concept_id": search_data.queries[i]['concept_id'],
+                    "user_id": current_user['user_id'],
+                    "source": search_data.source,
+                    "collections": search_data.collections,
+                    "selected_results": [],
+                    "search_results": results,
+                    "created": datetime.datetime.now(),
+                    "updated": datetime.datetime.now(),
+                }
+                await db.mappings.insert_one(mapping)
+                logging.debug(f"* saved mapping {mapping['mapping_id']}")
+            else:
+                # update the mapping
+                mapping = {
+                    "source": search_data.source,
+                    "collections": search_data.collections,
+                    "search_results": results,
+                    "updated": datetime.datetime.now(),
+                }
+                result = await db.mappings.update_one(
+                    {"mapping_id": m['mapping_id']},
+                    {"$set": mapping},
+                )
+                logging.debug(f"* updated mapping {m['mapping_id']}")
+
         
         return {
             'success': True,

@@ -72,6 +72,7 @@ export const convertConceptToQueryByFile = function(concept, definition) {
     let col_value = definition.value;
 
     return {
+        concept_id: concept.concept_id,
         term: concept[col_term],
         description: concept[col_description],
         value: concept[col_value]
