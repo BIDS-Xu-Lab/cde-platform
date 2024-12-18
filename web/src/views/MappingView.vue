@@ -12,7 +12,6 @@ import { Jimin } from '../Jimin';
 import SearchResultItem from '../components/SearchResultItem.vue';
 
 const store = useDataStore();
-
 async function onClickRefreshList() {
     console.log('* clicked Refresh List');
 
@@ -485,69 +484,86 @@ onMounted(() => {
     </div>
 </Panel>
 
-<div class="flex flex-column w-full result-list">
-<!-- result list -->
-<Panel class="w-full ">
-    <template #header>
-        <div class="w-full flex justify-between">
-            <div class="flex">
-                <div class="flex-col">
-                    <div class="text-lg font-bold">
-                        <i class="fa-solid fa-cubes"></i>
-                        CDE Mapping 
-                        <b v-if="store.working_concept">
-                            {{ store.working_concept?.[store.mapping.data_col_term] }}
-                        </b>
-                    </div>
-                    <div class="panel-subtitle text-sm">
-                        <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
-                            <b>{{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length }}</b>
-                            potential matches found
-                        </template>
-                        <template v-else>
-                            No results found
-                        </template>
+<div class="flex flex-col w-full result-list justify-between">
+    <!-- selected list -->
+
+    <Panel v-if="store.working_mappings[store.working_concept?.concept_id]?.selected_results?.length > 0" class="w-full mb-2">
+        <template #header>
+            <div class="w-full flex justify-between">
+                <div class="flex">
+                    <div class="flex-col">
+                        <div class="text-lg font-bold">
+                            <i class="fa-solid fa-check-double"></i>
+                            Selected CDE Mapping
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="flex justify-end" style="height: 2rem; line-height: 1rem;">
-                <InputText v-model="store.mapping.filter_terms_by"
-                    type="text" 
-                    placeholder="Filter keyword ..."
-                    class="term-filter"/>
-                <Divider layout="vertical" class="!mx-2" />
-                <Select v-model="store.mapping.sort_terms_by" 
-                    :options="sort_term_options" 
-                    optionLabel="name" 
-                    placeholder="Sort by" 
-                    class="term-sort"/>
-                <Divider layout="vertical" class="!mx-2" />
-                <Select v-model="store.mapping.sort_order_by" 
-                    :options="sort_order_options" 
-                    optionLabel="name" 
-                    placeholder="Order by" 
-                    class="term-sort"/>
+        </template>
+        <div class="result-list-scroller":style="{ maxHeight: 'calc(50vh - 18rem)'}">
+        <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.selected_results">
+                    <SearchResultItem :item="item" :item_idx="item_idx" />
+        </template>
+        </div>
+    </Panel>
 
+    <!-- result list -->
+    <Panel class="w-full">
+        <template #header>
+            <div class="w-full flex justify-between">
+                <div class="flex">
+                    <div class="flex-col">
+                        <div class="text-lg font-bold">
+                            <i class="fa-solid fa-cubes"></i>
+                            CDE Mapping 
+                            <b v-if="store.working_concept">
+                                {{ store.working_concept?.[store.mapping.data_col_term] }}
+                            </b>
+                        </div>
+                        <div class="panel-subtitle text-sm">
+                            <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
+                                <b>{{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length }}</b>
+                                potential matches found
+                            </template>
+                            <template v-else>
+                                No results found
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end" style="height: 2rem; line-height: 1rem;">
+                    <InputText v-model="store.mapping.filter_terms_by"
+                        type="text" 
+                        placeholder="Filter keyword ..."
+                        class="term-filter"/>
+                    <Divider layout="vertical" class="!mx-2" />
+                    <Select v-model="store.mapping.sort_terms_by" 
+                        :options="sort_term_options" 
+                        optionLabel="name" 
+                        placeholder="Sort by" 
+                        class="term-sort"/>
+                    <Divider layout="vertical" class="!mx-2" />
+                    <Select v-model="store.mapping.sort_order_by" 
+                        :options="sort_order_options" 
+                        optionLabel="name" 
+                        placeholder="Order by" 
+                        class="term-sort"/>
+
+                </div>
+            </div>
+        </template>
+
+        <div class="result-list-box">
+            <div class="result-list-scroller"
+                :style="{ height: 'calc(100vh - 18rem)'}">
+                <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.search_results">
+                    <SearchResultItem :item="item" :item_idx="item_idx" />
+                </template>
+                    
             </div>
         </div>
-    </template>
-
-    <div class="result-list-box">
-        <div class="result-list-scroller"
-            :style="{ height: 'calc(100vh - 18rem)'}">
-            <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.selected_results">
-                <SearchResultItem :item="item" :item_idx="item_idx" />
-            </template>
-
-            div
-            <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.search_results">
-                <SearchResultItem :item="item" :item_idx="item_idx" />
-            </template>
-                
-        </div>
-    </div>
-</Panel>
+    </Panel>
 </div>
 
 </div>

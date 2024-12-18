@@ -8,8 +8,22 @@ defineProps({
     item_idx: Number
 });
 
-function onClickSelectResult(item) {
-    store.selectResult(item);
+async function onClickSelectResult(result) {
+    console.log('* clicked Select Result:', result);
+
+    // update store
+    store.addSelectedResultToWorkingConcept(result);
+
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_mappings[store.working_concept.concept_id].selected_results
+    );
+
+    console.log('* updated selected results:', ret);
+
+    // show a message
+    store.msg(ret.message);
 }
 
 function fmtScore(score) {
