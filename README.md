@@ -1,6 +1,6 @@
 # CDE Platform
 
-A platform for managing CDEs
+A platform for CDE related tasks, such as mapping, reviewing, creating, and updating CDEs.
 
 # Development
 
@@ -79,3 +79,52 @@ npx vite --host 0.0.0.0 --port 5173
 ```
 
 Then, you should be able to access the frontend service at `http://localhost:5173`.
+
+
+# Deployment
+
+Please use docker to deploy the service. 
+
+TBD
+
+# Change log
+
+## 0.7.2
+
+- Added user registration and login
+- Added file upload
+- Added file list
+- Added project creation
+- Added project list
+- Added project detail
+
+## 0.7.0
+
+- Added other pages and views
+
+## 0.6.0
+
+- Added login page and own login logics
+- Added user registration APIs
+
+## 0.5.0
+
+- Added main.py for backend service
+- Added basic APIs for admin
+
+## 0.4.0
+
+- Added docker compose file for development
+
+## 0.3.0
+
+- Implemented basic UI using Primevue
+- Added homepage
+
+## 0.2.0
+
+- Added api and ui folders
+
+## 0.1.0
+
+- Initialized the repo version
