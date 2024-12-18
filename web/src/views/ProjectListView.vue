@@ -18,9 +18,9 @@ function getSelectionOptions(file) {
     });
 }
 
-function hasDuplicateColumns(file, column) {
+function anyDuplicateColumns(file, column) {
     // TODO: optimize this function
-    if (file[column] == '') return null;
+    if (file[column] == '' || file[column] == null) return null;
 
     if (column == 'term') {
         if (file.description == file.term) {
@@ -378,13 +378,15 @@ onMounted(() => {
             <div class="w-full file-item flex flex-col py-2">
                 <div class="file-name flex flex-row justify-between">
                     <div class="text-lg font-bold">
+                        <i class="fa fa-file"></i>
                         {{ file.filename }}
                     </div>
                     <div class="file-reviewers mt-2 py-2">
-                    Assigned Reviewers: 
-                    <i class="fa fa-user"></i>
+                        Assigned Reviewers: 
+                        <i class="fa fa-user"></i>
+                    </div>
                 </div>
-                </div>
+
                 <div class="file-column flex flex-row mb-2">
                     <div class="flex flex-col mr-2 w-col-select-box">
                         <label for="">Term</label>
@@ -395,7 +397,7 @@ onMounted(() => {
                             placeholder="Select a term column" 
                             class="w-full" />
                         <div>
-                            <span v-if="hasDuplicateColumns(file, 'term')" 
+                            <span v-if="anyDuplicateColumns(file, 'term') != null" 
                                 class="text-xs text-red-500">
                                 Duplicate columns
                             </span>
@@ -411,7 +413,7 @@ onMounted(() => {
                             placeholder="Select a description column" 
                             class="w-full" />
                         <div>
-                            <span v-if="hasDuplicateColumns(file, 'description')" 
+                            <span v-if="anyDuplicateColumns(file, 'description') != null" 
                                 class="text-xs text-red-500">
                                 Duplicate columns
                             </span>
@@ -427,14 +429,15 @@ onMounted(() => {
                             placeholder="Select a value column" 
                             class="w-full" />
                         <div>
-                            <span v-if="hasDuplicateColumns(file, 'value')" 
+                            <span v-if="anyDuplicateColumns(file, 'value') != null" 
                                 class="text-xs text-red-500">
                                 Duplicate columns
                             </span>
                         </div>
                     </div>
                 </div>
-                <div class="file-name flex flex-row justify-end">
+
+                <div class="file-name flex flex-row justify-start">
                     <Button 
                         severity="secondary"
                         size="small"
