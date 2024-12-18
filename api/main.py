@@ -633,6 +633,66 @@ async def update_file(
         'file': formatFile(file_data)
     }
 
+
+
+###########################################################
+# Concepts related APIs
+###########################################################
+
+@app.get('/get_concepts_by_file', tags=["concept"])
+async def get_concepts_by_file(
+    request: Request,
+    file_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get all concepts by file
+    '''
+    logging.info("get concepts by file")
+
+    # get the file first
+    file = await db.files.find_one({
+        "file_id": file_id
+    })
+
+    # if file is None, we will raise an error to the user
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # check ownership of this file for this user
+    flag_has_ownership = file['user_id'] == current_user['user_id']
+    logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
+
+    # check permission of this file for this user
+    permission = await db.file_users.find_one({
+        "file_id": file_id,
+        "user_id": current_user['user_id']
+    })
+    logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission}")
+
+    if flag_has_ownership:
+        # ok we have the ownership, we can pass
+        pass
+
+    elif permission is None:
+        # no ownership and no permission, we will raise an error
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
+    elif 'read' in permission['permission']:
+        # ok, we have the read permission
+        pass
+    
+    # get all concepts
+    concepts = await db.concepts.find({
+        "file_id": file_id
+    }).to_list(length=None)
+
+    return {
+        'success': True,
+        'concepts': formatConcepts(concepts)
+    }
+
+
 # @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
 # async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):
 #     # Ensure the user_id in the body matches the user_id in the path
@@ -921,6 +981,17 @@ def formatFiles(files):
         file.pop('_id', None)
 
     return files
+
+def formatConcept(concept):
+    concept.pop('_id', None)
+
+    return concept
+
+def formatConcepts(concepts):
+    for concept in concepts:
+        concept.pop('_id', None)
+
+    return concepts
 
 if __name__ == '__main__':
     import uvicorn

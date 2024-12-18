@@ -140,4 +140,23 @@ export const Jimin = {
 
         return rsp.data;
     },
+
+    ///////////////////////////////////////////////////////
+    // File related
+    ///////////////////////////////////////////////////////
+
+    getConceptsByFile: async function (file_id) {
+        console.log('* get concepts by file', file_id);
+
+        const rsp = await this.axios_instance.get(
+            '/get_concepts_by_file',
+            {
+                params: {
+                    file_id: file_id
+                }
+            }
+        );
+
+        return rsp.data.concepts;
+    }
 }

@@ -98,6 +98,18 @@ async function onClickMapping(file) {
     // set working file to this file
     store.working_file = file;
 
+    // set working concepts
+    try {
+        let ret = await Jimin.getConceptsByFile(file.file_id);
+        console.log('* got concepts:', ret);
+        store.working_file_concepts = ret;
+
+    } catch (err) {
+        console.error(err);
+        store.msg(err.message, 'Error', 'error');
+        return;
+    }
+
     // then, switch to the mapping view
     store.changeView('mapping');
 }
@@ -320,7 +332,7 @@ onMounted(() => {
     <div>
         <template v-for="project in store.projects">
             <div class="w-full project-item flex flex-row justify-between py-2 items-center">
-                <div class="flex flex-row"
+                <div class="flex flex-row grow cursor-pointer"
                     @click="onClickProjectItem(project)">
                     <div class="project-name">
                         <i class="fa-solid fa-suitcase mr-2"></i>
@@ -555,7 +567,6 @@ onMounted(() => {
 .project-item {
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--bd-color);
-    cursor: pointer;
 }
 .project-item:hover {
     background-color: var(--bg-color-menu-hover);
