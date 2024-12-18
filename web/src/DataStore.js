@@ -36,14 +36,14 @@ state: () => ({
     //     created: '2021-06-01',
     // },
 
-    // working file
+    // working file for mapping or other tasks
     working_file: null,
 
     // working file
     working_file_concepts: [],
 
-    // working term
-    working_term_idx: -1,
+    // working concept
+    working_concept: null,
 
     // for mapping
     mapping: {
@@ -51,10 +51,9 @@ state: () => ({
         collections: [],
 
         selected_source: null,
-        selected_collections: null,
+        selected_collections: [],
         sort_terms_by: null,
         filter_terms_by: '',
-
 
         data_col_name: 'element',
         data_col_description: 'description',
@@ -78,9 +77,6 @@ state: () => ({
 }),
 
 getters: {
-    working_term: (state) => {
-        return state.working_file[state.working_term_idx];
-    },
 
 },
 
@@ -149,14 +145,14 @@ actions: {
     ///////////////////////////////////////////////////////
     // Working File
     ///////////////////////////////////////////////////////
-    isWorkingConcept(term) {
+    isWorkingConcept(concept) {
         // check if the term is the working term by indexOf
         // working file is a list of term objects, need to use id to compare
-        return this.working_term_idx == term.id;
+        return this.working_concept?.id == concept.id;
     },
 
     reset() {
-        this.mapping.working_term_idx = [];
+        this.working_concept = null;
     }
 }
 });

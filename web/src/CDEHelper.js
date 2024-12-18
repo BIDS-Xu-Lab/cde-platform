@@ -64,3 +64,16 @@ export const makeSampleData = function() {
     }
     return concepts;
 }
+
+export const convertConceptToQueryByFile = function(concept, definition) {
+    // get the column of the term
+    let col_term = definition.term;
+    let col_description = definition.description;
+    let col_value = definition.value;
+
+    return {
+        term: concept[col_term],
+        description: concept[col_description],
+        value: concept[col_value]
+    }
+}

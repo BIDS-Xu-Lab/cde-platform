@@ -885,6 +885,86 @@ async def get_collections_by_source(
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+class SearchModel(BaseModel):
+    source: str | None = None
+    collections: List[str]
+    queries: List[Dict[str, Any]]
+    flag_embedding: bool = False
+    flag_openai: bool = False
+    flag_fuzzy: bool = True
+    size: int = 100
+
+@app.post('/search', tags=["mapping"])
+async def search(
+    request: Request,
+    search_data: SearchModel,
+):
+    '''
+    Search data
+    '''
+    logging.info("bulk_search")
+
+    if search_data.source is None:
+        raise HTTPException(status_code=400, detail="source is required")
+
+    bulk_search_body = []
+    for query in search_data.queries:
+        # search header
+        header = {"index": search_data.source}
+
+        # search body
+        body = {
+            'size': search_data.size,
+            'query': {
+                'bool': {
+                    'should': [
+                        {"multi_match": {"query": query['description'], "fields": ["term^2.5", "description^3","value^2"]}},
+                        {"multi_match": {"query": query['term'], "fields": ["term^3", "description^2.5", "value^2"]}},
+                    ],
+                    'minimum_should_match': 1
+                }
+            }
+        }
+
+        # add the collection filter
+        if search_data.collections:
+            body['query']['bool']['filter'] = {
+                'terms': {
+                    'source': search_data.collections
+                }
+            }
+        
+        # add to the bulk search body
+        bulk_search_body.append(header)
+        bulk_search_body.append(body)
+
+    # Execute the bulk search
+    try:
+        bulk_response = es.msearch(body=bulk_search_body)
+        all_results = []
+        for i, response in enumerate(bulk_response['responses']):
+            hits = response['hits']['hits']
+            results = [{
+                'score': hit['_score'],
+                'conceptId': hit['_source'].get('concept_id'),
+                'conceptCode': hit['_source'].get('code'),
+                'conceptSource': hit['_source'].get('source'),
+                'term': hit['_source'].get('term'),
+                'description': hit['_source'].get('description'),
+                'value': hit['_source'].get('value'),
+            } for hit in hits]
+            all_results.append(results)
+        
+        return {
+            'success': True,
+            'results': all_results
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    # get the search data
 
 # @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])
 # async def upsert_user_document(user_id: str, user_data: Dict[str, Any] = Body(...)):
@@ -991,13 +1071,13 @@ async def get_collections_by_source(
 #         raise HTTPException(status_code=500, detail=str(e))
 
 
-class BulkSearchRequest(BaseModel):
-    queries: List[str]
-    description: List[str] | None = None
-    source: List[str] | None = None
-    mapping: str
-    if_fuzzy: bool = True
-    openai: bool = False
+# class BulkSearchRequest(BaseModel):
+#     queries: List[str]
+#     description: List[str] | None = None
+#     source: List[str] | None = None
+#     mapping: str
+#     if_fuzzy: bool = True
+#     openai: bool = False
 
 # @app.post('/bulk_search', response_model=Dict[str, Any], summary="Perform a bulk search.", description="If 'openai' flag is true, submit the search results as a job for further processing and return the job ID. Otherwise, return the search results directly.", dependencies=[Depends(validate_token)])
 # async def bulk_search(request_data: BulkSearchRequest):

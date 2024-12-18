@@ -199,5 +199,43 @@ export const Jimin = {
         );
 
         return rsp.data.collections;
+    },
+
+    /**
+     * Search for the terms in the source and collections
+     * 
+     * @param {string} source Elasticsearch index name
+     * @param {list} collections List of collection names
+     * @param {object} queries List of query objects
+     * @param {int} size Number of results to return
+     * @param {boolean} flag_openai Flag to use OpenAI for query expansion
+     * @param {boolean} flag_fuzzy Flag to use fuzzy search
+     * @returns 
+     */
+    search: async function (
+        source, 
+        collections, 
+        queries, 
+        flag_embedding=false,
+        flag_openai=false, 
+        flag_fuzzy=true,
+        size=100, 
+    ) {
+        console.log('* search', source, collections, queries);
+
+        const rsp = await this.axios_instance.post(
+            '/search',
+            {
+                source: source,
+                collections: collections,
+                queries: queries,
+                flag_embedding: flag_embedding,
+                flag_openai: flag_openai,
+                flag_fuzzy: flag_fuzzy,
+                size: size,
+            }
+        );
+
+        return rsp.data.results;
     }
 }

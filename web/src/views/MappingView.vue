@@ -46,8 +46,29 @@ async function onChangeSource() {
     });
 }
 
-function onClickSearch() {
+async function onClickSearch() {
     console.log('* clicked Search ');
+
+    if (store.working_concept == null) {
+        store.msg('Please select a concept to search.');
+        return;
+    }
+
+    // search CDEs on the working concept
+    let results = await Jimin.search(
+        store.mapping.selected_source,
+        store.mapping.selected_collections,
+        [CDEHelper.convertConceptToQueryByFile(
+            store.working_concept, 
+            store.working_file
+        )],
+        store.features.embedding_search.enabled,
+        false,
+        false,
+        100
+    );
+
+    console.log('* search results:', results);
 }
 
 function onClickSearchAll() {
@@ -110,11 +131,9 @@ const sort_term_options = [
     { name: 'Status', code: 'status' }
 ];
 
-function onClickConcept(item) {
-    console.log('* clicked term:', item);
-
-    store.working_term_idx = store.working_file_concepts.indexOf(item);
-    console.log('* clicked working_term_idx:', store.working_term_idx);
+function onClickConcept(concept) {
+    console.log('* clicked concept:', concept);
+    store.working_concept = concept;
 }
 
 function fmtScore(score) {
@@ -170,7 +189,7 @@ onMounted(() => {
                     <i class="fa-solid fa-book-bookmark"></i>
                     Collections
                 </label>
-                <MultiSelect v-model="store.mapping.selected_collection" 
+                <MultiSelect v-model="store.mapping.selected_collections" 
                     :options="store.mapping.collections" 
                     variant="in"
                     filter 
@@ -186,7 +205,7 @@ onMounted(() => {
 
             <Button text
                 class="menu-button"
-                v-tooltip.bottom="'Search CDEs for the current selected term.'"
+                v-tooltip.bottom="'Search CDEs for the current selected concept.'"
                 @click="onClickSearch">
                 <i class="fa-solid fa-magnifying-glass menu-icon"></i>
                 <span>
@@ -315,7 +334,7 @@ onMounted(() => {
 <!-- main -->
 <div class="main flex-row">
 
-<!-- term list -->
+<!-- concept list -->
 <Panel class="h-full term-list">
     <template #header>
         <div class="w-full flex justify-between">
@@ -323,7 +342,7 @@ onMounted(() => {
                 <div class="flex-col">
                     <div class="text-lg font-bold">
                         <i class="fa fa-list "></i>
-                        Term List
+                        Concept List
                     </div>
                     <div class="panel-subtitle text-sm">
                         <b>{{ store.working_file_concepts.length }}</b>
