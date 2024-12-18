@@ -321,7 +321,6 @@ async def test_mongo():
     return db.list_collection_names()
 
 
-
 ###########################################################
 # Admin related APIs
 ###########################################################
@@ -334,6 +333,7 @@ async def admin_init_database(
     '''
     Initialize the database
     '''
+    logging.info("init database")
     # create collection `users` if not exist
     existing_collections = await db.list_collection_names()
 
@@ -351,30 +351,24 @@ async def admin_init_database(
             # await db[collection_name].insert_one({"init": True})
             await db.create_collection(collection_name)
             logging.info(f"* created collection `{collection_name}`")
+            
+            if collection_name == 'users':
+                # add a default admin
+                admin = {
+                    "user_id": str(uuid.uuid4()),
+                    "email": os.environ['ADMIN_EMAIL'],
+                    "name": os.environ['ADMIN_NAME'],
+                    "role": "admin",
+                    "password": hashlib.md5(os.environ['ADMIN_PASSWORD'].encode()).hexdigest()
+                }
+                await db.users.insert_one(admin)
+                logging.info(f"* created admin {admin['email']}")
 
     return {
         'success': True,
         'message': 'database initialized'
     }
 
-@app.post("/admin/clear_elasticsearch", tags=["admin"])
-async def admin_clear_elasticsearch(
-    request: Request,
-    x_token: str = Depends(authXTokenHeader)
-):
-    '''
-    Clear the elasticsearch
-    '''
-    indices = es.indices.get_alias(index="*")
-    index_names = [val for val in list(indices.keys()) if val[0] != '.']
-    for index_name in index_names:
-        es.indices.delete(index=index_name)
-        logging.info(f"* deleted index `{index_name}`")
-
-    return {
-        'success': True,
-        'message': 'elasticsearch cleared'
-    }
 
 @app.post("/admin/init_elasticsearch", tags=["admin"])
 async def admin_init_elasticsearch(
@@ -503,6 +497,57 @@ async def admin_register_user(
         'message': 'user exists',
         'user': formatUser(_user)
     }
+
+
+@app.post("/admin/clear_database", tags=["admin"])
+async def admin_clear_database(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Clear the database
+    '''
+    existing_collections = await db.list_collection_names()
+
+    for collection_name in [
+        'users',
+        'projects',
+        'files', 
+        'concepts',
+        'file_users',
+        'jobs',
+    ]:
+        if collection_name in existing_collections:
+            await db[collection_name].drop()
+            logging.info(f"* dropped collection `{collection_name}`")
+        else:
+            logging.info(f"* collection `{collection_name}` not found")
+
+    return {
+        'success': True,
+        'message': 'database cleared'
+    }
+
+
+@app.post("/admin/clear_elasticsearch", tags=["admin"])
+async def admin_clear_elasticsearch(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Clear the elasticsearch
+    '''
+    indices = es.indices.get_alias(index="*")
+    index_names = [val for val in list(indices.keys()) if val[0] != '.']
+    for index_name in index_names:
+        es.indices.delete(index=index_name)
+        logging.info(f"* deleted index `{index_name}`")
+
+    return {
+        'success': True,
+        'message': 'elasticsearch cleared'
+    }
+
 
 ###########################################################
 # OpenAI related APIs

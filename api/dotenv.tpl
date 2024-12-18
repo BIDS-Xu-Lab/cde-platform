@@ -15,7 +15,8 @@ JWT_ALGORITHM='HS256'
 LOGGING_CONF='logging.conf'
 
 # For admin
-ADMIN_USERNAME='admin'
+ADMIN_NAME='Admin'
+ADMIN_EMAIL="admin@cde.org"
 ADMIN_PASSWORD='j29j-asdf-9234@jzz1'
 
 # For elasticsearch
