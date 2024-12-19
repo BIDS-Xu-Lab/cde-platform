@@ -514,7 +514,7 @@ onMounted(() => {
                             <i class="fa fa-file"></i>
                             {{ file.filename }}
                         </div>
-                        <div class="file-reviewers mt-2 py-2">
+                        <div class="file-reviewers">
                             Assigned Reviewers: 
                             <i class="fa fa-user"></i>
 
