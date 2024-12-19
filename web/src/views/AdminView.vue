@@ -4,6 +4,8 @@ import { onMounted, ref } from 'vue';
 import { AWS } from '../AWS';
 import ProjectManagementView from './AdminSubViews/ProjectManagementView.vue';
 import UserManagementView from './AdminSubViews/UserManagementView.vue';
+import MongoManagementView from './AdminSubViews/MongoManagementView.vue';
+import CDEIndexManagementView from './AdminSubViews/CDEIndexManagementView.vue';
 
 const store = useDataStore();
 
@@ -117,7 +119,7 @@ onMounted(() => {
             <Button text
                 class="menu-button"
                 v-tooltip.bottom="'Manage CDE indexes.'"
-                @click="switchTab('cde_index')">
+                @click="switchTab('mongo')">
                 <i class="fa-solid fa-database menu-icon"></i>
                 <span>
                     MongoDB
@@ -160,15 +162,23 @@ onMounted(() => {
 
 <div class="main">
 
+
+
 <!-- user management -->
 <UserManagementView v-show="store.admin.current_tab == 'user'" />
 
 <!-- project management -->
 <ProjectManagementView v-show="store.admin.current_tab == 'project'" />
 
+<!-- mongodb management -->
+<MongoManagementView v-show="store.admin.current_tab == 'mongo'" />
+
+<!-- cde index management -->
+<CDEIndexManagementView v-show="store.admin.current_tab == 'cde_index'" />
+
+
+
 </div>
-
-
 </template>
 
 <style scoped>
