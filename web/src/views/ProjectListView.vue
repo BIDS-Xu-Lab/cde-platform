@@ -128,7 +128,16 @@ async function onClickMapping(file) {
     try {
         let ret = await Jimin.getConceptsByFile(file.file_id);
         console.log('* got concepts:', ret);
-        store.working_file_concepts = ret;
+        store.working_file_concepts = ret.concepts;
+        store.working_mappings = {};
+        // put all concepts into the working mappings
+        ret.mappings.forEach((mapping) => {
+            store.working_mappings[mapping.concept_id] = {
+                selected_results: mapping.selected_results,
+                search_results: mapping.search_results
+            };
+        });
+
 
     } catch (err) {
         console.error(err);

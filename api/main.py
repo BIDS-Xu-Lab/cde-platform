@@ -960,9 +960,15 @@ async def get_concepts_by_file(
         "file_id": file_id
     }).to_list(length=None)
 
+    mappings = await db.mappings.find({
+        "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
+        "user_id": current_user['user_id']
+    }).to_list(length=None)
+
     return {
         'success': True,
-        'concepts': formatConcepts(concepts)
+        'concepts': formatConcepts(concepts),
+        'mappings': formatMappings(mappings)
     }
 
 ###########################################################
@@ -1152,7 +1158,10 @@ async def get_mapping(
     })
 
     if m is None:
-        raise HTTPException(status_code=404, detail="Mapping not found")
+        return {
+            'success': True,
+            'message': []
+        }
     
     return {
         'success': True,

@@ -13,6 +13,8 @@ import { Jimin } from '../Jimin';
 import SearchResultItem from '../components/SearchResultItem.vue';
 
 const store = useDataStore();
+const prograss_visible = ref(false);
+const prograss_value = ref(0);
 async function onClickRefreshList() {
     console.log('* clicked Refresh List');
 
@@ -49,9 +51,12 @@ async function onChangeSource() {
 
 async function onClickSearch() {
     console.log('* clicked Search ');
-
+    if(store.mapping.selected_source == null) {
+        store.msg('Please select a source to search.', 'error', 'error');
+        return;
+    }
     if (store.working_concept == null) {
-        store.msg('Please select a concept to search.');
+        store.msg('Please select a concept to search.', 'error', 'error');
         return;
     }
 
@@ -82,8 +87,51 @@ async function onClickSearch() {
     }
 }
 
-function onClickSearchAll() {
+async function onClickSearchAll() {
     console.log('* clicked Search All');
+    if(store.mapping.selected_source == null) {
+        store.msg('Please select a source to search.','error', 'error');
+        return;
+    }
+    prograss_visible.value = true;
+    // for each concept in the working_file_concepts
+    // search CDEs on the working concept
+    for (let i=0; i < store.working_file_concepts.length; i++) {
+        prograss_value.value = Math.floor((i + 1) /  store.working_file_concepts.length * 100);
+        let concept = store.working_file_concepts[i];
+
+        // search CDEs on the working concept
+        let results = await Jimin.search(
+            store.mapping.selected_source,
+            store.mapping.selected_collections,
+            [CDEHelper.convertConceptToQueryByFile(
+                concept, 
+                store.working_file
+            )],
+            store.features.embedding_search.enabled,
+            false,
+            false,
+            100
+        );
+
+        console.log('* search results for ', i, results);
+
+        // check whether store.working_concept.id is in store.working_mappings
+        if (concept.concept_id in store.working_mappings) {
+            store.working_mappings[concept.concept_id].search_results = results[0];
+        } else {
+            store.working_mappings[concept.concept_id] = {
+                search_results: results[0],
+                selected_results: []
+            }
+        }
+
+    }
+    // sleep 1 sec let animation can be shown
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    prograss_visible.value = false;
+    prograss_value.value = 0;
+    store.msg('Searched all results.');
 }
 
 function onClickSave() {
@@ -149,19 +197,6 @@ const sort_order_options = [
 async function onClickConcept(concept) {
     console.log('* clicked concept:', concept);
     store.working_concept = concept;
-
-    // if local store has the concept, then do nothing
-    if (concept.concept_id in store.working_mappings) {
-        return;
-    } 
-    // if not, get selected results and search results (i.e., mappings)
-    // from database
-    let mapping = await Jimin.getMapping(concept.concept_id);
-
-    // update this mapping to the store
-    store.working_mappings[concept.concept_id] = mapping;
-
-    store.msg('Loaded mapping results.');
 }
 
 function fmtScore(score) {
@@ -431,11 +466,11 @@ onMounted(() => {
                     @click="onClickConcept(item)">
                     <div class="term-name">
                         <div class="mr-1">
-                            <template v-if="true">
-                                <Badge :value="item.id" severity="success" />
+                            <template v-if="store.hasSelectedResults(item)">
+                                <Tag :value="item.id" severity="success" />
                             </template>
                             <template v-else>
-                                <Badge :value="item.id" severity="warning" />
+                                <Tag :value="item.id" severity="contrast" />
                             </template>
                         </div>
                         <div>
@@ -584,7 +619,9 @@ onMounted(() => {
 </div>
 
 </div>
-
+<Dialog v-model:visible="prograss_visible" modal header="Search All Progress" :style="{ width: '50vw' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :closable="false">
+    <ProgressBar :value="prograss_value"></ProgressBar>
+</Dialog>
 
 </template>
 

@@ -191,7 +191,7 @@ export const Jimin = {
             }
         );
 
-        return rsp.data.concepts;
+        return rsp.data;
     },
 
 
