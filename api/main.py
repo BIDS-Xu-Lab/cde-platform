@@ -513,6 +513,26 @@ async def admin_register_user(
     }
 
 
+@app.get('/admin/get_all_users', tags=["admin"])
+async def admin_get_all_users(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Get all users
+    '''
+    logging.info("get all users")
+
+    users = await db.users.find().to_list(length=None)
+    logging.debug(f"* found {len(users)} users")
+
+    return {
+        'success': True,
+        'message': 'get all %s users' % len(users),
+        'users': formatUsers(users)
+    }
+
+
 @app.post("/admin/clear_database", tags=["admin"])
 async def admin_clear_database(
     request: Request,
@@ -1393,6 +1413,13 @@ def formatUser(user):
     user.pop('password', None)
 
     return user
+
+def formatUsers(users):
+    for user in users:
+        user.pop('_id', None)
+        user.pop('password', None)
+
+    return users
 
 def formatProject(project):
     project.pop('_id', None)

@@ -74,6 +74,19 @@ async function onClickAddUser() {
     }
 
     // add a new user
+    try {
+        let data = await AWS.registerUser(
+            data_add_user.value.email,
+            data_add_user.value.name,
+            data_add_user.value.password,
+        );
+        console.log('data:', data);
+        store.msg('Server returns: ' + data.message);
+
+    } catch (error) {
+        console.log('error:', error);
+        store.msg('Failed to add a new user.', 'Error', 'error');
+    }
 }
 
 function onClickGeneratePassword() {
@@ -92,6 +105,29 @@ function onClickGeneratePassword() {
 
 async function onClickRefreshUserList() {
     console.log('* clicked refresh user list');
+
+    // get user list
+    try {
+        let data = await AWS.getAllUsers();
+        console.log('data:', data);
+        store.msg('Server returns: ' + data.message);
+
+        users.value = data.users;
+
+    } catch (error) {
+        console.log('error:', error);
+        store.msg('Failed to get user list.', 'Error', 'error');
+    }
+}
+
+function onClickClearDataAddUser() {
+    console.log('* clicked clear data add user');
+    data_add_user.value = {
+        name: '',
+        email: '',
+        password: ''
+    };
+    info_add_user.value = '';
 }
 ///////////////////////////////////////////////////////////
 // Project management
@@ -209,7 +245,7 @@ onMounted(() => {
 <div v-if="current_tab == 'user'" class="h-full w-full flex flex-row">
     
     <div class="w-1/3 mr-1">
-        <Panel style="height: 9rem;">
+        <Panel>
             <template #header>
                 <div class="w-full flex justify-between">
                     <div class="flex">
@@ -228,44 +264,58 @@ onMounted(() => {
                 </div>
             </template>
 
-            <div class="flex flex-row items-center">
-                <div class="flex flex-col w-1/5 mr-1">
+            <div class="flex flex-col items-center">
+                <div class="flex flex-col w-full mr-1 mb-2">
                     <label class="text-sm" for="">Name</label>
                     <InputText placeholder="Name" 
                         v-model="data_add_user.name" />
                 </div>
-                <div class="flex flex-col w-1/5 mr-1">
+                <div class="flex flex-col w-full mr-1 mb-2">
                     <label class="text-sm" for="">Email</label>
                     <InputText placeholder="Email"
                         v-model="data_add_user.email" />
                 </div>
-                <div class="flex flex-col w-1/5 mr-1">
+                <div class="flex flex-col w-full mr-1 mb-2">
                     <label class="text-sm" for="">Password</label>
-                    <InputText placeholder="Password"
-                        v-model="data_add_user.password" />
+                    <div class="flex flex-row">
+                        <Button severity="secondary"
+                                class="mr-2"
+                                v-tooltip.bottom="'Generate a random password.'"
+                                @click="onClickGeneratePassword">
+                                <i class="fa-solid fa-key"></i>
+                            </Button>
+                        <InputText placeholder="Password"
+                            class="flex-grow"
+                            v-model="data_add_user.password" />
+                    </div>
                 </div>
 
                 <div class="flex flex-col mr-1">
                     <div class="text-sm text-red-500">
-                        &nbsp;
                         {{ info_add_user }}
                     </div>
-                    <div class="flex flex-row">
-                        <Button severity="secondary"
-                            class="mr-2"
-                            v-tooltip.bottom="'Generate a random password.'"
-                            @click="onClickGeneratePassword">
-                            <i class="fa-solid fa-key"></i>
-                        </Button>
+                    <div class="flex flex-row justify-between">
+                        <div class="mr-2">
+                            <Button
+                                v-tooltip.bottom="'Clear all info.'"
+                                @click="onClickClearDataAddUser">
+                                <i class="fa-solid fa-times"></i>
+                                <span>
+                                    Clear
+                                </span>
+                            </Button>
+                        </div>
 
-                        <Button
-                            v-tooltip.bottom="'Add a new user.'"
-                            @click="onClickAddUser">
-                            <i class="fa-solid fa-user-plus"></i>
-                            <span>
-                                Add User
-                            </span>
-                        </Button>
+                        <div>
+                            <Button
+                                v-tooltip.bottom="'Add a new user.'"
+                                @click="onClickAddUser">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span>
+                                    Add User
+                                </span>
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

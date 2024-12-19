@@ -25,4 +25,29 @@ export const AWS = {
         
         return rsp.data;
     },
+
+    registerUser: async function (email, name, password) {
+        console.log('* register user ' + email);
+
+        const rsp = await this.axios_instance.post(
+            '/register_user',
+            {
+                email: email,
+                name: name,
+                password: password
+            }
+        );
+        
+        return rsp.data;
+    },
+
+    getAllUsers: async function () {
+        console.log('* get all users');
+
+        const rsp = await this.axios_instance.get(
+            '/get_all_users'
+        );
+        
+        return rsp.data;
+    }
 }
