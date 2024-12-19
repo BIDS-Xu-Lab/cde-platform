@@ -5,6 +5,7 @@ import Badge from 'primevue/badge';
 
 import { useDataStore } from '../DataStore';
 import { onMounted, ref } from 'vue';
+import { useElementSize } from '@vueuse/core';
 import { Button } from 'primevue';
 
 import * as CDEHelper from '../CDEHelper';
@@ -188,6 +189,9 @@ async function onClickSelectResult(result) {
     // show a message
     store.msg(ret.message);
 }
+
+const selected_results_panel = ref();
+const search_results_panel = ref();
 
 onMounted(() => {
     console.log('* mounted MappingView');
@@ -384,7 +388,7 @@ onMounted(() => {
 <div class="main flex-row">
 
 <!-- concept list -->
-<Panel class="h-full term-list">
+<Panel class="h-full term-list mr-2">
     <template #header>
         <div class="w-full flex justify-between">
             <div class="flex">
@@ -484,41 +488,21 @@ onMounted(() => {
     </div>
 </Panel>
 
-<div class="flex flex-col w-full result-list justify-between">
-    <!-- selected list -->
+<div class="flex flex-col w-full h-full result-list">
 
-    <Panel v-if="store.working_mappings[store.working_concept?.concept_id]?.selected_results?.length > 0" class="w-full mb-2">
+    <Panel ref="search_results_panel"
+        class="w-full">
         <template #header>
-            <div class="w-full flex justify-between">
-                <div class="flex">
-                    <div class="flex-col">
-                        <div class="text-lg font-bold">
-                            <i class="fa-solid fa-check-double"></i>
-                            Selected CDE Mapping
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </template>
-        <div class="result-list-scroller":style="{ maxHeight: 'calc(50vh - 18rem)'}">
-        <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.selected_results">
-                    <SearchResultItem :item="item" :item_idx="item_idx" />
-        </template>
-        </div>
-    </Panel>
-
-    <!-- result list -->
-    <Panel class="w-full">
-        <template #header>
-            <div class="w-full flex justify-between">
+            <div class="w-full flex justify-between items-center">
                 <div class="flex">
                     <div class="flex-col">
                         <div class="text-lg font-bold">
                             <i class="fa-solid fa-cubes"></i>
-                            CDE Mapping 
-                            <b v-if="store.working_concept">
-                                {{ store.working_concept?.[store.mapping.data_col_term] }}
-                            </b>
+                            CDE Mappings
+                            <span v-if="store.working_concept">
+                                for 
+                                <i>{{ store.working_concept?.[store.mapping.data_col_term] }}</i>
+                            </span>
                         </div>
                         <div class="panel-subtitle text-sm">
                             <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
@@ -532,7 +516,8 @@ onMounted(() => {
                     </div>
                 </div>
                 
-                <div class="flex justify-end" style="height: 2rem; line-height: 1rem;">
+                <div class="flex justify-end mr-2" 
+                    style="height: 2rem; line-height: 1rem;">
                     <InputText v-model="store.mapping.filter_terms_by"
                         type="text" 
                         placeholder="Filter keyword ..."
@@ -554,14 +539,43 @@ onMounted(() => {
             </div>
         </template>
 
-        <div class="result-list-box">
-            <div class="result-list-scroller"
-                :style="{ height: 'calc(100vh - 18rem)'}">
-                <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.search_results">
-                    <SearchResultItem :item="item" :item_idx="item_idx" />
+        <div class="result-list-scroller"
+            :style="{ height: 'calc(100vh - 19rem)' }">
+
+            <!-- selected list -->
+            <template v-if="store.working_mappings[store.working_concept?.concept_id]?.selected_results.length > 0">
+            <div class="selected-results-section">
+
+                <div class="text-lg font-bold my-4">
+                    <i class="fa-solid fa-check-double"></i>
+                    Selected Results
+                    ({{ store.working_mappings[store.working_concept?.concept_id]?.selected_results.length }})
+                </div>
+                
+                <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.selected_results">
+                    <SearchResultItem :item="item" 
+                        :flag_selected="true"
+                        :flag_enabled_value_mapping="true"
+                        :item_idx="item_idx" />
                 </template>
-                    
+
             </div>
+            <Divider />
+            </template>
+
+            <!-- result list -->
+            <div class="text-lg font-bold mt-4">
+                <i class="fa-solid fa-list-ul"></i>
+                Search Results
+                ({{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length }})
+            </div>
+            <template v-for="item, item_idx in store.working_mappings[store.working_concept?.concept_id]?.search_results">
+                <SearchResultItem :item="item" 
+                    :flag_selected="false"
+                    :flag_enabled_value_mapping="false"
+                    :item_idx="item_idx" />
+            </template>
+                
         </div>
     </Panel>
 </div>
@@ -584,8 +598,6 @@ onMounted(() => {
 
 .result-list {
     width: calc(100% - 460px);
-    height: 100%;
-    margin: 0 0 0 0.5rem;
 }
 
 .term-filter {
@@ -617,6 +629,10 @@ onMounted(() => {
     font-size: 1.2rem;
     line-height: 1.5rem;
 }
+.term-detail {
+    line-height: 1.2rem;
+    margin: 0.5rem 0;
+}
 .term-concept {
     display: flex;
     flex-direction: row;
@@ -633,10 +649,10 @@ onMounted(() => {
     background-color: var(--bg-color-selected);
 }
 
-
-.result-list-box {
-    height: 100%;
+.selected-results-section {
+    background-color: var(--bg-color-selected);
 }
+
 .result-list-scroller {
     width: calc(100% + 1rem);
     overflow-y: auto;

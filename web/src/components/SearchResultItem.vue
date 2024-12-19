@@ -5,7 +5,9 @@ const store = useDataStore();
 
 defineProps({
     item: Object,
-    item_idx: Number
+    item_idx: Number,
+    flag_selected: Boolean || false,
+    flag_enabled_value_mapping: Boolean || false,
 });
 
 async function onClickSelectResult(result) {
@@ -26,10 +28,27 @@ async function onClickSelectResult(result) {
     store.msg(ret.message);
 }
 
+async function onClickRemoveResult(result) {
+    console.log('* clicked Remove Result:', result);
+
+    // update store
+    store.removeSelectedResultFromWorkingConcept(result);
+
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_mappings[store.working_concept.concept_id].selected_results
+    );
+
+    console.log('* updated selected results:', ret);
+
+    // show a message
+    store.msg(ret.message);
+}
+
 function fmtScore(score) {
     return score.toFixed(2);
 }
-
 
 </script>
 
@@ -65,7 +84,18 @@ function fmtScore(score) {
             </div>
         </div>
         <div>
-            <Button
+
+            <Button v-if="flag_selected"
+                size="small"
+                icon="pi pi-check"
+                severity="warn"
+                label="Remove"
+                class="mr-1"
+                v-tooltip.right="'Remove this concept.'"
+                @click="onClickRemoveResult(item)">
+            </Button>
+
+            <Button v-if="!flag_selected"
                 size="small"
                 icon="pi pi-check"
                 severity="success"
@@ -83,14 +113,25 @@ function fmtScore(score) {
     </div>
 
     <div class="result-valueset">
-        <div>
+        <div v-if="flag_enabled_value_mapping">
             <Button
                 size="small"
                 icon="pi pi-list"
                 label="Value Mapping"
-                severity="secondary"
+                severity="success"
                 class="btn-mini"
                 v-tooltip.right="'Map values for this concept.'"
+                @click="store.showGuide()">
+            </Button>
+        </div>
+        <div v-else>
+            <Button
+                size="small"
+                icon="pi pi-list"
+                label="Show values"
+                severity="secondary"
+                class="btn-mini"
+                v-tooltip.right="'Show values for this concept.'"
                 @click="store.showGuide()">
             </Button>
         </div>
@@ -106,6 +147,9 @@ function fmtScore(score) {
     padding: 0.5rem 0;
     display: flex;
     flex-direction: column;
+}
+.result-line:last-child {
+    border-bottom: 0;
 }
 .result-tags {
     display: flex;

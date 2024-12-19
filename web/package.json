@@ -12,6 +12,7 @@
     "@kinde-oss/kinde-auth-pkce-js": "^4.2.2",
     "@primevue/auto-import-resolver": "^4.2.5",
     "@primevue/themes": "^4.2.5",
+    "@vueuse/core": "^12.0.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",

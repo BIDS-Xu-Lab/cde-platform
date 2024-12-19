@@ -193,6 +193,19 @@ actions: {
         this.working_mappings[this.working_concept.concept_id].selected_results.push(result);
     },
 
+    removeSelectedResultFromWorkingConcept(result) {
+        if (!this.working_concept) {
+            return;
+        }
+
+        if (!this.working_mappings[this.working_concept.concept_id]) {
+            return;
+        }
+
+        // remove the result
+        this.working_mappings[this.working_concept.concept_id].selected_results = this.working_mappings[this.working_concept.concept_id].selected_results.filter(r => r != result);
+    },
+
     ///////////////////////////////////////////////////////
     // User File
     ///////////////////////////////////////////////////////
