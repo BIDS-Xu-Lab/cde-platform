@@ -54,6 +54,12 @@ function onClickNewFile() {
     visible_dialog_upload_file.value = true;
 }
 
+function onClickNewFileForProject(project) {
+    console.log('* clicked New File for Project', project);
+    selected_project_id_for_file.value = project.project_id;
+    visible_dialog_upload_file.value = true;
+}
+
 async function onClickUpdateProjectList() {
     console.log('* clicked Update Project List');
 
@@ -225,8 +231,8 @@ async function onClickCreate() {
 ///////////////////////////////////////////////////////////
 const fileupload = ref();
 store.fileupload = fileupload;
-const selected_project_for_file = ref();
-window.selected_project_for_file = selected_project_for_file;
+const selected_project_id_for_file = ref();
+window.selected_project_id_for_file = selected_project_id_for_file;
 
 async function onClickUpload() {
     try {
@@ -251,7 +257,7 @@ async function onClickUpload() {
                 updated: toolbox.formatDate(new Date()),
                 // Add any additional properties you need
             };
-            csv['project_id'] = selected_project_for_file.value? selected_project_for_file.value : 'default_project_id';
+            csv['project_id'] = selected_project_id_for_file.value? selected_project_id_for_file.value : 'default_project_id';
             csv["columns"] = Object.keys(csv.concepts[0]);
             csv["file_id"] = uuidv4();
             csv['user_id'] = store.user.user_id | 0;
@@ -439,7 +445,7 @@ onMounted(() => {
 
 <Panel class="h-full project-detail">
     <template #header>
-        <div class="w-full flex justify-between">
+        <div class="w-full flex justify-start items-start">
             <div class="flex">
                 <div class="flex-col">
                     <div class="text-lg font-bold">
@@ -454,8 +460,16 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <div>
 
+            <div class="ml-2">
+                <Button v-if="store.current_project"
+                    severity="secondary"
+                    size="small"
+                    v-tooltip.bottom="'Upload a new file to this project.'"
+                    @click="onClickNewFileForProject(store.current_project)">
+                    <i class="fa-solid fa-upload"></i>
+                    Add file to [{{ store.current_project.name }}]
+                </Button>
             </div>
         </div>
     </template>
@@ -597,7 +611,7 @@ onMounted(() => {
             <label for="select_project" class="font-semibold w-24">
                 Select a Project
             </label>
-            <Select v-model="selected_project_for_file" 
+            <Select v-model="selected_project_id_for_file" 
                 :options="store.projects"
                 optionLabel="name" 
                 optionValue="project_id"
