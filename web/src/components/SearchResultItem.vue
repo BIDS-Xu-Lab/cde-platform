@@ -85,12 +85,23 @@ function fmtScore(score) {
         </div>
 
         <div>
+        </div>  
+    </div>
+
+    <div class="result-detail">
+        Question Text:
+        {{ item.description }}
+    </div>
+
+    <div class="flex flex-row mt-2 mb-1">
+
+        <div>
             <Button v-if="flag_selected"
                 size="small"
                 icon="pi pi-check"
                 severity="warn"
                 label="Remove"
-                class="mr-1"
+                class="mr-2 btn-mini"
                 v-tooltip.right="'Remove this concept.'"
                 @click="onClickRemoveResult(item)">
             </Button>
@@ -100,19 +111,14 @@ function fmtScore(score) {
                 icon="pi pi-check"
                 severity="success"
                 label="Select"
-                class="mr-1"
+                class="mr-2 btn-mini"
                 v-tooltip.right="'Select this concept.'"
                 @click="onClickSelectResult(item)">
             </Button>
-        </div>  
-    </div>
+        </div>
 
-    <div class="result-detail">
-        Question Text:
-        {{ item.description }}
-    </div>
-
-    <div class="result-valueset mt-2 mb-1">
+        <Divider layout="vertical" class="!mx-2" />
+        
         <div v-if="flag_enabled_value_mapping">
             <Button
                 size="small"
