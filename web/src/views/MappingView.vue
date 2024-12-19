@@ -469,6 +469,9 @@ onMounted(() => {
                             <template v-if="store.hasSelectedResults(item)">
                                 <Tag :value="item.id" severity="success" />
                             </template>
+                            <template v-else-if="store.hasSearchResults(item)">
+                                <Tag :value="item.id" severity="info" />
+                            </template>
                             <template v-else>
                                 <Tag :value="item.id" severity="contrast" />
                             </template>

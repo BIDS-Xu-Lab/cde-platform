@@ -243,6 +243,12 @@ actions: {
         }
         return false;
     },
+    hasSearchResults(concept) {
+        if (this.working_mappings[concept.concept_id]) {
+            return this.working_mappings[concept.concept_id].search_results.length > 0;
+        }
+        return false;
+    },
 
     getSelectedResults(concept) {
         if (this.working_mappings[concept.concept_id]) {
