@@ -26,7 +26,7 @@ export const AWS = {
         return rsp.data;
     },
 
-    registerUser: async function (email, name, password) {
+    registerUser: async function (email, name, password, role='user') {
         console.log('* register user ' + email);
 
         const rsp = await this.axios_instance.post(
@@ -34,6 +34,7 @@ export const AWS = {
             {
                 email: email,
                 name: name,
+                role: role,
                 password: password
             }
         );

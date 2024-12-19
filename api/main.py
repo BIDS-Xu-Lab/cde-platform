@@ -466,6 +466,7 @@ async def admin_init_elasticsearch(
 class UserRegisterModel(BaseModel):
     email: str | None
     name: str | None
+    role: str | None
     password: str | None
 
 @app.post("/admin/register_user", tags=["admin"])
@@ -478,6 +479,7 @@ async def admin_register_user(
     '''
     if user_register.email is None or \
         user_register.name == None or \
+        user_register.role == None or \
         user_register.password == None:
 
         raise HTTPException(status_code=400, detail="email, name, and password are required")
@@ -494,7 +496,7 @@ async def admin_register_user(
             "user_id": str(uuid.uuid4()),
             "email": user_register.email,
             "name": user_register.name,
-            "role": "user",
+            "role": user_register.role,
             # hash the password to avoid saving plain text
             "password": hashlib.md5(user_register.password.encode()).hexdigest()
         }

@@ -46,6 +46,7 @@ const info_add_user = ref('');
 const data_add_user = ref({
     name: '',
     email: '',
+    role: 'user',
     password: ''
 });
 async function onClickAddUser() {
@@ -79,6 +80,7 @@ async function onClickAddUser() {
             data_add_user.value.email,
             data_add_user.value.name,
             data_add_user.value.password,
+            data_add_user.value.role
         );
         console.log('data:', data);
         store.msg('Server returns: ' + data.message);
@@ -276,6 +278,12 @@ onMounted(() => {
                         v-model="data_add_user.email" />
                 </div>
                 <div class="flex flex-col w-full mr-1 mb-2">
+                    <label class="text-sm" for="">Role</label>
+                    <Select placeholder="Email"
+                        :options="['user', 'admin']"
+                        v-model="data_add_user.role" />
+                </div>
+                <div class="flex flex-col w-full mr-1 mb-2">
                     <label class="text-sm" for="">Password</label>
                     <div class="flex flex-row">
                         <Button severity="secondary"
@@ -357,7 +365,11 @@ onMounted(() => {
                 <Column field="email" header="Email" style="width: 25%"></Column>
                 <Column field="role" header="Role" style="width: 25%"></Column>
                 <Column header="Actions" style="width: 25%">
-                
+                    <template #body="slotProps">
+                        <Button icon="pi pi-key" class="p-button-rounded p-button-secondary mr-2"></Button>
+                        <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2"></Button>
+                        <Button icon="pi pi-trash" class="p-button-rounded p-button-danger"></Button>
+                    </template>
                 </Column>
             </DataTable>
         </div>
