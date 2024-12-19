@@ -584,21 +584,27 @@ onMounted(() => {
                     </div>
 
                     <div class="file-column flex flex-row mb-2">
-                        <div class="flex flex-col mr-2 w-col-select-box">
+                        <div class="flex flex-col mr-2 w-col-info-box">
+                            <div class="text-sm"># Columns</div>
+                            <p class="text-xl font-bold">
+                                {{ file.columns.length }}
+                            </p>
+                        </div>
+                        <div class="flex flex-col mr-2 w-col-info-box">
                             <div class="text-sm">Term Column</div>
                             <p class="text-xl font-bold">
                                 {{ file.column_name_term }}
                             </p>
                         </div>
 
-                        <div class="flex flex-col w-col-select-box mr-2">
+                        <div class="flex flex-col w-col-info-box mr-2">
                             <div class="text-sm">Description Column</div>
                             <p class="text-xl font-bold">
                                 {{ file.column_name_description }}
                             </p>
                         </div>
 
-                        <div class="flex flex-col w-col-select-box">
+                        <div class="flex flex-col w-col-info-box">
                             <div class="text-sm">Values Column</div>
                             <p class="text-xl font-bold">
                                 {{ file.column_name_values }}
@@ -695,7 +701,7 @@ onMounted(() => {
             @change="onChangeUploadFile"
             accept="text/csv" />
         <div class="flex flex-row mb-2 ">
-            <div class="flex flex-col mr-2 w-col-select-box">
+            <div class="flex flex-col mr-2 w-col-info-box">
                 <label for="">Term</label>
                 <Select v-model="upload_file_column_mappings.term" 
                     :options="upload_file_columns"
@@ -709,7 +715,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="flex flex-col w-col-select-box mr-2">
+            <div class="flex flex-col w-col-info-box mr-2">
                 <label for="">Description</label>
                 <Select v-model="upload_file_column_mappings.description" 
                     :options="upload_file_columns"
@@ -723,7 +729,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="flex flex-col w-col-select-box">
+            <div class="flex flex-col w-col-info-box">
                 <label for="">Value</label>
                 <Select v-model="upload_file_column_mappings.values" 
                     :options="upload_file_columns"
@@ -831,7 +837,7 @@ onMounted(() => {
     background-color: var(--bg-color-menu-hover);
 }
 
-.w-col-select-box {
+.w-col-info-box {
     width: 180px !important;
 }
 </style>
