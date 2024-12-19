@@ -324,8 +324,8 @@ onMounted(() => {
 
     <Panel class="w-2/3">
         <template #header>
-            <div class="w-full flex justify-between">
-                <div class="flex">
+            <div class="w-full flex justify-start">
+                <div class="flex mr-2">
                     <div class="flex-col">
                         <div class="text-lg font-bold">
                             <i class="fa-solid fa-users"></i>
@@ -337,9 +337,11 @@ onMounted(() => {
                 </div>
                 <div>
                     <Button 
+                        size="small"
                         v-tooltip.bottom="'Update user list.'"
                         @click="onClickRefreshUserList">
                         <i class="fa-solid fa-sync"></i>
+                        Refresh List
                     </Button>
                 </div>
             </div>
