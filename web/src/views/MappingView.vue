@@ -161,7 +161,7 @@ async function onClickConcept(concept) {
     // update this mapping to the store
     store.working_mappings[concept.concept_id] = mapping;
 
-    store.msg('* loaded mapping results.');
+    store.msg('Loaded mapping results.');
 }
 
 function fmtScore(score) {
