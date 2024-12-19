@@ -105,6 +105,24 @@ onMounted(() => {
                     Projects
                 </span>
             </Button>
+        </div>
+        <div class="menu-group-title">
+            Management
+        </div>
+    </div>
+
+
+    <div class="menu-group">
+        <div class="menu-group-box">
+            <Button text
+                class="menu-button"
+                v-tooltip.bottom="'Manage CDE indexes.'"
+                @click="switchTab('cde_index')">
+                <i class="fa-solid fa-database menu-icon"></i>
+                <span>
+                    MongoDB
+                </span>
+            </Button>
             <Button text
                 class="menu-button"
                 v-tooltip.bottom="'Manage CDE indexes.'"
@@ -116,7 +134,7 @@ onMounted(() => {
             </Button>
         </div>
         <div class="menu-group-title">
-            Management
+            Databases
         </div>
     </div>
 
@@ -143,10 +161,10 @@ onMounted(() => {
 <div class="main">
 
 <!-- user management -->
-<UserManagementView v-if="store.admin.current_tab == 'user'" />
+<UserManagementView v-show="store.admin.current_tab == 'user'" />
 
 <!-- project management -->
-<ProjectManagementView v-if="store.admin.current_tab == 'project'" />
+<ProjectManagementView v-show="store.admin.current_tab == 'project'" />
 
 </div>
 
