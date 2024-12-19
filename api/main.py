@@ -606,6 +606,50 @@ async def admin_clear_elasticsearch(
 #         raise HTTPException(status_code=404, detail="Job not found")
 #     job["_id"] = str(job["_id"])  # Convert ObjectId to string for JSON compatibility
 #     return job
+
+###########################################################
+# General APIs
+###########################################################
+@app.get('/get_stats', tags=["general"])
+async def get_stats(
+    request: Request,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get stats
+    '''
+    logging.info("get stats")
+
+    # get the number of projects of the current user
+    n_projects = await db.projects.count_documents({
+        "user_id": current_user['user_id']
+    })
+
+    # get the number of files of the current user
+    n_files = await db.files.count_documents({
+        "user_id": current_user['user_id']
+    })
+
+    # get the number of concepts of the current user
+    n_concepts = await db.concepts.count_documents({
+        "user_id": current_user['user_id']
+    })
+
+    # get the number of mappings of the current user
+    n_mappings = await db.mappings.count_documents({
+        "user_id": current_user['user_id']
+    })
+
+    return {
+        'success': True,
+        'stats': {
+            'n_projects': n_projects,
+            'n_files': n_files,
+            'n_concepts': n_concepts,
+            'n_mappings': n_mappings,
+        }
+    }
+
 ###########################################################
 # Project related APIs
 ###########################################################

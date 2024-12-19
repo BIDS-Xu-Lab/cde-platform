@@ -21,6 +21,15 @@ state: () => ({
     // current current_view
     current_view: 'project_list',
 
+    // statistics for dashboard
+    // {
+    //     n_projects: 0,
+    //     n_files: 0,
+    //     n_concepts: 0,
+    //     n_mappings: 0,
+    // },
+    stats: null,
+
     // all projects belong to the current user
     projects: [],
 

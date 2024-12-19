@@ -62,6 +62,19 @@ export const Jimin = {
     },
 
     ///////////////////////////////////////////////////////
+    // General related
+    ///////////////////////////////////////////////////////
+    getStats: async function() {
+        console.log('* get stats');
+
+        const rsp = await this.axios_instance.get(
+            '/get_stats'
+        );
+
+        return rsp.data;
+    },
+
+    ///////////////////////////////////////////////////////
     // Project related
     ///////////////////////////////////////////////////////
     getProjects: async function() {

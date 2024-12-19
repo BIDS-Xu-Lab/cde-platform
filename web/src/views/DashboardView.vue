@@ -1,14 +1,28 @@
 <script setup>
+import { onMounted } from 'vue';
 import { useDataStore } from '../DataStore';
 const store = useDataStore();
 
-function onClickNewFile() {
-    console.log('* clicked New file ');
+async function onClickRefreshList() {
+    console.log('* clicked Refresh list');
+
+    // ask server for updated statistics
+    let data = await Jimin.getStats();
+
+    store.msg('Updated statistics.');
+
+    // set stats to store
+    store.stats = data.stats;
 }
 
-function onClickRefreshList() {
-    console.log('* clicked Refresh list');
-}
+onMounted(() => {
+    console.log('* mounted DashboardView');
+
+    // update stats only if store stats is null
+    if (store.stats == null) {
+        onClickRefreshList();
+    }
+});
 </script>
 
 <template>
@@ -51,14 +65,16 @@ function onClickRefreshList() {
 
 <div class="main flex-row">
 
-<Panel class="w-1/3 mr-2">
+<Panel v-if="store.stats"
+    class="mr-2"
+    style="width: 500px;">
     <template #header>
         <div class="w-full flex justify-between">
             <div class="flex">
                 <div class="flex-col">
                     <div class="text-lg font-bold">
                         <i class="fa-solid fa-briefcase"></i>
-                        Projects
+                        My Statistics
                     </div>
                     <div class="panel-subtitle text-sm">
                     </div>
@@ -69,47 +85,47 @@ function onClickRefreshList() {
             </div>
         </div>
     </template>
-</Panel>
 
-<Panel class="w-1/3 mr-2">
-    <template #header>
-        <div class="w-full flex justify-between">
-            <div class="flex">
-                <div class="flex-col">
-                    <div class="text-lg font-bold">
-                        <i class="fa-solid fa-user"></i>
-                        Updates
-                    </div>
-                    <div class="panel-subtitle text-sm">
-                    </div>
-                </div>
-            </div>
-            <div>
-
-            </div>
+    <div class="flex flex-row justify-between items-baseline">
+        <div class="flex flex-col justify-center items-center mb-10">
+            <span class="text-4xl font-bold">
+                {{ store.stats.n_projects }}
+            </span>
+            <span class="text-lg">
+                Projects
+            </span>
         </div>
-    </template>
-</Panel>
 
-<Panel class="w-1/3">
-    <template #header>
-        <div class="w-full flex justify-between">
-            <div class="flex">
-                <div class="flex-col">
-                    <div class="text-lg font-bold">
-                        <i class="fa-solid fa-user"></i>
-                        Statistics
-                    </div>
-                    <div class="panel-subtitle text-sm">
-                    </div>
-                </div>
-            </div>
-            <div>
-
-            </div>
+        <div class="flex flex-col justify-center items-center mb-10">
+            <span class="text-4xl font-bold">
+                {{ store.stats.n_files }}
+            </span>
+            <span class="text-lg">
+                Files
+            </span>
         </div>
-    </template>
+
+        <div class="flex flex-col justify-center items-center mb-10">
+            <span class="text-4xl font-bold">
+                {{ store.stats.n_concepts }}
+            </span>
+            <span class="text-lg">
+                Concepts
+            </span>
+        </div>
+
+        <div class="flex flex-col justify-center items-center mb-4">
+            <span class="text-4xl font-bold">
+                {{ store.stats.n_mappings }}
+            </span>
+            <span class="text-lg">
+                Mappings
+            </span>
+        </div>
+        
+    </div>
 </Panel>
+
 
 </div>
 
