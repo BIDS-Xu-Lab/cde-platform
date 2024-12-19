@@ -83,8 +83,8 @@ function fmtScore(score) {
                 </a>
             </div>
         </div>
-        <div>
 
+        <div>
             <Button v-if="flag_selected"
                 size="small"
                 icon="pi pi-check"
@@ -112,7 +112,7 @@ function fmtScore(score) {
         {{ item.description }}
     </div>
 
-    <div class="result-valueset">
+    <div class="result-valueset mt-2 mb-1">
         <div v-if="flag_enabled_value_mapping">
             <Button
                 size="small"

@@ -507,11 +507,14 @@ onMounted(() => {
                         <div class="panel-subtitle text-sm">
                             <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
                                 <b>{{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length }}</b>
-                                potential matches found
+                                potential matches
+                                | 
+                                <b>{{ store.working_mappings[store.working_concept?.concept_id]?.selected_results.length }}</b>
+                                selected
                             </template>
-                            <template v-else>
+                            <!-- <template v-else>
                                 No results found
-                            </template>
+                            </template> -->
                         </div>
                     </div>
                 </div>
