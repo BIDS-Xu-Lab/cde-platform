@@ -80,6 +80,13 @@ onMounted(() => {
             <i class="fa-solid fa-gears"></i>
             Settings
         </div> -->
+        <div v-show="store.user?.role == 'admin'" 
+            class="navi-item"
+            @click="store.changeView('admin')"
+            :class="{'active-page': store.current_view=='admin'}">
+            <i class="fa-brands fa-battle-net"></i>
+            Admin
+        </div>
     </div>
 
     <div class="navi-right">

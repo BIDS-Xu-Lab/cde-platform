@@ -238,7 +238,7 @@ async function onClickUpload() {
         store.msg('Please select a file to upload.', 'Error', 'error');
         return;
     }
-    
+
     let file = fileupload.value.files[0];
 
     Papa.parse(file, {
@@ -281,11 +281,11 @@ async function onClickUpload() {
             // update project list if no projects
             if (store.projects.length == 0) {
                 await onClickUpdateProjectList();
-                onClickProjectItem(store.projects[0]);
+                await onClickProjectItem(store.projects[0]);
 
             } else {
                 // update file list
-                onClickProjectItem(store.current_project);
+                await onClickProjectItem(store.current_project);
             }
 
             // close the dialog

@@ -11,10 +11,12 @@ import ReviewView from '../views/ReviewView.vue';
 import VisView from '../views/VisView.vue';
 import TeamView from '../views/TeamView.vue';
 import SettingView from '../views/SettingView.vue';
-const store = useDataStore();
+import AdminView from '../views/AdminView.vue';
 
 import { onMounted } from 'vue';
 import { Jimin } from '../Jimin';
+
+const store = useDataStore();
 
 onMounted(() => {
     console.log('* mounted Main');
@@ -70,6 +72,9 @@ onMounted(() => {
 
 <!-- Setting view -->
 <SettingView v-if="store.current_view == 'setting'" />
+
+<!-- Admin view -->
+<AdminView v-if="store.current_view == 'admin' && store.user?.role == 'admin'" />
 
 </div>
 

@@ -324,6 +324,19 @@ async def test_mongo():
 ###########################################################
 # Admin related APIs
 ###########################################################
+@app.get('/admin/test', tags=["admin"])
+async def admin_test(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Test the admin token
+    '''
+    return {
+        'success': True,
+        'message': 'admin test ok'
+    }
+
 
 @app.post("/admin/init_database", tags=["admin"])
 async def admin_init_database(
