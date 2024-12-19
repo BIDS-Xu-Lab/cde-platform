@@ -133,7 +133,7 @@ getters: {
         }
 
         return state.working_file_concepts.filter(c => {
-            let flag_has_keyword = c[state.mapping.data_col_term].toLowerCase().includes(state.mapping.filter_terms_by.toLowerCase());
+            let flag_has_keyword = c.term.toLowerCase().includes(state.mapping.filter_terms_by.toLowerCase());
 
             return flag_has_keyword;
         });

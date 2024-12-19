@@ -64,10 +64,7 @@ async function onClickSearch() {
     let results = await Jimin.search(
         store.mapping.selected_source,
         store.mapping.selected_collections,
-        [CDEHelper.convertConceptToQueryByFile(
-            store.working_concept, 
-            store.working_file
-        )],
+        [store.working_concept],
         store.features.embedding_search.enabled,
         false,
         false,
@@ -104,10 +101,7 @@ async function onClickSearchAll() {
         let results = await Jimin.search(
             store.mapping.selected_source,
             store.mapping.selected_collections,
-            [CDEHelper.convertConceptToQueryByFile(
-                concept, 
-                store.working_file
-            )],
+            [concept],
             store.features.embedding_search.enabled,
             false,
             false,
@@ -477,7 +471,7 @@ onMounted(() => {
                             </template>
                         </div>
                         <div>
-                            {{ item[store.mapping.data_col_term] }}
+                            {{ item.term }}
                         </div>
                     </div>
                     <div class="term-concept">
@@ -507,7 +501,7 @@ onMounted(() => {
                     </div>
                     <div class="term-detail">
                         Description:
-                        {{ item[store.mapping.data_col_description] }}
+                        {{ item.description }}
                     </div>
 
                     <div class="term-additional">
@@ -539,7 +533,7 @@ onMounted(() => {
                             CDE Mappings
                             <span v-if="store.working_concept">
                                 for 
-                                <i>{{ store.working_concept?.[store.mapping.data_col_term] }}</i>
+                                <i>{{ store.working_concept?.term }}</i>
                             </span>
                         </div>
                         <div class="panel-subtitle text-sm">

@@ -1025,14 +1025,16 @@ async def get_collections_by_source(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
 class SearchModel(BaseModel):
     source: str | None = None
     collections: List[str]
-    queries: List[Dict[str, Any]]
+    queries: List[Dict[str, Any]]  # Allow None values in the dictionary
     flag_embedding: bool = False
     flag_openai: bool = False
     flag_fuzzy: bool = True
     size: int = 100
+    
 
 @app.post('/search', tags=["mapping"])
 async def search(
@@ -1043,7 +1045,7 @@ async def search(
     '''
     Search data
     '''
-    logging.info("bulk_search")
+    logging.info("search")
 
     if search_data.source is None:
         raise HTTPException(status_code=400, detail="source is required")

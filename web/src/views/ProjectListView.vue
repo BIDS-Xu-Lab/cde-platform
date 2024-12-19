@@ -5,21 +5,13 @@ import { onMounted, ref } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { Jimin } from '../Jimin';
 import * as toolbox from '../toolbox';
+import { hasResults } from '../CDEHelper';
 
 const store = useDataStore();
 const visible_dialog_upload_file = ref(false);
 // const visible_dialog_move_file = ref(false);
 // const selected_project_for_move = ref();
 // const selected_file_for_move = ref();
-
-function getSelectionOptions(file) {
-    return file.columns.map((col) => {
-        return {
-            label: '[' + col + ']',
-            code: col
-        };
-    });
-}
 
 function anyDuplicateColumns(file, column) {
     // Return null if the column is empty
@@ -90,33 +82,8 @@ async function onClickProjectItem(project) {
 async function onClickMapping(file) {
     console.log('* clicked Mapping');
 
-    // Check if any required column is empty
-    if (!file.term || !file.description || !file.value) {
-        store.msg('Please select all required columns (term, description, and value).', 'Error', 'error');
-        return;
-    }
-
-    // Check for duplicates using existing anyDuplicateColumns function
-    const duplicateColumn = anyDuplicateColumns(file, 'term') || 
-                            anyDuplicateColumns(file, 'description') || 
-                            anyDuplicateColumns(file, 'value');
-    if (duplicateColumn) {
-        store.msg("Found duplicate column", 'Error', 'error');
-        return;
-    }
-
     // clear the existing mapping data
     store.clearMappingData();
-
-    // first, update the selected columns
-    let ret = await Jimin.updateFile(file);
-    store.mapping.data_col_term = file["term"]
-    store.mapping.data_col_description = file["description"]
-    store.mapping.data_col_value = file["value"]
-
-    console.log('* updated file:', ret);
-    console.log('* updated mapping:', store.mapping);
-    store.msg(ret.message);
 
     // set working project to this project
     store.working_project = store.current_project;
@@ -128,8 +95,11 @@ async function onClickMapping(file) {
     try {
         let ret = await Jimin.getConceptsByFile(file.file_id);
         console.log('* got concepts:', ret);
+
+        // set working concepts and mapping to default
         store.working_file_concepts = ret.concepts;
         store.working_mappings = {};
+
         // put all concepts into the working mappings
         ret.mappings.forEach((mapping) => {
             store.working_mappings[mapping.concept_id] = {
@@ -137,7 +107,6 @@ async function onClickMapping(file) {
                 search_results: mapping.search_results
             };
         });
-
 
     } catch (err) {
         console.error(err);
@@ -240,10 +209,33 @@ async function onClickCreate() {
 ///////////////////////////////////////////////////////////
 const fileupload = ref();
 store.fileupload = fileupload;
-const selected_project_id_for_file = ref();
-window.selected_project_id_for_file = selected_project_id_for_file;
 
-async function onClickUpload() {
+// for saving the raw data from the uploaded file
+const selected_project_id_for_file = ref();
+
+const upload_file_column_mappings = ref({
+    term: '',
+    description: '',
+    values: '',
+});
+window.upload_file_column_mappings = upload_file_column_mappings;
+
+let upload_file_data = {};
+window.upload_file_data = upload_file_data;
+
+const upload_file_columns = ref([]);
+
+function getSelectionOptions(file) {
+    return file.columns.map((col) => {
+        return {
+            label: '[' + col + ']',
+            code: col
+        };
+    });
+}
+
+async function onChangeUploadFile() {
+    console.log('* changed file:', fileupload.value.files[0]);
     try {
         if (!fileupload.value.files.length) {
             store.msg('Please select a file to upload.', 'Error', 'error');
@@ -255,61 +247,106 @@ async function onClickUpload() {
     }
 
     let file = fileupload.value.files[0];
-
+    
     Papa.parse(file, {
+        // config for parsing csv 
+        header: true, // Set to true if your CSV has a header row
+        skipEmptyLines: true,
+
+        // call back function when parsing is complete
         complete: async (result) => {
+            console.log('* read the selected file:', result);
+
+            // update columns
+            upload_file_columns.value = result.meta.fields;
+
             // Create an object representing the file to add to the store
-            const csv = {
-                filename: file.name,
-                concepts: result.data,
-                created: toolbox.formatDate(new Date()),
-                updated: toolbox.formatDate(new Date()),
-                // Add any additional properties you need
-            };
-            csv['project_id'] = selected_project_id_for_file.value? selected_project_id_for_file.value : 'default_project_id';
-            csv["columns"] = Object.keys(csv.concepts[0]);
-            csv["file_id"] = uuidv4();
-            csv['user_id'] = store.user.user_id | 0;
-            csv["currentConceptId"] = 0;
-            csv["updated"] = toolbox.formatDate(new Date());
-            csv["concepts"] = csv.concepts.map((concept, index) => {
+            upload_file_data['concepts'] = result.data;
+
+            // get all basic information
+            upload_file_data["filename"] = file.name;
+            upload_file_data['project_id'] = selected_project_id_for_file.value? selected_project_id_for_file.value : 'default_project_id';
+            upload_file_data["columns"] = result.meta.fields;
+            upload_file_data["file_id"] = uuidv4();
+            upload_file_data['user_id'] = store.user.user_id;
+
+            // Empty preselected items
+            upload_file_data["column_name_term"] = '';
+            upload_file_data["column_name_description"] = '';
+            upload_file_data["column_name_values"] = '';
+
+            console.log('* generated upload_file_data:', upload_file_data);
+
+            // add a few more information to each row
+            upload_file_data['concepts'] = upload_file_data['concepts'].map((row, index) => {
+                // row is one line in the csv file
                 return {
-                    ...concept,
+                    ...row,
                     // user_id: this.userId,
-                    file_id: csv["file_id"],
+                    file_id: upload_file_data["file_id"],
                     id: index,
                 };
             });
-            // Empty preselected items
-            csv["term"] = '';
-            csv["description"] = '';
-            csv["value"] = '';
 
-            console.log('* generated csv:', csv);
-
-            // send this csv to backend
-            let data = await Jimin.uploadFile(csv)
-            
-            console.log('* uploaded file:', data);
-            store.msg(data.message);
-
-            // update project list if no projects
-            if (store.projects.length == 0) {
-                await onClickUpdateProjectList();
-                await onClickProjectItem(store.projects[0]);
-
-            } else {
-                // update file list
-                await onClickProjectItem(store.current_project);
-            }
-
-            // close the dialog
-            visible_dialog_upload_file.value = false;
+            store.msg('Successfully read the file: ' + file.name);
             
         },
-        header: true, // Set to true if your CSV has a header row
-        skipEmptyLines: true,
     });
+}
+
+async function onClickUpload() {
+    console.log('* clicked Upload');
+    
+    // Check if any required column is empty
+
+    // Convert term, description, and value to standard column names
+    upload_file_data["column_name_term"] = upload_file_column_mappings.value.term;
+    upload_file_data["column_name_description"] = upload_file_column_mappings.value.description;
+    upload_file_data["column_name_values"] = upload_file_column_mappings.value.values;
+
+    // pre-processing the raw data
+    upload_file_data['concepts'] = upload_file_data['concepts'].map((row) => {
+        let new_row = {
+            ...row,
+
+            // Convert the column names to standard names
+            term: row[upload_file_data["column_name_term"]],
+            description: row[upload_file_data["column_name_description"]],
+
+            // a temporary column to hold the raw values
+            _values: row[upload_file_data["column_name_values"]],
+        };
+
+        // now convert values to an array
+        try {
+            new_row.values = new_row._values.split('|').map((value) => value.trim());
+        } catch (err) {
+            console.error(err, new_row);
+            new_row.values = [];
+        }
+
+        // delete _values
+        delete new_row._values;
+
+        return new_row;
+    });
+
+    // send this file to backend
+    let data = await Jimin.uploadFile(upload_file_data)
+    store.msg(data.message);
+
+    // update project list if no projects
+    if (store.projects.length == 0) {
+        await onClickUpdateProjectList();
+        await onClickProjectItem(store.projects[0]);
+
+    } else {
+        // update file list
+        await onClickProjectItem(store.current_project);
+    }
+
+    // close the dialog
+    visible_dialog_upload_file.value = false;
 };
 
 onMounted(() => {
@@ -531,51 +568,24 @@ onMounted(() => {
 
                     <div class="file-column flex flex-row mb-2">
                         <div class="flex flex-col mr-2 w-col-select-box">
-                            <label for="">Term</label>
-                            <Select v-model="file.term" 
-                                :options="getSelectionOptions(file)"
-                                optionLabel="label" 
-                                optionValue="code"
-                                placeholder="Select a term column" 
-                                class="w-full" />
-                            <div>
-                                <span v-if="anyDuplicateColumns(file, 'term') != null" 
-                                    class="text-xs text-red-500">
-                                    Duplicated with {{ anyDuplicateColumns(file, 'term') }}
-                                </span>
-                            </div>
+                            <div class="text-sm">Term Column</div>
+                            <p class="text-xl font-bold">
+                                {{ file.column_name_term }}
+                            </p>
                         </div>
 
                         <div class="flex flex-col w-col-select-box mr-2">
-                            <label for="">Description</label>
-                            <Select v-model="file.description" 
-                                :options="getSelectionOptions(file)"
-                                optionLabel="label" 
-                                optionValue="code"
-                                placeholder="Select a description column" 
-                                class="w-full" />
-                            <div>
-                                <span v-if="anyDuplicateColumns(file, 'description') != null" 
-                                    class="text-xs text-red-500">
-                                    Duplicated with {{ anyDuplicateColumns(file, 'description') }}
-                                </span>
-                            </div>
+                            <div class="text-sm">Description Column</div>
+                            <p class="text-xl font-bold">
+                                {{ file.column_name_description }}
+                            </p>
                         </div>
 
                         <div class="flex flex-col w-col-select-box">
-                            <label for="">Value</label>
-                            <Select v-model="file.value" 
-                                :options="getSelectionOptions(file)"
-                                optionLabel="label" 
-                                optionValue="code"
-                                placeholder="Select a value column" 
-                                class="w-full" />
-                            <div>
-                                <span v-if="anyDuplicateColumns(file, 'value') != null" 
-                                    class="text-xs text-red-500">
-                                    Duplicated with {{ anyDuplicateColumns(file, 'value') }}
-                                </span>
-                            </div>
+                            <div class="text-sm">Values Column</div>
+                            <p class="text-xl font-bold">
+                                {{ file.column_name_values }}
+                            </p>
                         </div>
                     </div>
 
@@ -644,7 +654,7 @@ onMounted(() => {
 <Dialog v-model:visible="visible_dialog_upload_file" 
     modal 
     header="Upload file" 
-    :style="{ width: '25rem' }">
+    :style="{ width: '50rem' }">
     <span class="text-surface-500 dark:text-surface-400 block mb-8">
         Upload your .csv file for the following project.
     </span>
@@ -660,11 +670,55 @@ onMounted(() => {
                 placeholder="Select a project" 
                 class="w-full" />
         </div>
-        <label for="select_file" class="font-semibold w-24">Select File</label>
+        <label for="select_file" class="font-semibold">Select File</label>
         <FileUpload ref="fileupload" 
             mode="basic" name="demo[]" 
             url="/api/upload" 
+            @change="onChangeUploadFile"
             accept="text/csv" />
+        <div class="flex flex-row mb-2 ">
+            <div class="flex flex-col mr-2 w-col-select-box">
+                <label for="">Term</label>
+                <Select v-model="upload_file_column_mappings.term" 
+                    :options="upload_file_columns"
+                    placeholder="Select a term column" 
+                    class="w-full" />
+                <div>
+                    <!-- <span v-if="anyDuplicateColumns(file, 'term') != null" 
+                        class="text-xs text-red-500">
+                        Duplicated with {{ anyDuplicateColumns(file, 'term') }}
+                    </span> -->
+                </div>
+            </div>
+
+            <div class="flex flex-col w-col-select-box mr-2">
+                <label for="">Description</label>
+                <Select v-model="upload_file_column_mappings.description" 
+                    :options="upload_file_columns"
+                    placeholder="Select a description column" 
+                    class="w-full" />
+                <div>
+                    <!-- <span v-if="anyDuplicateColumns(file, 'description') != null" 
+                        class="text-xs text-red-500">
+                        Duplicated with {{ anyDuplicateColumns(file, 'description') }}
+                    </span> -->
+                </div>
+            </div>
+
+            <div class="flex flex-col w-col-select-box">
+                <label for="">Value</label>
+                <Select v-model="upload_file_column_mappings.values" 
+                    :options="upload_file_columns"
+                    placeholder="Select a value column" 
+                    class="w-full" />
+                <div>
+                    <!-- <span v-if="anyDuplicateColumns(file, 'value') != null" 
+                        class="text-xs text-red-500">
+                        Duplicated with {{ anyDuplicateColumns(file, 'value') }}
+                    </span> -->
+                </div>
+            </div>
+        </div>
     </div>
     <div class="flex justify-end gap-2">
         <Button label="Upload" @click="onClickUpload()" severity="secondary" />
