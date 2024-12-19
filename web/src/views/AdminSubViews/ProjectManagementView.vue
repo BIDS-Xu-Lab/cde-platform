@@ -10,8 +10,20 @@ const store = useDataStore();
 ///////////////////////////////////////////////////////////
 
 // fetch all projects
-function onClickRefresProjectList() {
+async function onClickRefresProjectList() {
     console.log('* clicked Refresh Project List');
+
+    // fetch all projects
+    try {
+        let data = await AWS.getAllProjects();
+        console.log('data:', data);
+
+        store.msg('Server returns: ' + data.message);
+        store.admin.projects = data.projects;
+    } catch (error) {
+        console.log('error:', error);
+        store.msg('Failed to fetch all projects.', 'Error', 'error');
+    }
 }
 </script>
 

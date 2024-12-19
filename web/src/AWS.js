@@ -50,5 +50,15 @@ export const AWS = {
         );
         
         return rsp.data;
-    }
+    },
+
+    getAllProjects: async function () {
+        console.log('* get all projects');
+
+        const rsp = await this.axios_instance.get(
+            '/get_all_projects'
+        );
+        
+        return rsp.data;
+    },
 }

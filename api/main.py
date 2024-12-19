@@ -77,25 +77,11 @@ db = mongo_client.get_database()
 logging.info('* connected to mongodb at %s' % os.environ['MONGODB_URI'])
 
 
-
 # jobs_collection = db.jobs
 
 ###########################################################
 # User authentication related functions
 ###########################################################
-# authentication for user related APIs
-# auth_scheme = HTTPBearer()
-# async def validate_token(http_auth: HTTPAuthorizationCredentials = Security(auth_scheme)):
-#     token = http_auth.credentials
-#     try:
-#         return {
-#             "user_id": "test_user",
-#             "token": '123'
-#         }
-#     except Exception as e:
-#         raise e
-
-
 def sign_jwt(user) -> Dict[str, str]:
     '''
     Sign a JWT token with the user's information.
@@ -137,6 +123,7 @@ def decode_jwt(token: str) -> dict:
 ###########################################################
 # Authentication related scheme
 ###########################################################
+# scheme for the JWT cookie for general user
 cookie_scheme = APIKeyCookie(name="access_token", auto_error=True)
 async def authJWTCookie(access_token: str = Security(cookie_scheme)):
     '''
@@ -155,7 +142,7 @@ async def authJWTCookie(access_token: str = Security(cookie_scheme)):
     
     return user
 
-
+# scheme for the x-token header for admin access
 x_token_header_scheme = APIKeyHeader(
     name="x-token", 
     auto_error=True
@@ -532,6 +519,26 @@ async def admin_get_all_users(
         'success': True,
         'message': 'get all %s users' % len(users),
         'users': formatUsers(users)
+    }
+
+
+@app.get('/admin/get_all_projects', tags=["admin"])
+async def admin_get_all_projects(
+    request: Request,
+    x_token: str = Depends(authXTokenHeader)
+):
+    '''
+    Get all projects
+    '''
+    logging.info("get all projects")
+
+    projects = await db.projects.find().to_list(length=None)
+    logging.debug(f"* found {len(projects)} projects")
+
+    return {
+        'success': True,
+        'message': 'get all %s projects' % len(projects),
+        'projects': formatProjects(projects)
     }
 
 
