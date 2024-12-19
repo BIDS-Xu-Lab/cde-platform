@@ -79,6 +79,16 @@ state: () => ({
         data_col_value: 'value',
     },
 
+    // for admin only
+    admin: {
+        current_tab: '',
+        endpoint: '',
+        secret_key: '',
+        users: [],
+        projects: [],
+    },
+
+    // system features for users
     features: {
         embedding_search: {
             enabled: false,
