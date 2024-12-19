@@ -70,13 +70,21 @@ state: () => ({
 
         selected_source: null,
         selected_collections: [],
+
+        // for the terms filtering and sorting
         sort_terms_by: null,
-        sort_order_by: null,
+        sort_terms_order_by: null,
         filter_terms_by: '',
 
-        data_col_term: 'element',
-        data_col_description: 'description',
-        data_col_value: 'value',
+        // for the results filtering and sorting
+        filter_results_by: '',
+        sort_results_by: null,
+        sort_results_order_by: null,
+
+        // mapping row data columns
+        data_col_term: '',
+        data_col_description: '',
+        data_col_value: '',
     },
 
     // for admin only
@@ -112,6 +120,23 @@ getters: {
         }
 
         return state.working_mappings[state.working_concept.concept_id]?.search_results.filter(r => !state.working_mappings[state.working_concept.concept_id].selected_results.includes(r));
+    },
+
+    filtered_working_file_concepts(state) {
+        if (!state.working_file_concepts) {
+            return [];
+        }
+
+        // if the filter_term is empty string after trim, just return all the concepts
+        if (state.mapping.filter_terms_by.trim() == '') {
+            return state.working_file_concepts;
+        }
+
+        return state.working_file_concepts.filter(c => {
+            let flag_has_keyword = c[state.mapping.data_col_term].toLowerCase().includes(state.mapping.filter_terms_by.toLowerCase());
+
+            return flag_has_keyword;
+        });
     },
 },
 

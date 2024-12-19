@@ -460,7 +460,7 @@ onMounted(() => {
     <div class="term-list-box">
         <div class="term-list-scroller"
             :style="{ height: 'calc(100vh - 18rem)'}">
-            <template v-for="item in store.working_file_concepts">
+            <template v-for="item in store.filtered_working_file_concepts">
                 <div class="term-line"
                     :class="{ 'working-term': store.isWorkingConcept(item) }"
                     @click="onClickConcept(item)">
@@ -559,18 +559,18 @@ onMounted(() => {
                 
                 <div class="flex justify-end mr-2" 
                     style="height: 2rem; line-height: 1rem;">
-                    <InputText v-model="store.mapping.filter_terms_by"
+                    <InputText v-model="store.mapping.filter_results_by"
                         type="text" 
                         placeholder="Filter keyword ..."
                         class="term-filter"/>
                     <Divider layout="vertical" class="!mx-2" />
-                    <Select v-model="store.mapping.sort_terms_by" 
+                    <Select v-model="store.mapping.sort_results_by" 
                         :options="sort_term_options" 
                         optionLabel="name" 
                         placeholder="Sort by" 
                         class="term-sort"/>
                     <Divider layout="vertical" class="!mx-2" />
-                    <Select v-model="store.mapping.sort_order_by" 
+                    <Select v-model="store.mapping.sort_results_order_by" 
                         :options="sort_order_options" 
                         optionLabel="name" 
                         placeholder="Order by" 
@@ -587,7 +587,7 @@ onMounted(() => {
             <template v-if="store.working_mappings[store.working_concept?.concept_id]?.selected_results.length > 0">
             <div class="selected-results-section">
 
-                <div class="text-lg font-bold my-4">
+                <div class="text-lg font-bold mb-4">
                     <i class="fa-solid fa-check-double"></i>
                     Selected Results
                     ({{ store.working_mappings[store.working_concept?.concept_id]?.selected_results.length }})
