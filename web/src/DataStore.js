@@ -96,7 +96,13 @@ state: () => ({
 }),
 
 getters: {
+    working_mappings_search_results_without_selected(state) {
+        if (!state.working_concept) {
+            return [];
+        }
 
+        return state.working_mappings[state.working_concept.concept_id]?.search_results.filter(r => !state.working_mappings[state.working_concept.concept_id].selected_results.includes(r));
+    },
 },
 
 actions: {
