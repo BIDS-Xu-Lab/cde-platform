@@ -459,10 +459,10 @@ onMounted(() => {
                 <div class="flex-col">
                     <div class="text-lg font-bold">
                         <i class="fa-solid fa-briefcase"></i>
-                        Project Files
+                        Project
 
-                        <span v-if="store.files.length > 0">
-                            ({{ store.files.length }})
+                        <span v-if="store.current_project">
+                            [{{ store.current_project.name }}]
                         </span>
                     </div>
                     <div class="panel-subtitle text-sm">
@@ -483,125 +483,158 @@ onMounted(() => {
         </div>
     </template>
 
-    <div class="flex flex-col h-full pr-2" 
-        :style="{ height: 'calc(100vh - 18rem)'}"
-        style="width: calc(100% + 1rem); overflow-y: auto;">
-        <template v-for="file in store.files">
-            <div class="w-full file-item flex flex-col py-2">
-                <div class="file-name flex flex-row justify-between">
-                    <div class="text-lg font-bold">
-                        <i class="fa fa-file"></i>
-                        {{ file.filename }}
-                    </div>
-                    <div class="file-reviewers mt-2 py-2">
-                        Assigned Reviewers: 
-                        <i class="fa fa-user"></i>
+    <Tabs value="files">
+    <TabList>
+        <Tab value="files">
+            <i class="fa-regular fa-folder-open"></i>
+            Files
+            <span v-if="store.files.length > 0">
+                ({{ store.files.length }})
+            </span>
+        </Tab>
+        <Tab value="members">
+            <i class="fa fa-users"></i>
+            Members
+        </Tab>
+        <Tab value="settings">
+            <i class="fa fa-cog"></i>
+            Settings
+        </Tab>
+    </TabList>
+    <TabPanels 
+        :style="{ height: 'calc(100vh - 21rem)', width: 'calc(100% + 1rem)', overflowY: 'auto' }">
 
-                        <Button severity="info"
+        <!-- tab for mananging files -->
+        <TabPanel value="files">
+        <div class="flex flex-col h-full">
+            <template v-for="file in store.files">
+                <div class="w-full file-item flex flex-col py-2">
+                    <div class="file-name flex flex-row justify-between">
+                        <div class="text-lg font-bold">
+                            <i class="fa fa-file"></i>
+                            {{ file.filename }}
+                        </div>
+                        <div class="file-reviewers mt-2 py-2">
+                            Assigned Reviewers: 
+                            <i class="fa fa-user"></i>
+
+                            <Button severity="info"
+                                size="small"
+                                class="ml-2 btn-mini"
+                                @click="onClickAssignReviewers(file)"
+                                v-tooltip.bottom="'Assign reviewers for this file.'">
+                                <i class="fa-solid fa-user-plus"></i>
+                                Assign
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div class="file-column flex flex-row mb-2">
+                        <div class="flex flex-col mr-2 w-col-select-box">
+                            <label for="">Term</label>
+                            <Select v-model="file.term" 
+                                :options="getSelectionOptions(file)"
+                                optionLabel="label" 
+                                optionValue="code"
+                                placeholder="Select a term column" 
+                                class="w-full" />
+                            <div>
+                                <span v-if="anyDuplicateColumns(file, 'term') != null" 
+                                    class="text-xs text-red-500">
+                                    Duplicated with {{ anyDuplicateColumns(file, 'term') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col w-col-select-box mr-2">
+                            <label for="">Description</label>
+                            <Select v-model="file.description" 
+                                :options="getSelectionOptions(file)"
+                                optionLabel="label" 
+                                optionValue="code"
+                                placeholder="Select a description column" 
+                                class="w-full" />
+                            <div>
+                                <span v-if="anyDuplicateColumns(file, 'description') != null" 
+                                    class="text-xs text-red-500">
+                                    Duplicated with {{ anyDuplicateColumns(file, 'description') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col w-col-select-box">
+                            <label for="">Value</label>
+                            <Select v-model="file.value" 
+                                :options="getSelectionOptions(file)"
+                                optionLabel="label" 
+                                optionValue="code"
+                                placeholder="Select a value column" 
+                                class="w-full" />
+                            <div>
+                                <span v-if="anyDuplicateColumns(file, 'value') != null" 
+                                    class="text-xs text-red-500">
+                                    Duplicated with {{ anyDuplicateColumns(file, 'value') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="file-name flex flex-row justify-start">
+                        <Button 
+                            severity="secondary"
                             size="small"
-                            class="ml-2 btn-mini"
-                            @click="onClickAssignReviewers(file)"
-                            v-tooltip.bottom="'Assign reviewers for this file.'">
-                            <i class="fa-solid fa-user-plus"></i>
-                            Assign
+                            class="mr-2"
+                            v-tooltip.bottom="'Mapping concepts for this file.'"
+                            @click="onClickMapping(file)">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Mapping
+                        </Button>
+
+                        <Button 
+                            severity="info"
+                            size="small"
+                            class="mr-2"
+                            v-tooltip.bottom="'Download this file.'"
+                            @click="onClickDownload(file)">
+                            <i class="fa-solid fa-download"></i>
+                            Download
+                        </Button>
+
+                        <!-- <Button 
+                            severity="help"
+                            size="small"
+                            class="mr-2"
+                            v-tooltip.bottom="'Move this file.'"
+                            @click="visible_dialog_move_file = true; selected_file_for_move = file">
+                            <i class="fa-solid fa-angles-right"></i>
+                            move
+                        </Button> -->
+
+                        <Button 
+                            severity="danger"
+                            size="small"
+                            v-tooltip.bottom="'Delete this file.'"
+                            @click="onClickDeleteFile(file)">
+                            <i class="fa-solid fa-trash"></i>
+                            Delete
                         </Button>
                     </div>
+
                 </div>
+            </template>
+        </div>
+        </TabPanel>
 
-                <div class="file-column flex flex-row mb-2">
-                    <div class="flex flex-col mr-2 w-col-select-box">
-                        <label for="">Term</label>
-                        <Select v-model="file.term" 
-                            :options="getSelectionOptions(file)"
-                            optionLabel="label" 
-                            optionValue="code"
-                            placeholder="Select a term column" 
-                            class="w-full" />
-                        <div>
-                            <span v-if="anyDuplicateColumns(file, 'term') != null" 
-                                class="text-xs text-red-500">
-                                Duplicated with {{ anyDuplicateColumns(file, 'term') }}
-                            </span>
-                        </div>
-                    </div>
+        <!-- tab for managing reviewers -->
+        <TabPanel value="members">
+        </TabPanel>
 
-                    <div class="flex flex-col w-col-select-box mr-2">
-                        <label for="">Description</label>
-                        <Select v-model="file.description" 
-                            :options="getSelectionOptions(file)"
-                            optionLabel="label" 
-                            optionValue="code"
-                            placeholder="Select a description column" 
-                            class="w-full" />
-                        <div>
-                            <span v-if="anyDuplicateColumns(file, 'description') != null" 
-                                class="text-xs text-red-500">
-                                Duplicated with {{ anyDuplicateColumns(file, 'description') }}
-                            </span>
-                        </div>
-                    </div>
+        <!-- tab for managing settings -->
+        <TabPanel value="settings">
+        </TabPanel>
 
-                    <div class="flex flex-col w-col-select-box">
-                        <label for="">Value</label>
-                        <Select v-model="file.value" 
-                            :options="getSelectionOptions(file)"
-                            optionLabel="label" 
-                            optionValue="code"
-                            placeholder="Select a value column" 
-                            class="w-full" />
-                        <div>
-                            <span v-if="anyDuplicateColumns(file, 'value') != null" 
-                                class="text-xs text-red-500">
-                                Duplicated with {{ anyDuplicateColumns(file, 'value') }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="file-name flex flex-row justify-start">
-                    <Button 
-                        severity="secondary"
-                        size="small"
-                        class="mr-2"
-                        v-tooltip.bottom="'Mapping concepts for this file.'"
-                        @click="onClickMapping(file)">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        Mapping
-                    </Button>
-
-                    <Button 
-                        severity="info"
-                        size="small"
-                        class="mr-2"
-                        v-tooltip.bottom="'Download this file.'"
-                        @click="onClickDownload(file)">
-                        <i class="fa-solid fa-download"></i>
-                        Download
-                    </Button>
-
-                    <!-- <Button 
-                        severity="help"
-                        size="small"
-                        class="mr-2"
-                        v-tooltip.bottom="'Move this file.'"
-                        @click="visible_dialog_move_file = true; selected_file_for_move = file">
-                        <i class="fa-solid fa-angles-right"></i>
-                        move
-                    </Button> -->
-
-                    <Button 
-                        severity="danger"
-                        size="small"
-                        v-tooltip.bottom="'Delete this file.'"
-                        @click="onClickDeleteFile(file)">
-                        <i class="fa-solid fa-trash"></i>
-                        Delete
-                    </Button>
-                </div>
-
-            </div>
-        </template>
-    </div>
+    </TabPanels>
+    </Tabs>
 </Panel>
 
 

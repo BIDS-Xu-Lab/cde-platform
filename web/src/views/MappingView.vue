@@ -622,8 +622,18 @@ onMounted(() => {
 </div>
 
 </div>
-<Dialog v-model:visible="prograss_visible" modal header="Search All Progress" :style="{ width: '50vw' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :closable="false">
-    <p>Searched: {{ prograss_value }}/{{ store.working_file_concepts.length }}</p>
+
+<!-- dialog for search all progress -->
+<Dialog v-model:visible="prograss_visible" 
+    modal 
+    header="Progress of searching all concepts" 
+    :style="{ width: '400px' }" 
+    :closable="false">
+    <p class="text-lg">
+        Searched: 
+        {{ prograss_value }} / {{ store.working_file_concepts.length }}
+        ({{ (prograss_value / store.working_file_concepts.length * 100).toFixed(2) }}%)
+    </p>
     <ProgressBar :value="prograss_value" mode="indeterminate"></ProgressBar>
 </Dialog>
 
