@@ -50,6 +50,22 @@ function fmtScore(score) {
     return score.toFixed(2);
 }
 
+function onClickShowValues(item) {
+    console.log('* clicked Show Values:', item.value);
+    
+    // the item.value is a list of values concatenated by a pipe
+    // we need to split it into a list of string
+    // and we need to remove the white spaces for each value
+    let values = item.value.split('|').map(v => v.trim());
+    console.log('* values:', values);
+}
+
+async function onClickValueMapping(item) {
+    console.log('* clicked Value Mapping:', item);
+
+    
+}
+
 </script>
 
 <template>
@@ -71,7 +87,7 @@ function fmtScore(score) {
     </div>
     <div class="result-name">
         <div class="flex items-center">
-            <div>
+            <div class="font-bold text-lg">
                 {{ item.term }}
             </div>
             <Divider layout="vertical" class="!mx-2" />
@@ -89,8 +105,23 @@ function fmtScore(score) {
     </div>
 
     <div class="result-detail">
-        Question Text:
+        <span class="font-bold">
+            Question Text:
+        </span>
         {{ item.description }}
+    </div>
+
+    <div class="result-values">
+        <span class="font-bold">
+            Values:
+        </span>
+        <span v-if="item.value.length > 0">
+            {{ item.value }}
+        </span>
+        <span v-else class="text-sm">
+            <i class="fa fa-info-circle"></i> 
+            No values available.
+        </span>
     </div>
 
     <div class="flex flex-row mt-2 mb-1">
@@ -117,29 +148,28 @@ function fmtScore(score) {
             </Button>
         </div>
 
-        <Divider layout="vertical" class="!mx-2" />
-        
         <div v-if="flag_enabled_value_mapping">
+
             <Button
                 size="small"
                 icon="pi pi-list"
                 label="Value Mapping"
                 severity="success"
                 class="btn-mini"
-                v-tooltip.right="'Map values for this concept.'"
-                @click="store.showGuide()">
+                v-tooltip.right="'Map values for this CDE.'"
+                @click="onClickValueMapping(item)">
             </Button>
         </div>
         <div v-else>
-            <Button
+            <!-- <Button
                 size="small"
                 icon="pi pi-list"
                 label="Show values"
                 severity="secondary"
                 class="btn-mini"
-                v-tooltip.right="'Show values for this concept.'"
-                @click="store.showGuide()">
-            </Button>
+                v-tooltip.right="'Show values for this CDE.'"
+                @click="onClickShowValues(item)">
+            </Button> -->
         </div>
     </div>
     

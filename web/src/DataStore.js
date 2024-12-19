@@ -239,6 +239,12 @@ actions: {
             return;
         }
 
+        // update the result with the values from the working concept
+        result.value_mapping = {};
+        this.working_concept.values.map(v => {
+            result.value_mapping[v] = '';
+        });
+
         // save the result
         this.working_mappings[this.working_concept.concept_id].selected_results.push(result);
     },

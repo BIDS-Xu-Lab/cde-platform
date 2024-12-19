@@ -328,7 +328,13 @@ async function onClickUpload() {
 
         // now convert values to an array
         try {
-            new_row.values = new_row.__values.split('|').map((value) => value.trim());
+            let __values = new_row.__values.trim();
+
+            if (__values == ''){
+                new_row.values = [];
+            } else {
+                new_row.values = new_row.__values.trim().split('|').map((value) => value.trim());
+            }
         } catch (err) {
             console.error(err, new_row);
             new_row.values = [];
