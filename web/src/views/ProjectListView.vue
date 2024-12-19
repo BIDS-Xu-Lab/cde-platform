@@ -13,29 +13,7 @@ const visible_dialog_upload_file = ref(false);
 // const selected_project_for_move = ref();
 // const selected_file_for_move = ref();
 
-function anyDuplicateColumns(file, column) {
-    // Return null if the column is empty
-    if (!file[column]) return null;
 
-    // Define the columns to check against
-    const columnsToCheck = {
-        term: ['description', 'value'],
-        description: ['term', 'value'],
-        value: ['term', 'description']
-    };
-
-    // Get the columns we need to compare with
-    const comparisons = columnsToCheck[column];
-
-    // Check if the current column value matches any other column
-    for (const compareColumn of comparisons) {
-        if (file[column] === file[compareColumn]) {
-            return compareColumn;
-        }
-    }
-
-    return null;
-}
 
 function onClickSave() {
     console.log('* clicked Save');
@@ -218,7 +196,24 @@ const upload_file_column_mappings = ref({
     description: '',
     values: '',
 });
-window.upload_file_column_mappings = upload_file_column_mappings;
+function anyDuplicateColumns(column, skipField = '') {
+    // Return null if the column is empty
+    if (!column) return null;
+
+    const mappings = {
+        term: 'Term',
+        description: 'Description',
+        values: 'Values'
+    };
+
+    // Check each mapping except the one being modified
+    for (const [field, label] of Object.entries(mappings)) {
+        if (field !== skipField && upload_file_column_mappings.value[field] === column) {
+            return label;
+        }
+    }
+    return null;
+}
 
 let upload_file_data = {};
 window.upload_file_data = upload_file_data;
@@ -287,7 +282,11 @@ async function onChangeUploadFile() {
                     id: index,
                 };
             });
-
+            // pre-select the term description and value columns
+            upload_file_column_mappings.value.term = result.meta.fields[0];
+            upload_file_column_mappings.value.description = result.meta.fields[1];
+            upload_file_column_mappings.value.values = result.meta.fields[2];
+            
             store.msg('Successfully read the file: ' + file.name);
             
         },
@@ -703,10 +702,10 @@ onMounted(() => {
                     placeholder="Select a term column" 
                     class="w-full" />
                 <div>
-                    <!-- <span v-if="anyDuplicateColumns(file, 'term') != null" 
+                    <span v-if="anyDuplicateColumns(upload_file_column_mappings.term, 'term') != null" 
                         class="text-xs text-red-500">
-                        Duplicated with {{ anyDuplicateColumns(file, 'term') }}
-                    </span> -->
+                        Duplicated with {{ anyDuplicateColumns(upload_file_column_mappings.term, 'term') }}
+                    </span>
                 </div>
             </div>
 
@@ -717,10 +716,10 @@ onMounted(() => {
                     placeholder="Select a description column" 
                     class="w-full" />
                 <div>
-                    <!-- <span v-if="anyDuplicateColumns(file, 'description') != null" 
+                    <span v-if="anyDuplicateColumns(upload_file_column_mappings.description, 'description') != null" 
                         class="text-xs text-red-500">
-                        Duplicated with {{ anyDuplicateColumns(file, 'description') }}
-                    </span> -->
+                        Duplicated with {{ anyDuplicateColumns(upload_file_column_mappings.description, 'description') }}
+                    </span>
                 </div>
             </div>
 
@@ -731,10 +730,10 @@ onMounted(() => {
                     placeholder="Select a value column" 
                     class="w-full" />
                 <div>
-                    <!-- <span v-if="anyDuplicateColumns(file, 'value') != null" 
+                    <span v-if="anyDuplicateColumns(upload_file_column_mappings.values, 'values') != null" 
                         class="text-xs text-red-500">
-                        Duplicated with {{ anyDuplicateColumns(file, 'value') }}
-                    </span> -->
+                        Duplicated with {{ anyDuplicateColumns(upload_file_column_mappings.values, 'values') }}
+                    </span>
                 </div>
             </div>
         </div>
