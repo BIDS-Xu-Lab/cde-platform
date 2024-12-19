@@ -62,8 +62,8 @@ function onClickShowValues(item) {
 
 async function onClickValueMapping(item) {
     console.log('* clicked Value Mapping:', item);
-
     
+   
 }
 
 </script>

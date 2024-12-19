@@ -494,6 +494,7 @@ onMounted(() => {
                 <div>
                     <Button v-if="project.project_id != 'default_project_id'"
                         severity="secondary"
+                        :disabled="store.current_project?.project_id == project.project_id"
                         size="small"
                         v-tooltip.bottom="'Delete this project.'"
                         @click="onClickDeleteProject(project)">
@@ -640,6 +641,7 @@ onMounted(() => {
                         <Button 
                             severity="danger"
                             size="small"
+                            :disabled="store.working_file?.file_id == file.file_id"
                             v-tooltip.bottom="'Delete this file.'"
                             @click="onClickDeleteFile(file)">
                             <i class="fa-solid fa-trash"></i>
