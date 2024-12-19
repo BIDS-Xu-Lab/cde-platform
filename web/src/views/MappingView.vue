@@ -97,7 +97,7 @@ async function onClickSearchAll() {
     // for each concept in the working_file_concepts
     // search CDEs on the working concept
     for (let i=0; i < store.working_file_concepts.length; i++) {
-        prograss_value.value = Math.floor((i + 1) /  store.working_file_concepts.length * 100);
+        prograss_value.value = i + 1;
         let concept = store.working_file_concepts[i];
 
         // search CDEs on the working concept
@@ -125,10 +125,10 @@ async function onClickSearchAll() {
                 selected_results: []
             }
         }
-
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
     // sleep 1 sec let animation can be shown
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     prograss_visible.value = false;
     prograss_value.value = 0;
     store.msg('Searched all results.');
@@ -623,7 +623,8 @@ onMounted(() => {
 
 </div>
 <Dialog v-model:visible="prograss_visible" modal header="Search All Progress" :style="{ width: '50vw' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :closable="false">
-    <ProgressBar :value="prograss_value"></ProgressBar>
+    <p>Searched: {{ prograss_value }}/{{ store.working_file_concepts.length }}</p>
+    <ProgressBar :value="prograss_value" mode="indeterminate"></ProgressBar>
 </Dialog>
 
 </template>
