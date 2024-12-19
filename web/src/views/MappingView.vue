@@ -505,10 +505,48 @@ onMounted(() => {
                     </div>
 
                     <div class="term-additional">
-                        <div class="w-full text-right pr-2">
-                            <i class="fa fa-info-circle"></i>
-                            Additional Info
-                        </div>
+                        <Accordion value="1" class="w-full px-2" :unstyled="true">
+                            <AccordionPanel value="0">
+                                <AccordionHeader>
+                                    <i class="fa fa-info-circle mr-1"></i>
+                                    Additional Information
+                                </AccordionHeader>
+                                <AccordionContent>
+                                    <template v-for="key in Object.keys(item)">
+                                        <div v-if="['id', 'term', 'description', 'user_id', 'project_id', 'concept_id', 'file_id', 'values'].indexOf(key) < 0" 
+                                            class="flex justify-between">
+                                            <div class="font-bold">{{ key }}</div>
+                                            <div>{{ item[key] }}</div>
+                                        </div>
+                                        <div v-else-if="key == 'values'">
+                                            <div class="font-bold">
+                                                Values
+                                            </div>
+                                            <div>
+                                                <template v-for="value in item[key]">
+                                                    <div class="flex justify-start">
+                                                        <div class="ml-2">
+                                                            <i class="fa-regular fa-circle-dot"></i>
+                                                            {{ value }}
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </AccordionContent>
+                            </AccordionPanel>
+                            </Accordion>    
+            
+                        <!-- <div class="w-full text-right pr-2">
+                            <Button severity="secondary"
+                                v-tooltip.right="'Show additional information for this concept.'"
+                                class="btn-mini"
+                                @click="onClickShowAdditionalInfo">
+                                <i class="fa fa-info-circle"></i>
+                                Additional Info
+                            </Button>
+                        </div> -->
                         <div class="term-additional-info">
 
                         </div>

@@ -310,23 +310,34 @@ async function onClickUpload() {
             ...row,
 
             // Convert the column names to standard names
-            term: row[upload_file_data["column_name_term"]],
-            description: row[upload_file_data["column_name_description"]],
+            __term: row[upload_file_data["column_name_term"]],
+            __description: row[upload_file_data["column_name_description"]],
 
             // a temporary column to hold the raw values
-            _values: row[upload_file_data["column_name_values"]],
+            __values: row[upload_file_data["column_name_values"]],
         };
+        
+        // delete the original columns
+        delete new_row[upload_file_data["column_name_term"]];
+        delete new_row[upload_file_data["column_name_description"]];
+        delete new_row[upload_file_data["column_name_values"]];
+
+        // copy term and description to standard columns
+        new_row.term = new_row.__term;
+        new_row.description = new_row.__description;
 
         // now convert values to an array
         try {
-            new_row.values = new_row._values.split('|').map((value) => value.trim());
+            new_row.values = new_row.__values.split('|').map((value) => value.trim());
         } catch (err) {
             console.error(err, new_row);
             new_row.values = [];
         }
 
-        // delete _values
-        delete new_row._values;
+        // delete temp columns
+        delete new_row.__term;
+        delete new_row.__description;
+        delete new_row.__values;
 
         return new_row;
     });
