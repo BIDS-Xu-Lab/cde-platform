@@ -176,8 +176,6 @@ onMounted(() => {
 <!-- cde index management -->
 <CDEIndexManagementView v-show="store.admin.current_tab == 'cde_index'" />
 
-
-
 </div>
 </template>
 

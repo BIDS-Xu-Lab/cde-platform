@@ -77,6 +77,25 @@ export const Jimin = {
     ///////////////////////////////////////////////////////
     // Project related
     ///////////////////////////////////////////////////////
+    getProject: async function(project_id) {
+        console.log('* get project');
+
+        const rsp = await this.axios_instance.get(
+            '/get_project',
+            {
+                params: {
+                    project_id: project_id
+                }
+            }
+        );
+
+        if (rsp.data.success === false) {
+            return [];
+        }
+
+        return rsp.data;
+    },
+
     getProjects: async function() {
         console.log('* get projects');
 
@@ -88,7 +107,7 @@ export const Jimin = {
             return [];
         }
 
-        return rsp.data.projects;
+        return rsp.data;
     },
 
     createProject: async function (project) {
@@ -113,10 +132,24 @@ export const Jimin = {
         return rsp.data;
     },
 
+    addUserToProjectByEmail: async function (project_id, email, role='member') {
+        console.log('* add user to project by email', project_id, email);
+
+        const rsp = await this.axios_instance.post(
+            '/add_user_to_project_by_email',
+            { 
+                project_id: project_id, 
+                email: email,
+                role: role
+            }
+        );
+
+        return rsp.data;
+    },
+
     ///////////////////////////////////////////////////////
     // File related
     ///////////////////////////////////////////////////////
-
     uploadFile: async function (file) {
         console.log('* upload file', file);
 
@@ -178,7 +211,6 @@ export const Jimin = {
     ///////////////////////////////////////////////////////
     // Concepts related
     ///////////////////////////////////////////////////////
-
     getConceptsByFile: async function (file_id) {
         console.log('* get concepts by file', file_id);
 

@@ -195,7 +195,8 @@ function onClickClearDataAddUser() {
                     <div class="flex-col">
                         <div class="text-lg font-bold">
                             <i class="fa-solid fa-users"></i>
-                            User List
+                            User List 
+                            ({{ users.length }})
                         </div>
                         <div class="panel-subtitle text-sm">
                         </div>
@@ -213,11 +214,11 @@ function onClickClearDataAddUser() {
             </div>
         </template>
 
-        <div>
+        <div :style="{height: 'calc(100vh - 17rem)', overflowY: 'auto'}">
             <DataTable :value="users" 
                 paginator 
-                :rows="10" 
-                :rowsPerPageOptions="[10, 20, 50]" 
+                :rows="5" 
+                :rowsPerPageOptions="[5, 10, 20, 50]" 
                 tableStyle="min-width: 50rem">
                 <template #empty> No users found. </template>
                 <Column field="name" header="Name" style="width: 25%"></Column>

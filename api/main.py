@@ -666,6 +666,46 @@ async def get_stats(
 ###########################################################
 # Project related APIs
 ###########################################################
+@app.get('/get_project', tags=["project"])
+async def get_project(
+    request: Request,
+    project_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get a project
+    '''
+    logging.info("get project")
+
+    project = await db.projects.find_one({
+        "project_id": project_id,
+        "user_id": current_user['user_id']
+    })
+
+    # ok, try to find participated projects
+
+    # oh, still none, we will return None
+    if project is None:
+        return {
+            'success': False,
+            'project': None
+        }
+    
+    # ok, we found the project
+    # let's extend the member information with email and name for frontend
+    for member in project['members']:
+        user = await db.users.find_one({
+            "user_id": member['user_id']
+        })
+        member['email'] = user['email']
+        member['name'] = user['name']
+    
+    return {
+        'success': True,
+        'project': formatProject(project)
+    }
+
+
 @app.get('/get_projects', tags=["project"])
 async def get_projects(
     request: Request,
@@ -676,12 +716,25 @@ async def get_projects(
     '''
     logging.info("get projects")
 
+    start_time = time.time()
     projects = await db.projects.find({
         "user_id": current_user['user_id']
     }).to_list(length=None)
 
+    # for each project, add members' email and name
+    for project in projects:
+        for member in project['members']:
+            user = await db.users.find_one({
+                "user_id": member['user_id']
+            })
+            member['email'] = user['email']
+            member['name'] = user['name']
+    end_time = time.time()
+    logging.info(f"taken to retrieve projects: {end_time - start_time} seconds")
+
     return {
         'success': True,
+        'message': 'get all %s projects (%s seconds)' % (len(projects), end_time - start_time),
         'projects': formatProjects(projects)
     }
 
@@ -696,12 +749,20 @@ async def create_project(
     '''
     logging.info("create project")
 
-    project_data['user_id'] = current_user['user_id']
-    project_data['created'] = datetime.datetime.now()
-    project_data['updated'] = datetime.datetime.now()
-
     # create project_id
     project_data['project_id'] = str(uuid.uuid4())
+
+    # set the user_id using the current user
+    project_data['user_id'] = current_user['user_id']
+
+    # add self as the owner
+    project_data['members'] = [
+        { "user_id": current_user['user_id'], "role": "owner" }
+    ]
+
+    # set the created and updated time
+    project_data['created'] = datetime.datetime.now()
+    project_data['updated'] = datetime.datetime.now()
 
     result = await db.projects.insert_one(project_data)
 
@@ -740,6 +801,66 @@ async def delete_project(
         'message': 'Project deleted successfully'
     }
 
+
+class AddUserToProjectByEmailModel(BaseModel):
+    project_id: str
+    email: str
+    role: str
+
+@app.post('/add_user_to_project_by_email', tags=["project"])
+async def add_user_to_project_by_email(
+    request: Request,
+    data: AddUserToProjectByEmailModel,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Add a user to a project
+    '''
+    logging.info("add user to project")
+
+    # check whether the current user is the owner of this project
+    project = await db.projects.find_one({
+        "project_id": data.project_id,
+        "user_id": current_user['user_id']
+    })
+
+    if project is None:
+        raise HTTPException(status_code=404, detail="Not owner of this project")
+    
+    # check whether the user is in the database
+    user = await db.users.find_one({
+        "email": data.email
+    })
+
+    if user is None:
+        return {
+            'success': False,
+            'message': 'User [%s] not found' % data.email
+        }
+    
+    # check if this user['user_id'] is already in the project['members']
+    # if so, we will return False
+    if any(member['user_id'] == user['user_id'] for member in project['members']):
+        return {
+            'success': False,
+            'message': 'User [%s] already in the project' % data.email
+        }
+
+    # add this user to the project's members
+    _ = await db.projects.update_one(
+        {"project_id": data.project_id},
+        {"$push": {
+            "members": {
+                "user_id": user['user_id'],
+                "role": data.role
+            }
+        }}
+    )
+
+    return {
+        'success': True,
+        'message': 'User [%s] is added to project successfully' % data.email,
+    }
 
 ###########################################################
 # File related APIs

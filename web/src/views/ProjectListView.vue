@@ -34,10 +34,10 @@ async function onClickUpdateProjectList() {
     console.log('* clicked Update Project List');
 
     // get all projects
-    let projects = await Jimin.getProjects();
+    let ret = await Jimin.getProjects();
 
     // update store
-    store.projects = projects;
+    store.projects = ret.projects;
 }
 
 async function onClickProjectItem(project) {
@@ -364,6 +364,48 @@ async function onClickUpload() {
     visible_dialog_upload_file.value = false;
 };
 
+///////////////////////////////////////////////////////////
+// Member management
+///////////////////////////////////////////////////////////
+const email_add_member = ref('');
+
+async function onClickAddMember(project) {
+    console.log('* clicked Add Member', email_add_member.value);
+
+    let email = email_add_member.value;
+    let __email = email.trim();
+
+    if (__email == '') {
+        store.msg('Please enter an email address.', 'Error', 'error');
+        return;
+    }
+
+    // add this email to the project
+    let ret = await Jimin.addUserToProjectByEmail(
+        project.project_id,
+        email_add_member.value,
+    )
+
+    if (ret.success) {
+        store.msg(ret.message);
+    } else {
+        // if failed, show the error message and no further action
+        store.msg(ret.message, 'Error', 'error');
+        return;
+    }
+
+    // update the project info
+    let data = await Jimin.getProject(project.project_id);
+    
+    // replace the current project with the updated project
+    store.current_project = data.project;
+
+    // also update the project list in the store.projects
+    let idx = store.projects.findIndex((p) => p.project_id == project.project_id);
+    store.projects[idx] = data.project;
+}
+
+
 onMounted(() => {
     console.log('* mounted ProjectListView');
     onClickUpdateProjectList();
@@ -536,7 +578,8 @@ onMounted(() => {
         </div>
     </template>
 
-    <Tabs value="files">
+    <Tabs v-if="store.current_project"
+        value="files">
     <TabList>
         <Tab value="files">
             <i class="fa-regular fa-folder-open"></i>
@@ -548,6 +591,9 @@ onMounted(() => {
         <Tab value="members">
             <i class="fa fa-users"></i>
             Members
+            <span v-if="store.current_project.members.length > 0">
+                ({{ store.current_project.members.length }})
+            </span>
         </Tab>
         <Tab value="settings">
             <i class="fa fa-cog"></i>
@@ -666,6 +712,45 @@ onMounted(() => {
 
         <!-- tab for managing reviewers -->
         <TabPanel value="members">
+        <div class="flex flex-col h-full">
+            <div>
+                <label for=""
+                    class="mr-2">
+                    Email:
+                </label>
+                <InputText placeholder="Enter an email address"
+                    v-model="email_add_member"
+                    class="mr-2" />
+                <Button label="Add member"
+                    icon="pi pi-plus"
+                    @click="onClickAddMember(store.current_project)"
+                    v-tooltip.right="'Search this email in system and add to this project'" />
+            </div>
+
+            <div>
+                <template v-for="member in store.current_project.members">
+                    <div class="flex flex-row justify-start py-2 items-center">
+                        <div class="mr-4">
+                            <Button severity="danger"
+                                :disabled="store.user.user_id == member.user_id"
+                                size="small"
+                                v-tooltip.bottom="'Remove this member from this project.'">
+                                <i class="fa-solid fa-trash"></i>
+                            </Button>
+                        </div>
+                        <div class="flex flex-row items-center">
+                            <i class="fa fa-user"></i>
+                            <span class="ml-2">
+                                {{ member.name }}
+                            </span>
+                            <span class="ml-2">
+                                ({{ member.email }})
+                            </span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
         </TabPanel>
 
         <!-- tab for managing settings -->
@@ -796,6 +881,33 @@ onMounted(() => {
         <Button label="Create" @click="onClickCreate" severity="secondary" />
     </div>
 </Dialog>
+
+
+<!-- Dialog for assign users -->
+<!-- <Dialog v-model:visible="visible_dialog_assign_users" 
+    modal 
+    header="Assign Users" 
+    :style="{ width: '25rem' }">
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">
+        Assign users to this project.
+    </span>
+    <div class="flex flex-col justify-start gap-4 mb-4">
+        <div>
+            <label for="select_user" class="font-semibold w-24">
+                Select User
+            </label>
+            <Select v-model="selected_user_for_assign" 
+                :options="store.users"
+                optionLabel="name" 
+                optionValue="user_id"
+                placeholder="Select a user" 
+                class="w-full" />
+        </div>
+    </div>
+    <div class="flex justify-end gap-2">
+        <Button label="Assign" @click="onClickAssign()" severity="secondary" />
+    </div>
+</Dialog> -->
 
 <!-- <Dialog v-model:visible="visible_dialog_move_file" 
     modal 
