@@ -91,8 +91,8 @@ async function onClickDeleteFile(file) {
 
     store.msg(ret.message);
 
-    // update file list
-    onClickProjectItem(store.current_project);
+    // update all files for this project
+    await store.updateCurrentProjectFiles();
 }
 
 </script>

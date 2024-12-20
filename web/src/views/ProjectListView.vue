@@ -47,10 +47,7 @@ async function onClickProjectItem(project) {
     store.current_project = project;
 
     // get all files for this project
-    let files = await Jimin.getFilesByProject(project.project_id);
-    console.log('* got project files:', files);
-
-    store.files = files;
+    await store.updateCurrentProjectFiles();
 }
 
 async function onClickDeleteProject(project) {

@@ -210,9 +210,9 @@ async function onClickDeselectValueMapping(item, value) {
     <div v-if="flag_enabled_value_mapping && itemValueCheck(item)" 
         class="flex flex-col value-mapping">
         <div v-for="value in store.working_concept.values"
-            class="value-mapping-item flex flex-row items-center">
+            class="value-mapping-item flex flex-row items-center mb-2">
             <div class="h-full ml-4">
-                <Tag :value="value" />
+                <Tag class="w-96" :value="value" />
             </div>
             <div class="mx-4">
                 <template v-if="item.value_mapping[value]">

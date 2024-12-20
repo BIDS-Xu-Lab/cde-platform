@@ -193,6 +193,18 @@ actions: {
     },
 
     ///////////////////////////////////////////////////////
+    // Project File
+    ///////////////////////////////////////////////////////
+    async updateCurrentProjectFiles() {
+        // get all files for this project
+        let files = await Jimin.getFilesByProject(
+            store.current_project.project_id
+        );
+        console.log('* got project files:', files);
+        store.files = files;
+    },
+
+    ///////////////////////////////////////////////////////
     // User File
     ///////////////////////////////////////////////////////
     setUser(user) {
