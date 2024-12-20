@@ -197,12 +197,28 @@ export const Jimin = {
 
         return rsp.data;
     },
+
     moveFile: async function (file_id, project_id) {
         console.log('* move file', file_id, project_id);
 
         const rsp = await this.axios_instance.post(
             '/move_file',
             { file_id: file_id, project_id: project_id }
+        );
+
+        return rsp.data;
+    },
+
+    saveFile: async function (file_id) {
+        console.log('* save file', file_id);
+
+        const rsp = await this.axios_instance.get(
+            '/save_file',
+            {
+                params: {
+                    file_id: file_id,
+                }
+            }
         );
 
         return rsp.data;

@@ -1043,6 +1043,92 @@ async def delete_file(
     }
 
 
+@app.get('/save_file', tags=["file"])
+async def save_file(
+    request: Request,
+    file_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Save a file
+    '''
+    logging.info("save file")
+
+    # get the file
+    file = await db.files.find_one({
+        "file_id": file_id
+    })
+
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # check ownership of this file for this user
+    flag_has_ownership = file['user_id'] == current_user['user_id']
+    logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
+
+    # check permission of this file for this user
+    permission = await db.file_users.find_one({
+        "file_id": file_id,
+        "user_id": current_user['user_id']
+    })
+    logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission}")
+
+    if flag_has_ownership:
+        # ok we have the ownership, we can pass
+        pass
+
+    elif permission is None:
+        # no ownership and no permission, we will raise an error
+        raise HTTPException(status_code=403, detail="No permission on the requested file")
+    
+    else:
+        pass
+
+    # get all concepts
+    concepts = await db.concepts.find({
+        "file_id": file_id
+    }).to_list(length=None)
+
+    mappings = await db.mappings.find({
+        "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
+        "user_id": current_user['user_id']
+    }).to_list(length=None)
+
+    # post-processing the final output
+    # delete file_id, project_id, and user_id from file
+    file.pop('file_id')
+    file.pop('project_id')
+    file.pop('user_id')
+
+    # delete file_id, project_id, and user_id from concepts
+    for concept in concepts:
+        concept.pop('file_id')
+        concept.pop('project_id')
+        concept.pop('user_id')
+
+    # delete mapping_id, user_id, and source from mappings
+    for mapping in mappings:
+        mapping.pop('mapping_id')
+        mapping.pop('user_id')
+        mapping.pop('source')
+    
+    #point mappings' concept_id to the index of the concept
+    for mapping in mappings:
+        for i, concept in enumerate(concepts):
+            if concept['concept_id'] == mapping['concept_id']:
+                mapping['concept_id'] = concept['id']
+                break
+    
+    #remove concept_id from concepts
+    for concept in concepts:
+        concept.pop('concept_id')
+
+    return {
+        'file': formatFile(file),
+        'concepts': formatConcepts(concepts),
+        'mappings': formatMappings(mappings)
+    }
+
 ###########################################################
 # Concepts related APIs
 ###########################################################

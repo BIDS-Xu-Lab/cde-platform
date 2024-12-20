@@ -2,7 +2,8 @@
 import ToggleSwitch from 'primevue/toggleswitch';
 import VirtualScroller from 'primevue/virtualscroller';
 import Badge from 'primevue/badge';
-
+import Papa from 'papaparse'
+import { parse, stringify } from 'yaml'
 import { useDataStore } from '../DataStore';
 import { onMounted, ref } from 'vue';
 import { useElementSize } from '@vueuse/core';
@@ -128,29 +129,118 @@ async function onClickSearchAll() {
     store.msg('Searched all results.');
 }
 
-async function onClickSaveClose() {
+async function onClickSaveWork() {
     console.log('* clicked Save and Close');
+
+    // send request to backend
+    let ret = await Jimin.saveFile(store.working_file.file_id);
+
+    // download the result to local disk
+    let blob = new Blob([JSON.stringify(ret, false, 2)], { type: 'application/json' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    // remove extension
+    a.download = store.working_file.filename.replace(/\.[^/.]+$/, "") + '.json';
+    a.click();
+
 
     // save the current mappings to the server
     // just sleep 3 seconds
-    store.msg('Saved the current mappings.');
-
-    // clear working mappings
-    store.clearMappingData();
-
-    // switch to the project view
-    store.changeView('project_list');
+    store.msg('Saved the current file.');
 }
 
-function onClickDownload() {
+async function onClickDownload() {
     console.log('* clicked Download');
+    let ret = await Jimin.saveFile(store.working_file.file_id);
+    // convert ret to JSONL file
+    //first loop through the ret.concepts
+    let concepts_result = [];
+    for (let i = 0; i < ret.concepts.length; i++) {
+        let concept = ret.concepts[i];
+
+        for (let j = 0; j < ret.mappings.length; j++) {
+            let mapping = ret.mappings[j];
+            if (mapping.concept_id == concept.id) {
+                concept['mapping'] = mapping;
+                break;
+            }
+        }
+        concepts_result.push(concept);
+    }
+    // convert concepts to JSONL
+    let blob = new Blob([concepts_result.map(x => JSON.stringify(x)).join('\n')], { type: 'application/json' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    // remove extension, let extension be jsonl
+    a.download = store.working_file.filename.replace(/\.[^/.]+$/, "") + '.jsonl';
+    a.click();
 }
 
+async function onClickDownloadYAML() {
+    console.log('* clicked Download YAML');
+    let ret = await Jimin.saveFile(store.working_file.file_id);
+    // convert ret to YAML file
+    //first loop through the ret.concepts
+    let concepts_result = [];
+    for (let i = 0; i < ret.concepts.length; i++) {
+        let concept = ret.concepts[i];
+
+        for (let j = 0; j < ret.mappings.length; j++) {
+            let mapping = ret.mappings[j];
+            if (mapping.concept_id == concept.id) {
+                concept['mapping'] = mapping;
+                break;
+            }
+        }
+        concepts_result.push(concept);
+    }
+    // convert concepts to YAML
+    let blob = new Blob([stringify(concepts_result)], { type: 'application/json' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    // remove extension, let extension be yaml
+    a.download = store.working_file.filename.replace(/\.[^/.]+$/, "") + '.yaml';
+    a.click();
+}
+
+async function onClickDownloadTSV() {
+    console.log('* clicked Download');
+    let ret = await Jimin.saveFile(store.working_file.file_id);
+    // convert ret to JSONL file
+    //first loop through the ret.concepts
+    let concepts_result = [];
+    for (let i = 0; i < ret.concepts.length; i++) {
+        let concept = ret.concepts[i];
+
+        for (let j = 0; j < ret.mappings.length; j++) {
+            let mapping = ret.mappings[j];
+            if (mapping.concept_id == concept.id) {
+                // convert mapping JSON to string
+                concept['mapping'] = JSON.stringify(mapping);
+                
+                break;
+            }
+        }
+        concepts_result.push(concept);
+    }
+    // use papaparse to convert concepts to TSV
+    let blob = new Blob([Papa.unparse(concepts_result,{delimiter:'\t'})], { type: 'text/tsv' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    // remove extension, let extension be jsonl
+    a.download = store.working_file.filename.replace(/\.[^/.]+$/, "") + '.tsv';
+    a.click();
+}
 const downloadOptions = [{
     icon: 'pi pi-file',
     label: 'JSONL Format',
 
     command: () => {
+        onClickDownload();
         store.toast.add({ severity: 'success', summary: 'Downloaded successfully!', detail: 'Downloaded all data into a single JSONL file.', life: 3000 });
     }
 },
@@ -158,6 +248,7 @@ const downloadOptions = [{
     icon: 'pi pi-file',
     label: 'YAML Format',
     command: () => {
+        onClickDownloadYAML();
         store.toast.add({ severity: 'success', summary: 'Downloaded successfully!', detail: 'Downloaded all data into a single YAML file.', life: 3000 });
     }
 },
@@ -166,6 +257,7 @@ const downloadOptions = [{
     label: 'TSV Format',
     title: "Download all data into a single TSV file.",
     command: () => {
+        onClickDownloadTSV();
         store.toast.add({ severity: 'success', summary: 'Downloaded successfully!', detail: 'Downloaded all data into a single TSV file.', life: 3000 });
     }
 },
@@ -175,6 +267,7 @@ const downloadOptions = [{
 {
     label: 'Raw JSON Format',
     command: () => {
+        onClickSaveWork();
         store.toast.add({ severity: 'success', summary: 'Downloaded successfully!', detail: 'Downloaded all data into a single JSON file.', life: 3000 });
     }
 }
@@ -352,10 +445,10 @@ onMounted(() => {
             <Button text
                 class="menu-button"
                 v-tooltip.bottom="'Save the current mapping to the server and close mapping.'"
-                @click="onClickSaveClose">
+                @click="onClickSaveWork">
                 <i class="fa-regular fa-floppy-disk menu-icon"></i>
                 <span>
-                    Save &amp; Close
+                    Save
                 </span>
             </Button>
 
