@@ -895,7 +895,10 @@ async def upload_file(
             project = {
                 "project_id": 'default_project_id',
                 "name": "Default Project",
-                "user_id": current_user['user_id'], 
+                "user_id": current_user['user_id'],
+                'members': { 
+                    "user_id": current_user['user_id'], "role": "owner"
+                    },
                 "created": datetime.datetime.now(),
                 "updated": datetime.datetime.now(),
             }
