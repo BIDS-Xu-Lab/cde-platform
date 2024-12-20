@@ -362,6 +362,7 @@ onMounted(() => {
                     optionLabel="name" 
                     optionValue="code" 
                     placeholder="Select a data source" 
+                    v-tooltip.bottom="'Select a data source to search.'"
                     class="select-sources">
                     <template #header>
                         <div class="font-bold px-3">Available Sources</div>
@@ -381,6 +382,7 @@ onMounted(() => {
                     optionLabel="name" 
                     optionValue="code" 
                     placeholder="Select data collections" 
+                    v-tooltip.bottom="'Filter data collections to search.'"
                     class="select-sources">
                     <template #header>
                         <div class="font-bold px-3">Available Collections</div>
@@ -444,7 +446,7 @@ onMounted(() => {
         <div class="menu-group-box">
             <Button text
                 class="menu-button"
-                v-tooltip.bottom="'Save the current mapping to the server and close mapping.'"
+                v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
                 @click="onClickSaveWork">
                 <i class="fa-regular fa-floppy-disk menu-icon"></i>
                 <span>
@@ -453,7 +455,7 @@ onMounted(() => {
             </Button>
 
             <SplitButton text
-                v-tooltip.bottom="'Download the current mapping to local disk.'"
+                v-tooltip.bottom="'Download the current mapping JSONL format to local disk.'"
                 :model="downloadOptions"
                 @click="onClickDownload">
                 <div class="flex flex-col">
@@ -474,7 +476,7 @@ onMounted(() => {
         <div class="menu-group-box">
             <Button text
                 class="menu-button"
-                v-tooltip.bottom="'Save the current mapping to the server.'"
+                v-tooltip.bottom="'Re-rank the current search results using AI technology.'"
                 @click="onClickRerank">
                 <i class="fa-solid fa-arrow-up-wide-short menu-icon"></i>
                 <span>
@@ -484,7 +486,7 @@ onMounted(() => {
 
             <Button text
                 class="menu-button"
-                v-tooltip.bottom="'Download the current mapping to local disk.'"
+                v-tooltip.bottom="'Automatically link the values to the current CDE\'s values.'"
                 @click="onClickValueLinking">
                 <i class="fa-solid fa-link menu-icon"></i>
                 <span>
