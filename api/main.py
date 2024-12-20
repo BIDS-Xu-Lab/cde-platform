@@ -832,6 +832,12 @@ async def get_files_by_project(
         "project_id": project_id
     }).to_list(length=None)
 
+    # add stats to the files
+    for file in files:
+        file['n_concepts'] = await db.concepts.count_documents({
+            "file_id": file['file_id']
+        })
+
     return {
         'success': True,
         'files': formatFiles(files)

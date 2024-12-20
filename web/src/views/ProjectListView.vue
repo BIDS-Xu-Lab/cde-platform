@@ -584,27 +584,33 @@ onMounted(() => {
                     </div>
 
                     <div class="file-column flex flex-row mb-2">
-                        <div class="flex flex-col mr-2 w-col-info-box">
+                        <div class="flex flex-col mr-4">
                             <div class="text-sm"># Columns</div>
                             <p class="text-xl font-bold">
                                 {{ file.columns.length }}
                             </p>
                         </div>
-                        <div class="flex flex-col mr-2 w-col-info-box">
+                        <div class="flex flex-col mr-4">
+                            <div class="text-sm"># Concepts</div>
+                            <p class="text-xl font-bold">
+                                {{ file.n_concepts }}
+                            </p>
+                        </div>
+                        <div class="flex flex-col mr-4">
                             <div class="text-sm">Term Column</div>
                             <p class="text-xl font-bold">
                                 {{ file.column_name_term }}
                             </p>
                         </div>
 
-                        <div class="flex flex-col w-col-info-box mr-2">
+                        <div class="flex flex-col mr-4">
                             <div class="text-sm">Description Column</div>
                             <p class="text-xl font-bold">
                                 {{ file.column_name_description }}
                             </p>
                         </div>
 
-                        <div class="flex flex-col w-col-info-box">
+                        <div class="flex flex-col mr-4">
                             <div class="text-sm">Values Column</div>
                             <p class="text-xl font-bold">
                                 {{ file.column_name_values }}
