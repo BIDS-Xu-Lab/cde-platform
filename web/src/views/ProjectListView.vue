@@ -211,6 +211,14 @@ async function onChangeUploadFile() {
         },
     });
 }
+function isUploadDisabled() {
+    return upload_file_column_mappings.value.term === '' ||
+           upload_file_column_mappings.value.description === '' ||
+           upload_file_column_mappings.value.values === '' ||
+           anyDuplicateColumns(upload_file_column_mappings.value.term, 'term') ||
+           anyDuplicateColumns(upload_file_column_mappings.value.description, 'description') ||
+           anyDuplicateColumns(upload_file_column_mappings.value.values, 'values');
+}
 
 async function onClickUpload() {
     console.log('* clicked Upload');
@@ -668,7 +676,8 @@ onMounted(() => {
         </div>
     </div>
     <div class="flex justify-end gap-2">
-        <Button label="Upload" 
+        <Button label="Upload File" 
+            :disabled="isUploadDisabled()"
             icon="pi pi-upload"
             @click="onClickUpload()" 
             severity="secondary" />
