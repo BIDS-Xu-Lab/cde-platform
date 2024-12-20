@@ -720,7 +720,6 @@ async def get_projects(
     projects = await db.projects.find({
         "user_id": current_user['user_id']
     }).to_list(length=None)
-
     # for each project, add members' email and name
     for project in projects:
         for member in project['members']:
@@ -896,9 +895,11 @@ async def upload_file(
                 "project_id": 'default_project_id',
                 "name": "Default Project",
                 "user_id": current_user['user_id'],
-                'members': { 
-                    "user_id": current_user['user_id'], "role": "owner"
-                    },
+                'members': [
+                    { 
+                        "user_id": current_user['user_id'], "role": "owner"
+                        }
+                    ],
                 "created": datetime.datetime.now(),
                 "updated": datetime.datetime.now(),
             }

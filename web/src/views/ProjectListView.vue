@@ -178,7 +178,11 @@ async function onClickCreate() {
     // update project list
     onClickUpdateProjectList();
 
-    // close the dialog
+    // clear the text field and close the dialog
+     new_project.value = {
+        name: '',
+        description: '',
+     };
     visible_dialog_create_project.value = false;
 }
 
@@ -361,6 +365,11 @@ async function onClickUpload() {
     }
 
     // close the dialog
+    upload_file_column_mappings.value = {
+        term: '',
+        description: '',
+        values: '',
+    };
     visible_dialog_upload_file.value = false;
 };
 
