@@ -51,19 +51,59 @@ function fmtScore(score) {
 }
 
 function onClickShowValues(item) {
-    console.log('* clicked Show Values:', item.value);
+    console.log('* clicked Show Values:', item.values);
     
-    // the item.value is a list of values concatenated by a pipe
+    // the item.values is a list of values concatenated by a pipe
     // we need to split it into a list of string
     // and we need to remove the white spaces for each value
-    let values = item.value.split('|').map(v => v.trim());
+    let values = item.values.split('|').map(v => v.trim());
     console.log('* values:', values);
 }
 
-async function onClickValueMapping(item) {
+function itemValueCheck(item) {
+    if (item.values?.length > 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+async function onClickSaveMapping(item) {
     console.log('* clicked Value Mapping:', item);
     
    
+}
+
+async function onChangeValueMapping(item, value) {
+    console.log('* changed Value Mapping:', item, value);
+
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_mappings[store.working_concept.concept_id].selected_results
+    );
+
+    console.log('* updated value mapping:', ret);
+
+    // show a message
+    store.msg(ret.message);
+}
+
+async function onClickDeselectValueMapping(item, value) {
+    console.log('* clicked Deselect Value Mapping:', item, value);
+    item.value_mapping[value] = '';
+
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_mappings[store.working_concept.concept_id].selected_results
+    );
+
+    console.log('* updated value mapping:', ret);
+
+    // show a message
+    store.msg(ret.message);
+
 }
 
 </script>
@@ -115,8 +155,8 @@ async function onClickValueMapping(item) {
         <span class="font-bold">
             Values:
         </span>
-        <span v-if="item.value.length > 0">
-            {{ item.value }}
+        <span v-if="item.values?.length > 0">
+            {{ item.values }}
         </span>
         <span v-else class="text-sm">
             <i class="fa fa-info-circle"></i> 
@@ -124,7 +164,35 @@ async function onClickValueMapping(item) {
         </span>
     </div>
 
-    <div class="flex flex-row mt-2 mb-1">
+    <div class="flex flex-row mt-2 mb-1 items-baseline justify-between">
+        <div>
+            <Button v-if="!flag_selected"
+                size="small"
+                icon="pi pi-check"
+                severity="success"
+                label="Select"
+                class="mr-2"
+                v-tooltip.right="'Select this concept.'"
+                @click="onClickSelectResult(item)">
+            </Button>
+
+            <!-- <Button
+                v-if="flag_enabled_value_mapping && itemValueCheck(item)"
+                size="small"
+                icon="pi pi-list"
+                label="Save Value Mapping"
+                severity="success"
+                class=""
+                v-tooltip.right="'Map values for this CDE.'"
+                @click="onClickSaveMapping(item)">
+            </Button> -->
+
+            <div v-if="flag_enabled_value_mapping && itemValueCheck(item)"
+                 class="font-bold mb-4 ml-2">
+                <i class="fa fa-list"></i>
+                Value Mapping
+            </div>
+        </div>
 
         <div>
             <Button v-if="flag_selected"
@@ -132,47 +200,47 @@ async function onClickValueMapping(item) {
                 icon="pi pi-check"
                 severity="warn"
                 label="Remove"
-                class="mr-2 btn-mini"
+                class="mr-2"
                 v-tooltip.right="'Remove this concept.'"
                 @click="onClickRemoveResult(item)">
             </Button>
-
-            <Button v-if="!flag_selected"
-                size="small"
-                icon="pi pi-check"
-                severity="success"
-                label="Select"
-                class="mr-2 btn-mini"
-                v-tooltip.right="'Select this concept.'"
-                @click="onClickSelectResult(item)">
-            </Button>
-        </div>
-
-        <div v-if="flag_enabled_value_mapping">
-
-            <Button
-                size="small"
-                icon="pi pi-list"
-                label="Value Mapping"
-                severity="success"
-                class="btn-mini"
-                v-tooltip.right="'Map values for this CDE.'"
-                @click="onClickValueMapping(item)">
-            </Button>
-        </div>
-        <div v-else>
-            <!-- <Button
-                size="small"
-                icon="pi pi-list"
-                label="Show values"
-                severity="secondary"
-                class="btn-mini"
-                v-tooltip.right="'Show values for this CDE.'"
-                @click="onClickShowValues(item)">
-            </Button> -->
         </div>
     </div>
-    
+
+    <div v-if="flag_enabled_value_mapping && itemValueCheck(item)" 
+        class="flex flex-col value-mapping">
+        <div v-for="value in store.working_concept.values"
+            class="value-mapping-item flex flex-row items-center">
+            <div class="h-full ml-4">
+                <Tag :value="value" />
+            </div>
+            <div class="mx-4">
+                <template v-if="item.value_mapping[value]">
+                    <i class="fa fa-arrow-right"></i>
+                </template>
+                <template v-else>
+                    <i class="fa fa-times"></i>
+                </template>
+            </div>
+
+            <Select v-model="item.value_mapping[value]"
+                @change="onChangeValueMapping(item, value)"
+                filter 
+                :options="item.values"
+                placeholder="Select a value"
+                style="width: 20rem;"
+                v-tooltip.right="'Select a value to map.'" />
+
+            <Button v-if="item.value_mapping[value]"
+                severity="danger"
+                size="small"
+                icon="pi pi-trash"
+                label="Deselect"
+                class="ml-2"
+                v-tooltip.right="'Deselect the current value mapping.'"
+                @click="onClickDeselectValueMapping(item, value)" />
+        </div>
+    </div>
 </div>
 </template>
 

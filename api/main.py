@@ -1222,16 +1222,28 @@ async def search(
         all_results = []
         for i, response in enumerate(bulk_response['responses']):
             hits = response['hits']['hits']
-            results = [{
-                'score': hit['_score'],
-                'term_id': hit['_source'].get('concept_id'),
-                'term_code': hit['_source'].get('code'),
-                'term_source': hit['_source'].get('source'),
+            results = []
+            for hit in hits:
+                _r = {
+                    'score': hit['_score'],
+                    'term_id': hit['_source'].get('concept_id'),
+                    'term_code': hit['_source'].get('code'),
+                    'term_source': hit['_source'].get('source'),
 
-                'term': hit['_source'].get('term'),
-                'description': hit['_source'].get('description'),
-                'value': hit['_source'].get('value'),
-            } for hit in hits]
+                    'term': hit['_source'].get('term'),
+                    'description': hit['_source'].get('description'),
+                    'values': [],
+                }
+                # parse values
+                _value = hit['_source'].get('value')
+                if _value:
+                    _values = _value.split("|")
+                    for v in _values:
+                        _r['values'].append(v.strip())
+                else:
+                    _r['values'] = []
+
+                results.append(_r)
             all_results.append(results)
 
             # check whether we already have this in mappings 
