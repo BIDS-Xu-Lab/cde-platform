@@ -119,11 +119,10 @@ async function onClickDeleteFile(file) {
     if (!confirm('Are you sure to delete this file?')) {
         return;
     }
-
     // delete this file
     let ret = await Jimin.deleteFile(file.file_id);
     // if this file is the working file, reset the working file
-    if (file.file_id == store.working_file.file_id) {
+    if (store.working_file && file.file_id == store.working_file.file_id) {
         store.working_file = null;
         store.working_file_concepts = [];
         store.working_concept = null;
