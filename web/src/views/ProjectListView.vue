@@ -296,8 +296,6 @@ async function onChangeUploadFile() {
 async function onClickUpload() {
     console.log('* clicked Upload');
     
-    // Check if any required column is empty
-
     // Convert term, description, and value to standard column names
     upload_file_data["column_name_term"] = upload_file_column_mappings.value.term;
     upload_file_data["column_name_description"] = upload_file_column_mappings.value.description;
@@ -327,12 +325,13 @@ async function onClickUpload() {
 
         // now convert values to an array
         try {
+            // remove leading and trailing white spaces
             let __values = new_row.__values.trim();
 
             if (__values == ''){
                 new_row.values = [];
             } else {
-                new_row.values = new_row.__values.trim().split('|').map((value) => value.trim());
+                new_row.values = __values.split('|').map((value) => value.trim());
             }
         } catch (err) {
             console.error(err, new_row);
@@ -700,14 +699,20 @@ onMounted(() => {
                 placeholder="Select a project" 
                 class="w-full" />
         </div>
-        <label for="select_file" class="font-semibold">Select File</label>
+
+        <!-- select file to upload -->
+        <label for="select_file" class="font-semibold">
+            Select File
+        </label>
         <FileUpload ref="fileupload" 
             mode="basic" name="demo[]" 
             url="/api/upload" 
             @change="onChangeUploadFile"
             accept="text/csv" />
+
+        <!-- select columns -->
         <div class="flex flex-row mb-2 ">
-            <div class="flex flex-col mr-2 w-col-info-box">
+            <div class="flex flex-col mr-2 w-1/3">
                 <label for="">Term</label>
                 <Select v-model="upload_file_column_mappings.term" 
                     :options="upload_file_columns"
@@ -721,7 +726,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="flex flex-col w-col-info-box mr-2">
+            <div class="flex flex-col w-1/3 mr-2">
                 <label for="">Description</label>
                 <Select v-model="upload_file_column_mappings.description" 
                     :options="upload_file_columns"
@@ -735,7 +740,7 @@ onMounted(() => {
                 </div>
             </div>
 
-            <div class="flex flex-col w-col-info-box">
+            <div class="flex flex-col w-1/3">
                 <label for="">Value</label>
                 <Select v-model="upload_file_column_mappings.values" 
                     :options="upload_file_columns"
@@ -751,7 +756,10 @@ onMounted(() => {
         </div>
     </div>
     <div class="flex justify-end gap-2">
-        <Button label="Upload" @click="onClickUpload()" severity="secondary" />
+        <Button label="Upload" 
+            icon="pi pi-upload"
+            @click="onClickUpload()" 
+            severity="secondary" />
     </div>
 </Dialog>
 

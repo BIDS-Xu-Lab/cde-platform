@@ -128,8 +128,18 @@ async function onClickSearchAll() {
     store.msg('Searched all results.');
 }
 
-function onClickSave() {
-    console.log('* clicked Save');
+async function onClickSaveClose() {
+    console.log('* clicked Save and Close');
+
+    // save the current mappings to the server
+    // just sleep 3 seconds
+    store.msg('Saved the current mappings.');
+
+    // clear working mappings
+    store.clearMappingData();
+
+    // switch to the project view
+    store.changeView('project_list');
 }
 
 function onClickDownload() {
@@ -341,11 +351,11 @@ onMounted(() => {
         <div class="menu-group-box">
             <Button text
                 class="menu-button"
-                v-tooltip.bottom="'Save the current mapping to the server.'"
-                @click="onClickSave">
+                v-tooltip.bottom="'Save the current mapping to the server and close mapping.'"
+                @click="onClickSaveClose">
                 <i class="fa-regular fa-floppy-disk menu-icon"></i>
                 <span>
-                    Save
+                    Save &amp; Close
                 </span>
             </Button>
 

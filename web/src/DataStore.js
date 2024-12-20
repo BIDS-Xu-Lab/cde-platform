@@ -220,9 +220,10 @@ actions: {
     },
 
     clearMappingData() { 
-        this.working_mappings = {};
+        this.working_file = null;
         this.working_concept = null;
         this.working_file_concepts = [];
+        this.working_mappings = {};
     },
 
     addSelectedResultToWorkingConcept(result) {
