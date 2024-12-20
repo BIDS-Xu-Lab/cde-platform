@@ -76,8 +76,16 @@ mongo_client = AsyncIOMotorClient(os.environ['MONGODB_URI'])
 db = mongo_client.get_database()
 logging.info('* connected to mongodb at %s' % os.environ['MONGODB_URI'])
 
-
-# jobs_collection = db.jobs
+# all the collections
+MONGO_ALL_COLLECTION_NAMES = [
+    'users',          # user information
+    'projects',       # project information
+    'files',          # file information of projects
+    'concepts',       # concepts loaded from files
+    'file_users',     # user permissions on each file
+    'jobs',           # jobs for OpenAI
+    'mappings',       # mappings between concepts and CDEs
+]
 
 ###########################################################
 # User authentication related functions
@@ -337,19 +345,12 @@ async def admin_init_database(
     # create collection `users` if not exist
     existing_collections = await db.list_collection_names()
 
-    for collection_name in [
-        'users',
-        'projects',
-        'files', 
-        'concepts',
-        'file_users',
-        'jobs',
-        'mappings'
-    ]:
+    for collection_name in MONGO_ALL_COLLECTION_NAMES:
         if collection_name in existing_collections:
+            # ok, this collection exists
             logging.info(f"* found collection `{collection_name}` exists")
         else:
-            # await db[collection_name].insert_one({"init": True})
+            # not found, create this collection!
             await db.create_collection(collection_name)
             logging.info(f"* created collection `{collection_name}`")
             
@@ -542,9 +543,14 @@ async def admin_get_all_projects(
     }
 
 
+class AdminClearDatabaseModel(BaseModel):
+    # collections to exclude from deletion
+    exclude_collections: List[str] = []
+
 @app.post("/admin/clear_database", tags=["admin"])
 async def admin_clear_database(
     request: Request,
+    data: AdminClearDatabaseModel | None = None,
     x_token: str = Depends(authXTokenHeader)
 ):
     '''
@@ -552,14 +558,12 @@ async def admin_clear_database(
     '''
     existing_collections = await db.list_collection_names()
 
-    for collection_name in [
-        'users',
-        'projects',
-        'files', 
-        'concepts',
-        'file_users',
-        'jobs',
-    ]:
+    for collection_name in MONGO_ALL_COLLECTION_NAMES:
+        # skip the excluded collections
+        if data is not None and collection_name in data.exclude_collections:
+            logging.info(f"* skip specific collection `{collection_name}`")
+            continue
+
         if collection_name in existing_collections:
             await db[collection_name].drop()
             logging.info(f"* dropped collection `{collection_name}`")
@@ -568,7 +572,7 @@ async def admin_clear_database(
 
     return {
         'success': True,
-        'message': 'database cleared'
+        'message': 'all database collections cleared, except %s' % data
     }
 
 

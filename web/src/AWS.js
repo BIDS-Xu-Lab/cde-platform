@@ -61,4 +61,30 @@ export const AWS = {
         
         return rsp.data;
     },
+
+    ///////////////////////////////////////////////////////
+    // DANGER ZONE
+    ///////////////////////////////////////////////////////
+    initDatabase: async function () {
+        console.log('* init database');
+
+        const rsp = await this.axios_instance.post(
+            '/init_database'
+        );
+        
+        return rsp.data;
+    },
+
+    clearDatabase: async function (exclude_collections=[]) {
+        console.log('* clear database');
+
+        const rsp = await this.axios_instance.post(
+            '/clear_database',
+            {
+                exclude_collections: exclude_collections
+            }
+        );
+        
+        return rsp.data;
+    },
 }
