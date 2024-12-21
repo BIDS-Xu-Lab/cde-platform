@@ -286,16 +286,16 @@ const sort_terms_options = [
     label: 'Name',
     code: 'name',
     items: [
-        { label: 'Name ascent', value: 'name|asc', icon: 'fa-solid fa-arrow-down-az' },
-        { label: 'Name descent', value: 'name|desc', icon: 'fa-solid fa-arrow-down-az' },
+        { label: 'Name ascent', value: 'name|asc', icon: ['fa', 'arrow-down-az'] },
+        { label: 'Name descent', value: 'name|desc', icon: ['fa', 'arrow-down-az'] },
     ]
 },
 {
     label: 'Description',
     code: 'description',
     items: [
-        { label: 'Description ascent', value: 'description|asc', icon: 'fa-solid fa-arrow-down-az' },
-        { label: 'Description descent', value: 'description|desc', icon: 'fa-solid fa-arrow-down-az' },
+        { label: 'Description ascent', value: 'description|asc', icon: ['fa', 'arrow-down-az'] },
+        { label: 'Description descent', value: 'description|desc', icon: ['fa', 'arrow-down-az'] },
     ]
 },
 ];
@@ -590,8 +590,10 @@ onMounted(() => {
                 <InputText v-model="store.mapping.filter_terms_by"
                     type="text" 
                     placeholder="Filter keyword ..."
-                    class="term-filter"/>
+                    style="width: 9rem;" />
+
                 <Divider layout="vertical" class="!mx-2" />
+
                 <Select v-model="store.mapping.sort_terms_by" 
                     @change="onChangeSortTerms"
                     :options="sort_terms_options" 
@@ -602,7 +604,7 @@ onMounted(() => {
                     placeholder="Sort by" 
                     showClear
                     scrollHeight="25rem"
-                    class="term-sort">
+                    style="width: 12rem;">
                     <template #optiongroup="slotProps">
                         <div class="flex items-center">
                             <div class="mr-2">
@@ -614,7 +616,7 @@ onMounted(() => {
                     <template #option="slotProps">
                         <div class="flex items-center">
                             <div class="mx-1">
-                                -
+                                <i class="fa-solid fa-minus"></i>
                             </div>
                             <div>{{ slotProps.option.label }}</div>
                         </div>
@@ -653,11 +655,11 @@ onMounted(() => {
                             <div class="flex items-center">
                                 <template v-if="store.hasSelectedResults(item)">
                                     <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>
-                                    {{ store.getSelectedResults(item).length }} selected
+                                    {{ store.getSelectedResults(item).length }} selected.
                                 </template>
                                 <template v-else>
                                     <i class="fa fa-exclamation-triangle mr-1"></i>
-                                    No concept selected
+                                    No CDE is selected.
                                 </template>
                             </div>
                         </div>
@@ -674,8 +676,22 @@ onMounted(() => {
                         </div>
                     </div>
                     <div class="term-detail">
-                        Description:
+                        <b>
+                            Description:
+                        </b>
                         {{ item.description }}
+                    </div>
+                    <div>
+                        <b>
+                            Values:
+                        </b>
+                        <span v-if="item.values?.length > 0">
+                            {{ item.values.length }} values.
+                        </span>
+                        <span v-else class="text-sm">
+                            <font-awesome-icon icon="fa-solid fa-info-circle" />
+                            No values available.
+                        </span>
                     </div>
 
                     <div class="term-additional mt-2">
@@ -683,7 +699,7 @@ onMounted(() => {
                             <AccordionPanel value="0">
                                 <AccordionHeader>
                                     <i class="fa fa-info-circle mr-1"></i>
-                                    Additional Information
+                                    Detailed Information
                                 </AccordionHeader>
                                 <AccordionContent>
                                     <template v-for="key in Object.keys(item)">
@@ -852,20 +868,13 @@ onMounted(() => {
 }
 
 .term-list {
-    width: 460px;
+    width: 500px;
     min-width: 460px;
     height: 100%;
 }
 
 .result-list {
-    width: calc(100% - 460px);
-}
-
-.term-filter {
-    width: 120px;
-}
-.term-sort {
-    width: 120px;
+    width: calc(100% - 500px);
 }
 .term-list-scroller {
     width: calc(100% + 1rem);
