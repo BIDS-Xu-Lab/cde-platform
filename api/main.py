@@ -4,7 +4,8 @@ import time
 import os
 import asyncio
 import uuid
-from elasticsearch import Elasticsearch
+# from elasticsearch import Elasticsearch
+from elasticsearch import AsyncElasticsearch
 import jwt
 from motor.motor_asyncio import AsyncIOMotorClient
 import json
@@ -13,6 +14,7 @@ import sys
 import logging
 from bson import json_util
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Response, Body, Path, Depends, status, Security, APIRouter
 from fastapi.security import APIKeyHeader, HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,8 +52,34 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> Plain
 
     return PlainTextResponse(str(exc), status_code=500)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    
+    # Create the Elasticsearch
+    global es
+    es = AsyncElasticsearch(os.environ['ES_PATH'])
+    logging.info('* connected to elasticsearch at %s' % os.environ['ES_PATH'])
+
+    # Create the MongoDB client
+    global db
+    mongo_client = AsyncIOMotorClient(os.environ['MONGODB_URI'])
+    db = mongo_client.get_database()
+    logging.info('* connected to mongodb at %s' % os.environ['MONGODB_URI'])
+
+    # serve the app
+    yield
+
+    # close app
+    await es.close()
+    await mongo_client.close()
+
+
 # Create the FastAPI app
-app = FastAPI(root_path=os.environ['ROOT_PATH'])
+app = FastAPI(
+    root_path=os.environ['ROOT_PATH'],
+    lifespan=lifespan,
+)
 
 # allow all origins
 origins = [
@@ -68,14 +96,6 @@ app.add_middleware(
 
 app.add_exception_handler(Exception, unhandled_exception_handler)
 
-# Create the Elasticsearch and MongoDB clients
-es = Elasticsearch(os.environ['ES_PATH'])
-logging.info('* connected to elasticsearch at %s' % os.environ['ES_PATH'])
-
-mongo_client = AsyncIOMotorClient(os.environ['MONGODB_URI'])
-db = mongo_client.get_database()
-logging.info('* connected to mongodb at %s' % os.environ['MONGODB_URI'])
-
 # all the collections
 MONGO_ALL_COLLECTION_NAMES = [
     'users',          # user information
@@ -86,6 +106,7 @@ MONGO_ALL_COLLECTION_NAMES = [
     'jobs',           # jobs for OpenAI
     'mappings',       # mappings between concepts and CDEs
 ]
+
 
 ###########################################################
 # User authentication related functions
@@ -446,7 +467,7 @@ async def admin_init_elasticsearch(
                     item['value'] = "|".join(map(lambda x: x['permissibleValue'], item['valueDomain']['permissibleValues']))
 
                 # insert the item
-                es.index(index=index_name, body=item)
+                await es.index(index=index_name, body=item)
             
             logging.info(f"* inserted {len(data)} data into {index_name}")
 
@@ -1240,7 +1261,7 @@ async def get_collections_by_source(
             }
         }
 
-        response = es.search(index=source, body=query_body)
+        response = await es.search(index=source, body=query_body)
         sources = [bucket['key'] for bucket in response['aggregations']['unique_sources']['buckets']]
         return {
             'success': True,
@@ -1308,7 +1329,7 @@ async def search(
 
     # Execute the bulk search
     try:
-        bulk_response = es.msearch(body=bulk_search_body)
+        bulk_response = await es.msearch(body=bulk_search_body)
         all_results = []
         for i, response in enumerate(bulk_response['responses']):
             hits = response['hits']['hits']
