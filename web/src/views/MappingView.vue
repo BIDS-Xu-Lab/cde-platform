@@ -281,11 +281,57 @@ function onClickValueLinking() {
     console.log('* clicked Value Linking');
 }
 
-const sort_term_options = [
-    { name: 'Name', code: 'name' },
-    { name: 'Type', code: 'type' },
-    { name: 'Status', code: 'status' }
+const sort_terms_options = [
+{
+    label: 'Name',
+    code: 'name',
+    items: [
+        { label: 'Name ascent', value: 'name|asc', icon: 'fa-solid fa-arrow-down-az' },
+        { label: 'Name descent', value: 'name|desc', icon: 'fa-solid fa-arrow-down-az' },
+    ]
+},
+{
+    label: 'Description',
+    code: 'description',
+    items: [
+        { label: 'Description ascent', value: 'description|asc', icon: 'fa-solid fa-arrow-down-az' },
+        { label: 'Description descent', value: 'description|desc', icon: 'fa-solid fa-arrow-down-az' },
+    ]
+},
 ];
+
+function onChangeSortTerms() {
+    console.log('* changed Sort Terms:', store.mapping.sort_terms_by);
+
+    if (store.mapping.sort_terms_by == null) {
+        return;
+    }
+
+    let [field, order] = store.mapping.sort_terms_by.split('|');
+}
+
+const sort_results_options = [
+{ name: 'Name', code:'name' },
+{ name: 'Score', code:'score' },
+// {
+//     label: 'Name',
+//     code: 'name',
+//     items: [
+//         { label: 'Name ascent', value: 'asc' },
+//         { label: 'Name descent', value: 'desc' },
+//     ]
+// },
+// {
+//     label: 'Description',
+//     code: 'description',
+//     items: [
+//         { label: 'Description ascent', value: 'asc' },
+//         { label: 'Description descent', value: 'desc' },
+//     ]
+// },
+];
+
+
 const sort_order_options = [
     { name: 'Descent', code: 'desc' },
     { name: 'Ascent', code: 'asc' }
@@ -547,10 +593,33 @@ onMounted(() => {
                     class="term-filter"/>
                 <Divider layout="vertical" class="!mx-2" />
                 <Select v-model="store.mapping.sort_terms_by" 
-                    :options="sort_term_options" 
-                    optionLabel="name" 
+                    @change="onChangeSortTerms"
+                    :options="sort_terms_options" 
+                    optionGroupLabel="label"
+                    optionGroupChildren="items"
+                    optionLabel="label" 
+                    optionValue="value"
                     placeholder="Sort by" 
-                    class="term-sort"/>
+                    showClear
+                    scrollHeight="25rem"
+                    class="term-sort">
+                    <template #optiongroup="slotProps">
+                        <div class="flex items-center">
+                            <div class="mr-2">
+                                <i class="fa-solid fa-circle"></i>
+                            </div>
+                            <div>{{ slotProps.option.label }}</div>
+                        </div>
+                    </template>
+                    <template #option="slotProps">
+                        <div class="flex items-center">
+                            <div class="mx-1">
+                                -
+                            </div>
+                            <div>{{ slotProps.option.label }}</div>
+                        </div>
+                    </template>
+                </Select>
 
             </div>
         </div>
@@ -692,8 +761,9 @@ onMounted(() => {
                     <Divider layout="vertical" class="!mx-2" />
 
                     <Select v-model="store.mapping.sort_results_by" 
-                        :options="sort_term_options" 
+                        :options="sort_results_options" 
                         optionLabel="name" 
+                        optionValue="name" 
                         placeholder="Sort by" 
                         class="term-sort mr-1"/>
 
