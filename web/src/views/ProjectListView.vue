@@ -449,8 +449,8 @@ onMounted(() => {
 
     <div>
         <template v-for="project in store.projects">
-            <div class="w-full project-item flex flex-row justify-between py-2 items-center">
-                <div class="flex flex-row grow cursor-pointer"
+            <div class="w-full project-item flex flex-row justify-between items-center">
+                <div class="flex flex-row grow cursor-pointer py-2"
                     @click="onClickProjectItem(project)">
                     <div class="project-name">
                         <i class="fa-solid fa-suitcase mr-2"></i>
@@ -783,7 +783,6 @@ onMounted(() => {
 }
 
 .project-item {
-    padding: 0.5rem 0;
     border-bottom: 1px solid var(--bd-color);
 }
 .project-item:hover {

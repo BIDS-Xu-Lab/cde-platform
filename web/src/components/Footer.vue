@@ -17,7 +17,8 @@ onMounted(() => {
     {{ store.version }}
 </div>
 
-<div class="footer-right">
+<div class="footer-right flex flex-row items-center">
+
     <div>
         <i class="fa-brands fa-github"></i>
     </div>

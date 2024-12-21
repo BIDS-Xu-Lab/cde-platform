@@ -133,6 +133,7 @@ async function onClickDeselectValueMapping(item, value) {
             <Divider layout="vertical" class="!mx-2" />
             <div class="text-base">
                 <a :href="'https://cde.nlm.nih.gov/deView?tinyId=' + item.term_id"
+                    title="Open this CDE in NIH CDE Browser in a new tab."
                     target="_blank">
                     <i class="fa fa-globe"></i>
                     {{ item.term_id }}
