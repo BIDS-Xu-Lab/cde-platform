@@ -138,6 +138,10 @@ getters: {
             return flag_has_keyword;
         });
     },
+
+    n_mapped_concepts_in_working_file(state) {
+        return state.working_file_concepts.filter(c => state.hasSelectedResults(c)).length;
+    },
 },
 
 actions: {

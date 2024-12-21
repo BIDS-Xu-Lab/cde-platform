@@ -532,7 +532,7 @@ onMounted(() => {
                         Concept List
                     </div>
                     <div class="panel-subtitle text-sm">
-                        <b>{{ store.working_file_concepts.length }}</b>
+                        <b>{{ store.n_mapped_concepts_in_working_file }}</b>
                         /
                         {{ store.working_file_concepts.length }}  
                         mapped
@@ -641,20 +641,8 @@ onMounted(() => {
                                     </template>
                                 </AccordionContent>
                             </AccordionPanel>
-                            </Accordion>    
-            
-                        <!-- <div class="w-full text-right pr-2">
-                            <Button severity="secondary"
-                                v-tooltip.right="'Show additional information for this concept.'"
-                                class="btn-mini"
-                                @click="onClickShowAdditionalInfo">
-                                <i class="fa fa-info-circle"></i>
-                                Additional Info
-                            </Button>
-                        </div> -->
-                        <div class="term-additional-info">
+                        </Accordion>    
 
-                        </div>
                     </div>
                 </div>
             </template>

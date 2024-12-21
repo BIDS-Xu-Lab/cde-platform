@@ -453,19 +453,20 @@ onMounted(() => {
                 <div class="flex flex-row grow cursor-pointer py-2"
                     @click="onClickProjectItem(project)">
                     <div class="project-name">
-                        <i class="fa-solid fa-suitcase mr-2"></i>
                         <span v-if="project.project_id == store.current_project?.project_id"
                             class="font-bold">
+                            <i class="fa fa-folder-open mr-2"></i>
                             {{ project.name }}
                         </span>
                         <span v-else>
+                            <i class="fa fa-folder mr-2"></i>
                             {{ project.name }}
                         </span>
                     </div>
                 </div>
                 <div>
                     <Button v-if="project.project_id != 'default_project_id'"
-                        severity="secondary"
+                        severity="danger"
                         :disabled="store.current_project?.project_id == project.project_id"
                         size="small"
                         v-tooltip.bottom="'Delete this project.'"
