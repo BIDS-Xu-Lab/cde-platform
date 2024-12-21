@@ -101,19 +101,19 @@ async function onClickDeleteFile(file) {
     <div class="w-full file-item flex flex-col py-2">
         <div class="file-name flex flex-row justify-between">
             <div class="text-lg font-bold">
-                <i class="fa fa-file"></i>
+                <font-awesome-icon :icon="['fa', 'file']" />
                 {{ file.filename }}
             </div>
             <div class="file-reviewers">
                 Assigned Reviewers: 
-                <i class="fa fa-user"></i>
+                <font-awesome-icon :icon="['fa', 'user']" />
 
                 <Button severity="info"
                     size="small"
                     class="ml-2 btn-mini"
                     @click="togglePopoverAssignUsers"
                     v-tooltip.bottom="'Assign reviewers for this file.'">
-                    <i class="fa-solid fa-user-plus"></i>
+                    <font-awesome-icon :icon="['fa', 'user-plus']" />
                     Assign members
                 </Button>
 
@@ -169,7 +169,7 @@ async function onClickDeleteFile(file) {
                 class="mr-2"
                 v-tooltip.bottom="'Mapping concepts for this file.'"
                 @click="onClickMapping(file)">
-                <i class="fa-solid fa-magnifying-glass"></i>
+                <font-awesome-icon :icon="['fa', 'magnifying-glass']" />
                 Mapping
             </Button>
 
@@ -179,19 +179,9 @@ async function onClickDeleteFile(file) {
                 class="mr-2"
                 v-tooltip.bottom="'Download this file.'"
                 @click="onClickDownload(file)">
-                <i class="fa-solid fa-download"></i>
+                <font-awesome-icon :icon="['fa', 'download']" />
                 Download
             </Button>
-
-            <!-- <Button 
-                severity="help"
-                size="small"
-                class="mr-2"
-                v-tooltip.bottom="'Move this file.'"
-                @click="visible_dialog_move_file = true; selected_file_for_move = file">
-                <i class="fa-solid fa-angles-right"></i>
-                move
-            </Button> -->
 
             <Button 
                 severity="danger"
@@ -199,7 +189,7 @@ async function onClickDeleteFile(file) {
                 :disabled="store.working_file?.file_id == file.file_id"
                 v-tooltip.bottom="'Delete this file.'"
                 @click="onClickDeleteFile(file)">
-                <i class="fa-solid fa-trash"></i>
+                <font-awesome-icon :icon="['fa', 'trash']" />
                 Delete
             </Button>
         </div>

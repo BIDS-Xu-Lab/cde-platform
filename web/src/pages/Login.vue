@@ -70,7 +70,6 @@ async function onClickLogin() {
                   Redirecting to dashboard ... <br>
                   If not, you can click 
                   <Button @click="store.gotoMain('dashboard')" variant="link">
-                    <i class="fa fa-dashboard"></i>
                     Dashboard
                   </Button>
                 </p>

@@ -389,7 +389,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Refresh list.'"
                 @click="onClickRefreshList">
-                <i class="fa-solid fa-rotate menu-icon"></i>
+                <font-awesome-icon icon="fa-solid fa-rotate" class="menu-icon" />
                 <span>
                     Refresh
                 </span>
@@ -397,7 +397,7 @@ onMounted(() => {
 
             <div class="flex flex-col mr-2">
                 <label class="text-sm">
-                    <i class="fa fa-database"></i>
+                    <font-awesome-icon icon="fa-solid fa-database"></font-awesome-icon>
                     Sources
                 </label>
                 <Select v-model="store.mapping.selected_source" 
@@ -418,7 +418,7 @@ onMounted(() => {
 
             <div class="flex flex-col">
                 <label class="text-sm" for="">
-                    <i class="fa-solid fa-book-bookmark"></i>
+                    <font-awesome-icon icon="fa-solid fa-book-bookmark"></font-awesome-icon>
                     Collections
                 </label>
                 <MultiSelect v-model="store.mapping.selected_collections" 
@@ -440,7 +440,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Search CDEs for the current selected concept.'"
                 @click="onClickSearch">
-                <i class="fa-solid fa-magnifying-glass menu-icon"></i>
+                <font-awesome-icon icon="fa-solid fa-magnifying-glass" class="menu-icon" />
                 <span>
                     Search
                 </span>
@@ -449,7 +449,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Search CDEs for all terms.'"
                 @click="onClickSearchAll">
-                <i class="fa-brands fa-searchengin menu-icon"></i>
+                <font-awesome-icon icon="fa-brands fa-searchengin" class="menu-icon" />
                 <span>
                     Search All
                 </span>
@@ -494,7 +494,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
                 @click="onClickSaveWork">
-                <i class="fa-regular fa-floppy-disk menu-icon"></i>
+                <font-awesome-icon icon="fa-regular fa-floppy-disk" class="menu-icon" />
                 <span>
                     Save
                 </span>
@@ -505,7 +505,7 @@ onMounted(() => {
                 :model="downloadOptions"
                 @click="onClickDownload">
                 <div class="flex flex-col">
-                    <i class="fa-solid fa-download menu-icon"></i>
+                    <font-awesome-icon icon="fa-solid fa-download" class="menu-icon" />
                     <span>
                         Download
                     </span>
@@ -524,7 +524,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Re-rank the current search results using AI technology.'"
                 @click="onClickRerank">
-                <i class="fa-solid fa-arrow-up-wide-short menu-icon"></i>
+                <font-awesome-icon icon="fa-solid fa-arrow-up-wide-short" class="menu-icon" />
                 <span>
                     Re-rank
                 </span>
@@ -534,7 +534,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Automatically link the values to the current CDE\'s values.'"
                 @click="onClickValueLinking">
-                <i class="fa-solid fa-link menu-icon"></i>
+                <font-awesome-icon icon="fa-solid fa-link" class="menu-icon" />
                 <span>
                     Value Linking
                 </span>
@@ -551,7 +551,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Show the user manual in a new window.'"
                 @click="store.showGuide()">
-                <i class="fa-solid fa-book menu-icon"></i>
+                <font-awesome-icon icon="fa-solid fa-book" class="menu-icon" />
                 <span>
                     How-to Guide
                 </span>
@@ -574,7 +574,7 @@ onMounted(() => {
             <div class="flex">
                 <div class="flex-col">
                     <div class="text-lg font-bold">
-                        <i class="fa fa-list "></i>
+                        <font-awesome-icon icon="fa-solid fa-list" />
                         Concept List
                     </div>
                     <div class="panel-subtitle text-sm">
@@ -606,7 +606,7 @@ onMounted(() => {
                     <template #optiongroup="slotProps">
                         <div class="flex items-center">
                             <div class="mr-2">
-                                <i class="fa-solid fa-circle"></i>
+                                <font-awesome-icon icon="fa-solid fa-circle" />
                             </div>
                             <div>{{ slotProps.option.label }}</div>
                         </div>

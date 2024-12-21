@@ -21,70 +21,66 @@ onMounted(() => {
         <div class="navi-item home"
             @click="onClickGoHome"
             :class="{'active-page': store.current_view=='homepage'}">
-            <i class="fa fa-home"></i>
+            <font-awesome-icon :icon="['fa', 'home']" />
             Home
         </div>
         <div class="navi-item"
             @click="store.changeView('dashboard')"
             :class="{'active-page': store.current_view=='dashboard'}">
-            <i class="fa fa-dashboard"></i>
+            <font-awesome-icon :icon="['fa', 'dashboard']" />
             Dashboard
         </div>
         <div class="navi-item"
             @click="store.changeView('project_list')"
             :class="{'active-page': store.current_view=='project_list'}">
-            <i class="fa-solid fa-briefcase"></i>
+            <font-awesome-icon :icon="['fas', 'briefcase']" />
             Projects
         </div>
-        <!-- <div class="navi-item"
-            @click="store.changeView('team')"
-            :class="{'active-page': store.current_view=='team'}">
-            <i class="fa-solid fa-users"></i>
-            Team
-        </div> -->
+
+        <!-- functions after login -->
         <div v-show="store.working_file != null"
             class="navi-item"
             @click="store.changeView('mapping')"
             :class="{'active-page': store.current_view=='mapping'}">
-            <i class="fa-solid fa-arrows-left-right-to-line"></i>
+            <font-awesome-icon :icon="['fa-solid', 'arrows-left-right-to-line']" />
             Mapping
         </div>
         <div v-show="store.working_file != null" 
             class="navi-item"
             @click="store.changeView('review')"
             :class="{'active-page': store.current_view=='review'}">
-            <i class="fa-solid fa-code-compare"></i>
+            <font-awesome-icon :icon="['fa-solid', 'code-compare']" />
             Review
         </div>
         <!-- <div class="navi-item"
             @click="store.changeView('create')"
             :class="{'active-page': store.current_view=='create'}">
-            <i class="fa-regular fa-pen-to-square"></i>
+            <font-awesome-icon :icon="['fa-regular', 'pen-to-square']" />
             Create CDE
         </div> -->
         <!-- <div class="navi-item"
             @click="store.changeView('vis')"
             :class="{'active-page': store.current_view=='vis'}">
-            <i class="fa-brands fa-uncharted"></i>
+            <font-awesome-icon :icon="['fab', 'uncharted']" />
             Visualization
         </div>
         <div class="navi-item"
             @click="store.changeView('profile')"
             :class="{'active-page': store.current_view=='profile'}">
-            <i class="fa-regular fa-user"></i>
+            <font-awesome-icon :icon="['fa-regular', 'user']" />
             My Profile
         </div>
         <div class="navi-item"
             @click="store.changeView('setting')"
             :class="{'active-page': store.current_view=='setting'}">
-            <i class="fa-solid fa-gears"></i>
+            <font-awesome-icon :icon="['fa-solid', 'gears']" />
             Settings
         </div> -->
         <div v-show="store.user?.role == 'admin'" 
             class="navi-item"
             @click="store.changeView('admin')"
             :class="{'active-page': store.current_view=='admin'}">
-            <i class="fa-brands fa-battle-net"></i>
+            <font-awesome-icon :icon="['fab', 'battle-net']" />
             Admin
         </div>
     </div>
@@ -93,12 +89,12 @@ onMounted(() => {
 
         <div>
             <template v-if="store.working_project != null">
-                <i class="fa-solid fa-briefcase mr-1"></i>
+                <font-awesome-icon :icon="['fas', 'briefcase']" class="mr-1" />
                 <span class="italic">
                     {{ store.working_project?.name }}
                 </span>
                 - 
-                <i class="fa fa-file mr-1"></i>
+                <font-awesome-icon :icon="['fa', 'file']" class="mr-1" />
                 <span class="italic">
                     {{ store.working_file?.filename }}
                 </span>
@@ -108,13 +104,13 @@ onMounted(() => {
         <Divider layout="vertical"/>
 
         <div v-if="store.user == null">
-            <i class="fa-solid fa-user mr-1"></i>
+            <font-awesome-icon :icon="['far', 'user']" class="mr-1" />
             <span @click="store.gotoLogin()">
                 Login
             </span>
         </div>
         <div v-else>
-            <i class="fa-solid fa-user mr-1"></i>
+            <font-awesome-icon :icon="['fas', 'user']" class="mr-1" />
             <span>
                 {{ store.user.name }}
             </span>

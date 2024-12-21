@@ -56,7 +56,7 @@ onMounted(() => {
         <div class="menu-group-box">
             <div class="flex flex-col ml-2">
                 <label for="" class="text-sm">
-                    <i class="fa fa-server"></i>
+                    <font-awesome-icon :icon="['fa', 'server']" />
                     Endpoint
                 </label>
                 <InputText placeholder="Endpoint"
@@ -65,7 +65,7 @@ onMounted(() => {
             </div> 
             <div class="flex flex-col ml-2">
                 <label for="" class="text-sm">
-                    <i class="fa fa-key"></i>
+                    <font-awesome-icon :icon="['fa', 'key']" />
                     Secret Key
                 </label>
                 <InputText placeholder="Secret Key"
@@ -76,7 +76,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Connect to the admin APIs.'"
                 @click="onClickConnect">
-                <i class="fa-solid fa-satellite-dish menu-icon"></i>
+                <font-awesome-icon :icon="['fas', 'satellite-dish']" class="menu-icon" />
                 <span>
                     Connect
                 </span>
@@ -93,7 +93,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Manage users.'"
                 @click="switchTab('user')">
-                <i class="fa-solid fa-users menu-icon"></i>
+                <font-awesome-icon :icon="['fas', 'users']" class="menu-icon" />
                 <span>
                     Users
                 </span>
@@ -102,7 +102,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Manage projects'"
                 @click="switchTab('project')">
-                <i class="fa-solid fa-suitcase menu-icon"></i>
+                <font-awesome-icon :icon="['fas', 'suitcase']" class="menu-icon" />
                 <span>
                     Projects
                 </span>
@@ -120,7 +120,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Manage CDE indexes.'"
                 @click="switchTab('mongo')">
-                <i class="fa-solid fa-database menu-icon"></i>
+                <font-awesome-icon :icon="['fas', 'database']" class="menu-icon" />
                 <span>
                     MongoDB
                 </span>
@@ -129,7 +129,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Manage CDE indexes.'"
                 @click="switchTab('cde_index')">
-                <i class="fa-solid fa-server menu-icon"></i>
+                <font-awesome-icon :icon="['fas', 'server']" class="menu-icon" />
                 <span>
                     CDE Indexes
                 </span>
@@ -146,7 +146,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Show the user manual in a new window.'"
                 @click="store.showGuide()">
-                <i class="fa-solid fa-book menu-icon"></i>
+                <font-awesome-icon :icon="['fas', 'book']" class="menu-icon" />
                 <span>
                     How-to Guide
                 </span>

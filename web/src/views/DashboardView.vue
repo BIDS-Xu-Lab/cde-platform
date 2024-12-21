@@ -32,7 +32,7 @@ onMounted(() => {
             <Button text
                 class="menu-button"
                 @click="onClickRefreshList">
-                <i class="fa-solid fa-rotate menu-icon"></i>
+                <font-awesome-icon icon="fa-solid fa-rotate" class="menu-icon" />
                 <span>
                     Refresh
                 </span>
@@ -49,7 +49,7 @@ onMounted(() => {
                 class="menu-button"
                 v-tooltip.bottom="'Show the user manual in a new window.'"
                 @click="store.showGuide()">
-                <i class="fa-solid fa-book menu-icon"></i>
+                <font-awesome-icon icon="fa-solid fa-book" class="menu-icon" />
                 <span>
                     How-to Guide
                 </span>
@@ -73,7 +73,7 @@ onMounted(() => {
             <div class="flex">
                 <div class="flex-col">
                     <div class="text-lg font-bold">
-                        <i class="fa-solid fa-briefcase"></i>
+                        <font-awesome-icon icon="fa-solid fa-briefcase" />
                         My Statistics
                     </div>
                     <div class="panel-subtitle text-sm">

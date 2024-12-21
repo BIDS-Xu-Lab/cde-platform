@@ -11,16 +11,18 @@ onMounted(() => {
 <template>
 <div class="footer">
 <div class="footer-left">
-    <i class="fa fa-edit"></i>
+    <font-awesome-icon :icon="['fa', 'edit']" />
     CDE Reviewer
 
     {{ store.version }}
 </div>
 
 <div class="footer-right flex flex-row items-center">
-
     <div>
-        <i class="fa-brands fa-github"></i>
+    </div>
+    <div>
+        <font-awesome-icon :icon="['fab', 'github']" />
+        GitHub
     </div>
 </div>
 </div>

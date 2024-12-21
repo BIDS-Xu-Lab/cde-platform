@@ -135,7 +135,7 @@ async function onClickDeselectValueMapping(item, value) {
                 <a :href="'https://cde.nlm.nih.gov/deView?tinyId=' + item.term_id"
                     title="Open this CDE in NIH CDE Browser in a new tab."
                     target="_blank">
-                    <i class="fa fa-globe"></i>
+                    <font-awesome-icon :icon="['fa', 'globe']" />
                     {{ item.term_id }}
                 </a>
             </div>
@@ -160,7 +160,7 @@ async function onClickDeselectValueMapping(item, value) {
             {{ item.values }}
         </span>
         <span v-else class="text-sm">
-            <i class="fa fa-info-circle"></i> 
+            <font-awesome-icon :icon="['fa', 'info-circle']" />
             No values available.
         </span>
     </div>
@@ -189,8 +189,8 @@ async function onClickDeselectValueMapping(item, value) {
             </Button> -->
 
             <div v-if="flag_enabled_value_mapping && itemValueCheck(item)"
-                 class="font-bold mb-4 ml-2">
-                <i class="fa fa-list"></i>
+                class="font-bold mb-4 ml-2">
+                <font-awesome-icon :icon="['fa', 'list']" />
                 Value Mapping
             </div>
         </div>
@@ -217,10 +217,10 @@ async function onClickDeselectValueMapping(item, value) {
             </div>
             <div class="mx-4">
                 <template v-if="item.value_mapping[value]">
-                    <i class="fa fa-arrow-right"></i>
+                    <font-awesome-icon :icon="['fa', 'arrow-right']" />
                 </template>
                 <template v-else>
-                    <i class="fa fa-times"></i>
+                    <font-awesome-icon :icon="['fa', 'times']" />
                 </template>
             </div>
 
