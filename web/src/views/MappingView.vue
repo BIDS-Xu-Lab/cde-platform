@@ -609,7 +609,7 @@ onMounted(() => {
                         {{ item.description }}
                     </div>
 
-                    <div class="term-additional">
+                    <div class="term-additional mt-2">
                         <Accordion value="1" class="w-full px-2" :unstyled="true">
                             <AccordionPanel value="0">
                                 <AccordionHeader>
@@ -687,9 +687,9 @@ onMounted(() => {
                                 <b>{{ store.working_mappings[store.working_concept?.concept_id]?.selected_results.length }}</b>
                                 selected
                             </template>
-                            <!-- <template v-else>
-                                No results found
-                            </template> -->
+                            <template v-else>
+                                &nbsp;
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -700,13 +700,15 @@ onMounted(() => {
                         type="text" 
                         placeholder="Filter keyword ..."
                         class="term-filter"/>
+                    
                     <Divider layout="vertical" class="!mx-2" />
+
                     <Select v-model="store.mapping.sort_results_by" 
                         :options="sort_term_options" 
                         optionLabel="name" 
                         placeholder="Sort by" 
-                        class="term-sort"/>
-                    <Divider layout="vertical" class="!mx-2" />
+                        class="term-sort mr-1"/>
+
                     <Select v-model="store.mapping.sort_results_order_by" 
                         :options="sort_order_options" 
                         optionLabel="name" 
@@ -742,6 +744,8 @@ onMounted(() => {
             </template>
 
             <!-- result list -->
+            <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
+
             <div class="text-lg font-bold mt-4">
                 <i class="fa-solid fa-list-ul"></i>
                 Search Results
@@ -752,6 +756,14 @@ onMounted(() => {
                     :flag_selected="false"
                     :flag_enabled_value_mapping="false"
                     :item_idx="item_idx" />
+            </template>
+
+            </template>
+            <template v-else>
+                <div class="">
+                    <i class="fa-solid fa-info-circle"></i>
+                    No search results
+                </div>
             </template>
                 
         </div>
