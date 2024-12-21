@@ -1230,7 +1230,7 @@ async def get_sources(
     '''
     logging.info("get sources and collections")
 
-    indices = es.indices.get_alias(index="*")
+    indices = await es.indices.get_alias(index="*")
     index_names = [val for val in list(indices.keys()) if val[0] != '.']
     return {
         'success': True,
