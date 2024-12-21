@@ -449,8 +449,9 @@ onMounted(() => {
 
     <div>
         <template v-for="project in store.projects">
-            <div class="w-full project-item flex flex-row justify-between items-center">
-                <div class="flex flex-row grow cursor-pointer py-2"
+            <div class="w-full project-item flex flex-row justify-between items-start">
+                <div class="flex flex-row cursor-pointer py-2"
+                    style="width: calc(100% - 8rem)"
                     @click="onClickProjectItem(project)">
                     <div class="project-name">
                         <span v-if="project.project_id == store.current_project?.project_id"
@@ -464,15 +465,17 @@ onMounted(() => {
                         </span>
                     </div>
                 </div>
-                <div>
-                    <Button v-if="project.project_id != 'default_project_id'"
-                        severity="danger"
-                        :disabled="store.current_project?.project_id == project.project_id"
-                        size="small"
-                        v-tooltip.bottom="'Delete this project.'"
-                        @click="onClickDeleteProject(project)">
-                        <i class="fa-solid fa-trash"></i>
-                    </Button>
+
+                <div class="py-2"
+                    style="width: 8rem; text-align: right;">
+                    <div >
+                        <font-awesome-icon icon="far fa-file" />
+                        {{ project.n_files }}
+                        |
+
+                        <font-awesome-icon icon="far fa-user" />
+                        {{ project.members.length }} 
+                    </div>
                 </div>
             </div>
         </template>
@@ -500,12 +503,11 @@ onMounted(() => {
 
             <div class="ml-2">
                 <Button v-if="store.current_project"
-                    severity="secondary"
-                    size="small"
+                    severity="success"
                     v-tooltip.bottom="'Upload a new file to this project.'"
                     @click="onClickNewFileForProject(store.current_project)">
                     <i class="fa-solid fa-upload"></i>
-                    Add file to [{{ store.current_project.name }}]
+                    Add file
                 </Button>
             </div>
         </div>
@@ -591,6 +593,95 @@ onMounted(() => {
 
         <!-- tab for managing settings -->
         <TabPanel value="settings">
+        <div class="flex flex-col h-full">
+            <div>
+                <Button v-tooltip.bottom="'Save the project information.'"
+                    severity="success"
+                    @click="onClickSaveProject">
+                    <i class="fa-solid fa-save"></i>
+                    Save settings
+                </Button>
+            </div>
+
+            <div>
+                <div class="text-xl font-bold mt-4 border-b-2">
+                    <font-awesome-icon icon="fa-solid fa-cog" />
+                    Basic Information
+                </div>
+                <div class="flex flex-col gap-4 mt-4">
+                    <div class="max-w-lg">
+                        <label for="name" class="font-semibold w-24">
+                            Project Name
+                        </label>
+                        <InputText v-model="store.current_project.name"
+                            placeholder="Enter a project name"
+                            class="w-full" />
+                    </div>
+                    
+                    <div class="max-w-lg">
+                        <label for="name" class="font-semibold w-24">
+                            Project Description (optional)
+                        </label>
+                        <InputText v-model="store.current_project.description"
+                            placeholder="Enter a project description"
+                            class="w-full" />
+                    </div>
+                </div>
+
+                <!-- danger zone -->
+                <div class="text-xl font-bold mt-4 border-b-2">
+                    <font-awesome-icon icon="fa-solid fa-exclamation-triangle" />
+                    Danger Zone
+                </div>
+
+                <div class="border-1">
+
+                    <div class="flex flex-row justify-between mb-4 p-4">
+                        <div class="flex flex-col">
+                            <div class="font-bold">
+                                Transfer ownership
+                            </div>
+                            <div>
+                                Transfer this project to another user who have the ability to create projects.
+                            </div>
+                        </div>
+                        <div class="flex flex-row justify-end">
+                            <Button severity="danger"
+                                severirty="danger"
+                                class="ml-4"
+                                v-tooltip.bottom="'Transfer this project.'"
+                                @click="store.msg('Transfer this project.')">
+                                <i class="fa-solid fa-trash"></i>
+                                Transfer
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-row justify-between mb-4 p-4">
+                        <div class="flex flex-col">
+                            <div class="font-bold">
+                                Delete this project
+                            </div>
+                            <div>
+                                Once you delete a project, there is no going back. Please be certain.
+                            </div>
+                        </div>
+                        <div class="flex flex-row justify-end">
+                            <Button severity="danger"
+                                severirty="danger"
+                                class="ml-4"
+                                v-tooltip.bottom="'Delete this project.'"
+                                @click="onClickDeleteProject(store.current_project)">
+                                <i class="fa-solid fa-trash"></i>
+                                Delete this project
+                            </Button>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
         </TabPanel>
 
     </TabPanels>
@@ -780,7 +871,7 @@ onMounted(() => {
     margin: 0 0.5rem 0 0;
 }
 .project-detail {
-    width: calc(100% - 400px);
+    width: calc(100% - 500px);
 }
 
 .project-item {

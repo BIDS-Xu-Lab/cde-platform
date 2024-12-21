@@ -724,6 +724,11 @@ async def get_project(
         })
         member['email'] = user['email']
         member['name'] = user['name']
+
+    # add a statistics to the project
+    project['n_files'] = await db.files.count_documents({
+        "project_id": project['project_id']
+    })
     
     return {
         'success': True,
@@ -745,6 +750,7 @@ async def get_projects(
     projects = await db.projects.find({
         "user_id": current_user['user_id']
     }).to_list(length=None)
+
     # for each project, add members' email and name
     for project in projects:
         for member in project['members']:
@@ -755,6 +761,12 @@ async def get_projects(
             member['name'] = user['name']
     end_time = time.time()
     logging.info(f"taken to retrieve projects: {end_time - start_time} seconds")
+
+    # add statistics to the projects
+    for project in projects:
+        project['n_files'] = await db.files.count_documents({
+            "project_id": project['project_id']
+        })
 
     return {
         'success': True,
