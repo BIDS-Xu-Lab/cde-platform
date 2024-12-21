@@ -430,6 +430,10 @@ async def admin_init_elasticsearch(
 
             # insert data into the index
             for item in data:
+                # add concept_id
+                item['concept_id'] = item['tinyId']
+                item['code'] = item['tinyId']
+
                 # add a column called source
                 item['source'] = item['stewardOrg']['name']
 

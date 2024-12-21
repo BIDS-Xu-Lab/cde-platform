@@ -87,4 +87,24 @@ export const AWS = {
         
         return rsp.data;
     },
+
+    initElasticsearch: async function () {
+        console.log('* init elasticsearch');
+
+        const rsp = await this.axios_instance.post(
+            '/init_elasticsearch'
+        );
+        
+        return rsp.data;
+    },
+
+    clearElasticsearch: async function () {
+        console.log('* clear elasticsearch');
+
+        const rsp = await this.axios_instance.post(
+            '/clear_elasticsearch',
+        );
+        
+        return rsp.data;
+    },
 }
