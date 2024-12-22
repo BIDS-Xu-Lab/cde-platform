@@ -72,8 +72,7 @@ state: () => ({
         selected_collections: [],
 
         // for the terms filtering and sorting
-        sort_terms_by: null,
-        sort_terms_order_by: null,
+        sort_terms_by: null, // it's a string, e.g., name|asc
         filter_terms_by: '',
 
         // for the results filtering and sorting
@@ -127,16 +126,34 @@ getters: {
             return [];
         }
 
+        let filtered_sorted_concepts = []
         // if the filter_term is empty string after trim, just return all the concepts
         if (state.mapping.filter_terms_by.trim() == '') {
-            return state.working_file_concepts;
+            filtered_sorted_concepts = state.working_file_concepts;
         }
 
-        return state.working_file_concepts.filter(c => {
+        // filter
+        filtered_sorted_concepts = state.working_file_concepts.filter(c => {
             let flag_has_keyword = c.term.toLowerCase().includes(state.mapping.filter_terms_by.toLowerCase());
 
             return flag_has_keyword;
         });
+
+        // order by the given column
+        if (state.mapping.sort_terms_by) {
+            let [sort_by, order_by] = state.mapping.sort_terms_by.split('|');
+            let sort_func = (a, b) => {
+                if (order_by == 'asc') {
+                    return a[sort_by] > b[sort_by] ? 1 : -1;
+                } else {
+                    return a[sort_by] < b[sort_by] ? 1 : -1;
+                }
+            };
+
+            filtered_sorted_concepts.sort(sort_func);
+        }
+
+        return filtered_sorted_concepts;
     },
 
     n_mapped_concepts_in_working_file(state) {

@@ -338,6 +338,20 @@ async function onClickAddMember(project) {
 }
 
 
+async function onClickSaveProject() {
+    console.log('* clicked Save Project', store.current_project);
+
+    // send this project to backend
+    // let project = await Jimin.updateProject(store.current_project);
+    // console.log('* updated project:', project);
+
+    // store.msg('Updated the project: ' + project.name);
+
+    // // update project list
+    // onClickUpdateProjectList();
+}
+
+
 onMounted(() => {
     console.log('* mounted ProjectListView');
     onClickUpdateProjectList();
@@ -449,7 +463,8 @@ onMounted(() => {
 
     <div>
         <template v-for="project in store.projects">
-            <div class="w-full project-item flex flex-row justify-between items-start">
+            <div class="w-full project-item flex flex-row justify-between items-start"
+                :class="{ 'current-project': store.current_project?.project_id == project.project_id }">
                 <div class="flex flex-row cursor-pointer py-2"
                     style="width: calc(100% - 8rem)"
                     @click="onClickProjectItem(project)">
@@ -879,6 +894,9 @@ onMounted(() => {
 }
 .project-item:hover {
     background-color: var(--bg-color-menu-hover);
+}
+.current-project {
+    background-color: var(--bg-color-selected);
 }
 
 .file-item {

@@ -286,8 +286,8 @@ const sort_terms_options = [
     label: 'Name',
     code: 'name',
     items: [
-        { label: 'Name ascent', value: 'name|asc', icon: ['fa', 'arrow-down-az'] },
-        { label: 'Name descent', value: 'name|desc', icon: ['fa', 'arrow-down-az'] },
+        { label: 'Term ascent', value: 'term|asc', icon: ['fa', 'arrow-down-az'] },
+        { label: 'Term descent', value: 'term|desc', icon: ['fa', 'arrow-down-az'] },
     ]
 },
 {
@@ -306,8 +306,6 @@ function onChangeSortTerms() {
     if (store.mapping.sort_terms_by == null) {
         return;
     }
-
-    let [field, order] = store.mapping.sort_terms_by.split('|');
 }
 
 const sort_results_options = [
@@ -501,13 +499,13 @@ onMounted(() => {
             </Button>
 
             <SplitButton text
-                v-tooltip.bottom="'Download the current mapping JSONL format to local disk.'"
+                v-tooltip.bottom="'Export the current mapping results as a JSONL format file to local disk.'"
                 :model="downloadOptions"
                 @click="onClickDownload">
                 <div class="flex flex-col">
                     <font-awesome-icon icon="fa-solid fa-download" class="menu-icon" />
                     <span>
-                        Download
+                        Export
                     </span>
                 </div>
             </SplitButton>
@@ -646,7 +644,7 @@ onMounted(() => {
                                 <Tag :value="item.id" severity="contrast" />
                             </template>
                         </div>
-                        <div>
+                        <div :class="{ 'font-bold': store.isWorkingConcept(item) }">
                             {{ item.term }}
                         </div>
                     </div>
