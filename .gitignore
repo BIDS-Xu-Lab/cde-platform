@@ -311,3 +311,6 @@ es-data/
 
 # logs
 app.log.*
+
+# cde data 
+cde-data/
