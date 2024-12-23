@@ -72,6 +72,12 @@ cd web
 npm install
 ```
 
+Then update the config, if needed.
+
+```bash
+cp dotenv.tpl .env
+```
+
 Then, you can run the frontend service.
 
 ```bash

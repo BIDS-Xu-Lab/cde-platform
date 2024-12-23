@@ -551,7 +551,7 @@ onMounted(() => {
         </Tab>
     </TabList>
     <TabPanels 
-        :style="{ height: 'calc(100vh - 21rem)', width: 'calc(100% + 1rem)', overflowY: 'auto' }">
+        :style="{ height: 'calc(100vh - 21.5rem)', width: 'calc(100% + 1rem)', overflowY: 'auto' }">
 
         <!-- tab for mananging files -->
         <TabPanel value="files">
