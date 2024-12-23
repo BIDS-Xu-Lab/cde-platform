@@ -17,7 +17,7 @@ import { Jimin } from './Jimin';
 
 // initialize Jimin
 Jimin.init({
-    endpoint: 'http://localhost:8001'
+    endpoint: import.meta.env.VITE_BACKEND_ENDPOINT
 });
 window.Jimin = Jimin;
 
