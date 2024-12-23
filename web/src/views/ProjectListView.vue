@@ -732,10 +732,10 @@ onMounted(() => {
             Select File
         </label>
         <FileUpload ref="fileupload" 
-            mode="basic" name="demo[]" 
+            mode="basic"
             url="/api/upload" 
             @change="onChangeUploadFile"
-            accept="text/csv" />
+            accept=".csv, .tsv" />
 
         <!-- select columns -->
         <div class="flex flex-row mb-2 ">
