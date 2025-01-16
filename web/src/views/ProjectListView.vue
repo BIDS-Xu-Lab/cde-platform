@@ -179,7 +179,7 @@ async function onChangeUploadFile() {
 
             // get all basic information
             upload_file_data["filename"] = file.name;
-            upload_file_data['project_id'] = selected_project_id_for_file.value? selected_project_id_for_file.value : 'default_project_id';
+            upload_file_data['project_id'] = selected_project_id_for_file.value? selected_project_id_for_file.value : '';
             upload_file_data["columns"] = result.meta.fields;
             upload_file_data["file_id"] = uuidv4();
             upload_file_data['user_id'] = store.user.user_id;

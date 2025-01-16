@@ -13,8 +13,11 @@ const togglePopoverAssignUsers = (event) => {
     popover_assign_users.value.toggle(event);
 }
 
-async function onClickAssignUsers(file) {
-    console.log('* clicked Assign Reviewers', file);
+async function onClickAssignMember(member, file) {
+    console.log('* clicked Assign Reviewers', member, file);
+    // assign this member to this file
+    // let ret = await Jimin.assignReviewerToFile(member.name, store.current_project.project_id, file.file_id);
+    // store.msg(ret.message);
     store.msg('Assign reviewers for this file.');
 }
 
@@ -95,13 +98,6 @@ async function onClickDeleteFile(file) {
     await store.updateCurrentProjectFiles();
 }
 
-async function onClickAssignMember(member) {
-    console.log('* selected member:', member);
-    // assign this member to this file
-    // let ret = await Jimin.assignReviewerToFile(member.name, store.current_project.project_id, file.file_id);
-    // store.msg(ret.message);
-}
-
 </script>
 
 <template>
@@ -127,7 +123,10 @@ async function onClickAssignMember(member) {
                 <Popover ref="popover_assign_users">
                     <div class="flex flex-col gap-4 w-[25rem]">
                         <div class="font-bold">
-                            <li v-for="member in store.current_project.members.filter(member => member.role ==='member')" :key="member.name" class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border" @click="onClickAssignMember(member)">
+                            <div class = "flex justify-center" v-if="store.current_project.members.filter(member => member.role ==='member').length === 0">
+                                No members available.
+                            </div>
+                            <li v-for="member in store.current_project.members.filter(member => member.role ==='member')" :key="member.name" class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border" @click="onClickAssignMember(member, file)">
                                 <div>
                                     <span class="font-medium">{{ member.name }}</span>
                                     <div class="text-sm text-surface-500 dark:text-surface-400">{{ member.email }}</div>

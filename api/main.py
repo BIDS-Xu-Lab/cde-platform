@@ -913,23 +913,23 @@ async def upload_file(
     '''
     logging.debug('* got file data %s' % str(file_data))
 
-    # if project_id is not in the file_data, we will link the default project
-        # ok, so we already have the project specified from the upload
-        # we can check this project exists
+    # find the project
     project = await db.projects.find_one({
         "project_id": file_data['project_id']
     })
 
+    # if project is None, we will create a default project
     if project is None:
         # try to find the default project
         default_project = await db.projects.find_one({
-            "project_id": 'default_project_id'
+            "name": 'Default Project',
+            "user_id": current_user['user_id']
         })
 
         if default_project is None:
             # insert a default
             project = {
-                "project_id": 'default_project_id',
+                "project_id": str(uuid.uuid4()),
                 "name": "Default Project",
                 "user_id": current_user['user_id'],
                 'members': [
