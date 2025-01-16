@@ -669,7 +669,7 @@ async def get_stats(
 
     # get the number of files of the current user
     n_files = await db.files.count_documents({
-        f"file_priority.{current_user['user_id']}": {"$exists": True}
+        f"file_permission.{current_user['user_id']}": {"$exists": True}
     })
 
     # get the number of concepts of the current user
@@ -967,13 +967,13 @@ async def upload_file(
     file_data['project_id'] = project['project_id']
 
     """
-    set user priority.
+    set user permission.
     0 : owner
     1 : mapper
     2 : reader
     uploader would be the owner
     """
-    file_data['file_priority'] = {
+    file_data['file_permission'] = {
         current_user['user_id']: 0
     }
         
@@ -1020,12 +1020,12 @@ async def get_files_by_project(
         "project_id": project_id
     }).to_list(length=None)
 
-    # filter the files by the user_id in file["file_priority"], only return the files that the user has access to
-    files = [file for file in files if current_user['user_id'] in file['file_priority']]
+    # filter the files by the user_id in file["file_permission"], only return the files that the user has access to
+    files = [file for file in files if current_user['user_id'] in file['file_permission']]
 
     # add stats to the files
     for file in files:
-        file['priority'] = file['file_priority'][current_user['user_id']]
+        file['permission'] = file['file_permission'][current_user['user_id']]
         file['n_concepts'] = await db.concepts.count_documents({
             "file_id": file['file_id']
         })
@@ -1086,7 +1086,7 @@ async def delete_file(
     # get the file
     file = await db.files.find_one({
         "file_id": file_id,
-        f"file_priority.{current_user['user_id']}": 0
+        f"file_permission.{current_user['user_id']}": 0
     })
 
     if file is None:
@@ -1096,7 +1096,7 @@ async def delete_file(
     # delete the file
     result = await db.files.delete_one({
         "file_id": file_id,
-        f"file_priority.{current_user['user_id']}": 0
+        f"file_permission.{current_user['user_id']}": 0
     })
 
     return {
@@ -1125,11 +1125,11 @@ async def save_file(
         raise HTTPException(status_code=404, detail="File not found")
     
     # check ownership of this file for this user
-    flag_has_ownership = file['file_priority'][current_user['user_id']] == 0 
+    flag_has_ownership = file['file_permission'][current_user['user_id']] == 0 
     logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
 
     # check permission of this file for this user
-    permission = file['file_priority'].get(current_user['user_id'])
+    permission = file['file_permission'].get(current_user['user_id'])
     logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission}")
 
     if flag_has_ownership:
@@ -1154,10 +1154,10 @@ async def save_file(
     }).to_list(length=None)
 
     # post-processing the final output
-    # delete file_id, project_id, and file_priority from file
+    # delete file_id, project_id, and file_permission from file
     file.pop('file_id')
     file.pop('project_id')
-    file.pop('file_priority')
+    file.pop('file_permission')
 
     # delete file_id, project_id, and user_id from concepts
     for concept in concepts:
@@ -1213,11 +1213,11 @@ async def get_concepts_by_file(
         raise HTTPException(status_code=404, detail="File not found")
     
     # check ownership of this file for this user
-    flag_has_ownership = file['file_priority'][current_user['user_id']] == 0
+    flag_has_ownership = file['file_permission'][current_user['user_id']] == 0
     logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
 
     # check permission of this file for this user
-    permission = file['file_priority'].get(current_user['user_id'])
+    permission = file['file_permission'].get(current_user['user_id'])
     logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission}")
 
     if flag_has_ownership:
@@ -1793,7 +1793,7 @@ def formatFile(file):
 def formatFiles(files):
     for file in files:
         file.pop('_id', None)
-        file.pop('file_priority', None)
+        file.pop('file_permission', None)
 
     return files
 
