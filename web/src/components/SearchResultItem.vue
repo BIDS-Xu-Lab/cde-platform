@@ -112,9 +112,6 @@ async function onClickDeselectValueMapping(item, value) {
 <div class="result-line">
     <div class="result-tags">
         <div class="flex flex-row">
-            <div class="pr-3">
-                {{ item_idx + 1 }}
-            </div>
             <Badge :value="fmtScore(item.score)" 
                 class="mr-1 badge-score"
                 severity="info" />
@@ -167,15 +164,12 @@ async function onClickDeselectValueMapping(item, value) {
 
     <div class="flex flex-row mt-2 mb-1 items-baseline justify-between">
         <div>
-            <Button v-if="!flag_selected"
-                size="small"
-                icon="pi pi-check"
-                severity="success"
-                label="Select"
-                class="mr-2"
-                v-tooltip.right="'Select this concept.'"
-                @click="onClickSelectResult(item)">
-            </Button>
+            <div v-if="flag_enabled_value_mapping && itemValueCheck(item)"
+                class="font-bold mb-4 ml-2">
+                <font-awesome-icon :icon="['fa', 'list']" />
+                Value Mapping
+            </div>
+
 
             <!-- <Button
                 v-if="flag_enabled_value_mapping && itemValueCheck(item)"
@@ -187,19 +181,22 @@ async function onClickDeselectValueMapping(item, value) {
                 v-tooltip.right="'Map values for this CDE.'"
                 @click="onClickSaveMapping(item)">
             </Button> -->
-
-            <div v-if="flag_enabled_value_mapping && itemValueCheck(item)"
-                class="font-bold mb-4 ml-2">
-                <font-awesome-icon :icon="['fa', 'list']" />
-                Value Mapping
-            </div>
         </div>
 
         <div>
-            <Button v-if="flag_selected"
+            <Button v-if="!flag_selected"
                 size="small"
                 icon="pi pi-check"
+                severity="success"
+                label="Select"
+                class="mr-2"
+                v-tooltip.right="'Select this concept.'"
+                @click="onClickSelectResult(item)">
+            </Button>
+            <Button v-if="flag_selected"
+                size="small"
                 severity="warn"
+                icon="pi pi-trash"
                 label="Remove"
                 class="mr-2"
                 v-tooltip.right="'Remove this concept.'"

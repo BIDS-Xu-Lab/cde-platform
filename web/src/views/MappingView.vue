@@ -821,7 +821,7 @@ onMounted(() => {
             <div class="text-lg font-bold mt-4">
                 <i class="fa-solid fa-list-ul"></i>
                 Search Results
-                <!-- ({{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length }}) -->
+                ({{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length - store.working_mappings[store.working_concept?.concept_id]?.selected_results.length }})
             </div>
             <template v-for="item, item_idx in store.working_mappings_search_results_without_selected">
                 <SearchResultItem :item="item" 
