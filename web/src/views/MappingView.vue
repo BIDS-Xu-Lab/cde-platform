@@ -653,11 +653,11 @@ onMounted(() => {
                             <div class="flex items-center">
                                 <template v-if="store.hasSelectedResults(item)">
                                     <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>
-                                    {{ store.getSelectedResults(item).length }} selected.
+                                    {{ store.getSelectedResults(item).length }} Mapped Recommended.
                                 </template>
                                 <template v-else>
                                     <i class="fa fa-exclamation-triangle mr-1"></i>
-                                    No CDE is selected.
+                                    Not Mapped.
                                 </template>
                             </div>
                         </div>
