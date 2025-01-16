@@ -635,13 +635,13 @@ onMounted(() => {
                     <div class="term-name">
                         <div class="mr-1">
                             <template v-if="store.hasSelectedResults(item)">
-                                <Tag :value="item.id" severity="success" />
+                                <Tag :value="item.id + 1" severity="success" />
                             </template>
                             <template v-else-if="store.hasSearchResults(item)">
-                                <Tag :value="item.id" severity="info" />
+                                <Tag :value="item.id + 1" severity="info" />
                             </template>
                             <template v-else>
-                                <Tag :value="item.id" severity="contrast" />
+                                <Tag :value="item.id + 1" severity="contrast" />
                             </template>
                         </div>
                         <div :class="{ 'font-bold': store.isWorkingConcept(item) }">
