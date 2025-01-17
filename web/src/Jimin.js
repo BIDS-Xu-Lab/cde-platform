@@ -224,6 +224,22 @@ export const Jimin = {
         return rsp.data;
     },
 
+    assignMapperToFile: async function (file_id, user_id) {
+        console.log('* assign mapper to file', file_id, user_id);
+
+        const rsp = await this.axios_instance.get(
+            '/assign_file',
+            { 
+                params:{
+                    file_id: file_id, 
+                    user_id: user_id
+                }
+            }
+        );
+
+        return rsp.data;
+    },
+
     ///////////////////////////////////////////////////////
     // Concepts related
     ///////////////////////////////////////////////////////

@@ -35,7 +35,8 @@ state: () => ({
 
     // all files belong to the selected project
     files: [],
-
+    
+    current_project: null,
     // working project
     working_project: null,
     // {
@@ -219,7 +220,7 @@ actions: {
     async updateCurrentProjectFiles() {
         // get all files for this project
         let files = await Jimin.getFilesByProject(
-            store.current_project.project_id
+            this.current_project.project_id
         );
         console.log('* got project files:', files);
         store.files = files;
@@ -231,14 +232,24 @@ actions: {
     setUser(user) {
         this.user = user;
     },
-
     async logout() {
         // send a request to the server to logout
         await Jimin.logout();
 
         // then clear the user
         this.user = null;
-
+        // clear the working project
+        this.working_project = null;
+        // clear the working file
+        this.working_file = null;
+        // clear the working concept
+        this.working_concept = null;
+        // clear the working file concepts
+        this.working_file_concepts = [];
+        // clear the working mappings
+        this.working_mappings = {};
+        // clear the current project
+        this.current_project = null;
         // redirect to the login page
         this.gotoLogin();
     },

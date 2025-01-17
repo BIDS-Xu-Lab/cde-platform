@@ -1025,7 +1025,6 @@ async def get_files_by_project(
 
     # add stats to the files
     for file in files:
-        file['permission'] = file['file_permission'][current_user['user_id']]
         file['n_concepts'] = await db.concepts.count_documents({
             "file_id": file['file_id']
         })
@@ -1188,6 +1187,50 @@ async def save_file(
         'mappings': formatMappings(mappings)
     }
 
+@app.get('/assign_file', tags=["file"])
+async def assign_file(
+    request: Request,
+    file_id: str,
+    user_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Assign a file to a user
+    '''
+    # Debug: check the file_id user_id and current user
+    logging.info(f"assign file {file_id} to user {user_id} by {current_user['user_id']}")
+    
+    # get the file
+    file = await db.files.find_one({
+        "file_id": file_id
+    })
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # check ownership of this file for this user
+    flag_has_ownership = file['file_permission'][current_user['user_id']] == 0
+    logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
+
+    if flag_has_ownership:
+        # ok we have the ownership, we can pass
+        pass
+    else:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
+    # assign the file to the user
+    result = await db.files.update_one(
+        {"file_id": file_id},
+        {"$set": {
+            f"file_permission.{user_id}": 1
+        }}
+    )
+    logger.info(f"* assigned file {file_id} to user {user_id}")
+    return {
+        'success': True,
+        'message': 'File assigned successfully'
+    }
+
+
 ###########################################################
 # Concepts related APIs
 ###########################################################
@@ -1224,13 +1267,13 @@ async def get_concepts_by_file(
         # ok we have the ownership, we can pass
         pass
 
-    elif permission is None:
+    elif permission < 2:
+    #not owner but has permission, we can pass
+        pass
+    
+    else:
         # no ownership and no permission, we will raise an error
         raise HTTPException(status_code=403, detail="Permission denied")
-    
-    elif 'read' in permission['permission']:
-        # ok, we have the read permission
-        pass
     
     # get all concepts
     concepts = await db.concepts.find({
@@ -1793,7 +1836,6 @@ def formatFile(file):
 def formatFiles(files):
     for file in files:
         file.pop('_id', None)
-        file.pop('file_permission', None)
 
     return files
 

@@ -19,9 +19,9 @@ onMounted(() => {
     console.log('* mounted DashboardView');
 
     // update stats only if store stats is null
-    if (store.stats == null) {
-        onClickRefreshList();
-    }
+    // if (store.stats == null) {
+    onClickRefreshList();
+    // }
 });
 </script>
 

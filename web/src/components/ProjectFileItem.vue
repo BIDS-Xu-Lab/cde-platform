@@ -16,8 +16,12 @@ const togglePopoverAssignUsers = (event) => {
 async function onClickAssignMember(member, file) {
     console.log('* clicked Assign Reviewers', member, file);
     // assign this member to this file
-    // let ret = await Jimin.assignReviewerToFile(member.name, store.current_project.project_id, file.file_id);
-    // store.msg(ret.message);
+    let ret = await Jimin.assignMapperToFile(file.file_id, member.user_id);
+    store.msg(ret.message);
+    //  close the popover
+    togglePopoverAssignUsers();
+    // update all files for this project
+    await store.updateCurrentProjectFiles();
     store.msg('Assign reviewers for this file.');
 }
 
@@ -107,7 +111,8 @@ async function onClickDeleteFile(file) {
                 <font-awesome-icon :icon="['fa', 'file']" />
                 {{ file.filename }}
             </div>
-            <div class="file-reviewers">
+            <!-- only if user have permission can assign user -->
+            <div class="file-reviewers" v-if="file.file_permission[store.user.user_id] < 2">
                 Assigned Reviewers: 
                 <font-awesome-icon :icon="['fa', 'user']" />
 
@@ -123,10 +128,10 @@ async function onClickDeleteFile(file) {
                 <Popover ref="popover_assign_users">
                     <div class="flex flex-col gap-4 w-[25rem]">
                         <div class="font-bold">
-                            <div class = "flex justify-center" v-if="store.current_project.members.filter(member => member.role ==='member').length === 0">
+                            <div class = "flex justify-center" v-if="store.current_project.members.filter(member => !(member.user_id in file.file_permission)).length === 0">
                                 No members available.
                             </div>
-                            <li v-for="member in store.current_project.members.filter(member => member.role ==='member')" :key="member.name" class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border" @click="onClickAssignMember(member, file)">
+                            <li v-for="member in store.current_project.members.filter(member => !(member.user_id in file.file_permission))" :key="member.name" class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border" @click="onClickAssignMember(member, file)">
                                 <div>
                                     <span class="font-medium">{{ member.name }}</span>
                                     <div class="text-sm text-surface-500 dark:text-surface-400">{{ member.email }}</div>
