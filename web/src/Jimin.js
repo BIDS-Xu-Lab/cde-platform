@@ -126,7 +126,9 @@ export const Jimin = {
 
         const rsp = await this.axios_instance.post(
             '/delete_project',
-            { project_id: project_id }
+            { 
+                project_id: project_id 
+            }
         );
 
         return rsp.data;

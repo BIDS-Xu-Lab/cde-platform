@@ -840,15 +840,19 @@ async def create_project(
         'project': formatProject(project_data)
     }
 
+class DeleteProjectModel(BaseModel):
+    project_id: str
+
 @app.post('/delete_project', tags=["project"])
 async def delete_project(
     request: Request,
-    project_id: str,
+    project: DeleteProjectModel,
     current_user: dict = Depends(authJWTCookie),
 ):
     '''
     Delete a project
     '''
+    project_id = project.project_id
     logging.info("delete project")
 
     project = await db.projects.find_one({
