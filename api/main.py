@@ -667,14 +667,32 @@ async def get_stats(
         }
     })
 
-    # get the number of files of the current user
     n_files = await db.files.count_documents({
-        f"file_permission.{current_user['user_id']}": {"$exists": True}
+        "project_id": {
+            "$in": [
+                project['project_id'] for project in await db.projects.find({
+                    "members.user_id": current_user['user_id']
+                }, {"project_id": 1}).to_list(length=None)
+            ]
+        }
     })
+     
 
     # get the number of concepts of the current user
     n_concepts = await db.concepts.count_documents({
-        "user_id": current_user['user_id']
+        "file_id": {
+            "$in": [
+                file['file_id'] for file in await db.files.find({
+                    "project_id": {
+                        "$in": [
+                            project['project_id'] for project in await db.projects.find({
+                                "members.user_id": current_user['user_id']
+                            }, {"project_id": 1}).to_list(length=None)
+                        ]
+                    }
+                }, {"file_id": 1}).to_list(length=None)
+            ]
+        }
     })
 
     # get the number of mappings of the current user
@@ -909,7 +927,7 @@ async def add_user_to_project_by_email(
 
     return {
         'success': True,
-        'message': 'User [%s] is added to project successfully' % data.email,
+        'message': f'User [{data.email}] is added to project as [{data.role}] successfully',
     }
 
 ###########################################################
@@ -966,17 +984,7 @@ async def upload_file(
     # set the project_id using the project we found or created
     file_data['project_id'] = project['project_id']
 
-    """
-    set user permission.
-    0 : owner
-    1 : mapper
-    2 : reader
-    uploader would be the owner
-    """
-    file_data['file_permission'] = {
-        current_user['user_id']: 0
-    }
-        
+    file_data['file_owner'] = current_user['user_id']    
     # get all the concepts from this file
     concepts = file_data.pop('concepts', None)
 
@@ -1019,9 +1027,6 @@ async def get_files_by_project(
     files = await db.files.find({
         "project_id": project_id
     }).to_list(length=None)
-
-    # filter the files by the user_id in file["file_permission"], only return the files that the user has access to
-    files = [file for file in files if current_user['user_id'] in file['file_permission']]
 
     # add stats to the files
     for file in files:
@@ -1085,7 +1090,7 @@ async def delete_file(
     # get the file
     file = await db.files.find_one({
         "file_id": file_id,
-        f"file_permission.{current_user['user_id']}": 0
+        "file_owner": current_user['user_id']
     })
 
     if file is None:
@@ -1095,7 +1100,7 @@ async def delete_file(
     # delete the file
     result = await db.files.delete_one({
         "file_id": file_id,
-        f"file_permission.{current_user['user_id']}": 0
+        "file_owner": current_user['user_id']
     })
 
     return {
@@ -1124,23 +1129,30 @@ async def save_file(
         raise HTTPException(status_code=404, detail="File not found")
     
     # check ownership of this file for this user
-    flag_has_ownership = file['file_permission'][current_user['user_id']] == 0 
+    flag_has_ownership = file['file_owner'] == current_user['user_id'] 
     logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
 
     # check permission of this file for this user
-    permission = file['file_permission'].get(current_user['user_id'])
-    logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission}")
+    permission = await db.projects.find_one({
+        "project_id": file['project_id'],
+        "members": {
+            "$elemMatch": {
+                "user_id": current_user['user_id']
+            }
+        }
+    })
+    logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission is not None}")
 
     if flag_has_ownership:
         # ok we have the ownership, we can pass
         pass
 
-    elif permission is None or permission > 1:
-        # no ownership and no permission, we will raise an error
-        raise HTTPException(status_code=403, detail="No permission on the requested file")
+    elif permission:
+        pass
     
     else:
-        pass
+        # no ownership and no permission, we will raise an error
+        raise HTTPException(status_code=403, detail="No permission on the requested file")
 
     # get all concepts
     concepts = await db.concepts.find({
@@ -1153,10 +1165,9 @@ async def save_file(
     }).to_list(length=None)
 
     # post-processing the final output
-    # delete file_id, project_id, and file_permission from file
+    # delete file_id, project_id
     file.pop('file_id')
     file.pop('project_id')
-    file.pop('file_permission')
 
     # delete file_id, project_id, and user_id from concepts
     for concept in concepts:
@@ -1187,48 +1198,48 @@ async def save_file(
         'mappings': formatMappings(mappings)
     }
 
-@app.get('/assign_file', tags=["file"])
-async def assign_file(
-    request: Request,
-    file_id: str,
-    user_id: str,
-    current_user: dict = Depends(authJWTCookie),
-):
-    '''
-    Assign a file to a user
-    '''
-    # Debug: check the file_id user_id and current user
-    logging.info(f"assign file {file_id} to user {user_id} by {current_user['user_id']}")
+# @app.get('/assign_file', tags=["file"])
+# async def assign_file(
+#     request: Request,
+#     file_id: str,
+#     user_id: str,
+#     current_user: dict = Depends(authJWTCookie),
+# ):
+#     '''
+#     Assign a file to a user
+#     '''
+#     # Debug: check the file_id user_id and current user
+#     logging.info(f"assign file {file_id} to user {user_id} by {current_user['user_id']}")
     
-    # get the file
-    file = await db.files.find_one({
-        "file_id": file_id
-    })
-    if file is None:
-        raise HTTPException(status_code=404, detail="File not found")
+#     # get the file
+#     file = await db.files.find_one({
+#         "file_id": file_id
+#     })
+#     if file is None:
+#         raise HTTPException(status_code=404, detail="File not found")
     
-    # check ownership of this file for this user
-    flag_has_ownership = file['file_permission'][current_user['user_id']] == 0
-    logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
+#     # check ownership of this file for this user
+#     flag_has_ownership = file['file_owner'] == current_user['user_id']
+#     logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
 
-    if flag_has_ownership:
-        # ok we have the ownership, we can pass
-        pass
-    else:
-        raise HTTPException(status_code=403, detail="Permission denied")
+#     if flag_has_ownership:
+#         # ok we have the ownership, we can pass
+#         pass
+#     else:
+#         raise HTTPException(status_code=403, detail="Permission denied")
     
-    # assign the file to the user
-    result = await db.files.update_one(
-        {"file_id": file_id},
-        {"$set": {
-            f"file_permission.{user_id}": 1
-        }}
-    )
-    logger.info(f"* assigned file {file_id} to user {user_id}")
-    return {
-        'success': True,
-        'message': 'File assigned successfully'
-    }
+#     # assign the file to the user
+#     result = await db.files.update_one(
+#         {"file_id": file_id},
+#         {"$set": {
+#             f".{user_id}": 1
+#         }}
+#     )
+#     logger.info(f"* assigned file {file_id} to user {user_id}")
+#     return {
+#         'success': True,
+#         'message': 'File assigned successfully'
+#     }
 
 
 ###########################################################
@@ -1256,18 +1267,25 @@ async def get_concepts_by_file(
         raise HTTPException(status_code=404, detail="File not found")
     
     # check ownership of this file for this user
-    flag_has_ownership = file['file_permission'][current_user['user_id']] == 0
+    flag_has_ownership = file['file_owner'] == current_user['user_id']
     logging.debug(f"* check ownership of file {file_id} for user {current_user['user_id']} = {flag_has_ownership}")
 
     # check permission of this file for this user
-    permission = file['file_permission'].get(current_user['user_id'])
-    logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission}")
+    permission = await db.projects.find_one({
+        "project_id": file['project_id'],
+        "members": {
+            "$elemMatch": {
+                "user_id": current_user['user_id']
+            }
+        }
+    })  
+    logging.debug(f"* check permission of file {file_id} for user {current_user['user_id']} = {permission is not None}")
 
     if flag_has_ownership:
         # ok we have the ownership, we can pass
         pass
 
-    elif permission < 2:
+    elif permission:
     #not owner but has permission, we can pass
         pass
     

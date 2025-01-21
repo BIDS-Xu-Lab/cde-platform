@@ -7,23 +7,30 @@ defineProps({
 });
 
 const store = useDataStore();
-const popover_assign_users = ref(null);
+// const popover_assign_users = ref(null);
+// const popover_assigned_users = ref(null);
 
-const togglePopoverAssignUsers = (event) => {
-    popover_assign_users.value.toggle(event);
-}
+// const togglePopoverAssignUsers = (event) => {
+//     popover_assign_users.value.toggle(event);
+// }
 
-async function onClickAssignMember(member, file) {
-    console.log('* clicked Assign Reviewers', member, file);
-    // assign this member to this file
-    let ret = await Jimin.assignMapperToFile(file.file_id, member.user_id);
-    store.msg(ret.message);
-    //  close the popover
-    togglePopoverAssignUsers();
-    // update all files for this project
-    await store.updateCurrentProjectFiles();
-    store.msg('Assign reviewers for this file.');
-}
+
+// const togglePopoverAssignedUsers = (event) =>  {
+//     console.log('* clicked View Assigned Member');
+//     popover_assigned_users.value.toggle(event);
+// }
+
+// async function onClickAssignMember(member, file) {
+//     console.log('* clicked Assign Reviewers', member, file);
+//     // assign this member to this file
+//     let ret = await Jimin.assignMapperToFile(file.file_id, member.user_id);
+//     store.msg(ret.message);
+//     //  close the popover
+//     togglePopoverAssignUsers();
+//     // update all files for this project
+//     await store.updateCurrentProjectFiles();
+//     store.msg('Assign reviewers for this file.');
+// }
 
 async function onClickMapping(file) {
     console.log('* clicked Mapping');
@@ -68,6 +75,7 @@ async function onClickDownload(file) {
     console.log('* clicked Download');
 }
 
+
 // async function onClickMove() {
 //     console.log('* clicked Move');
 //     visible_dialog_move_file.value = true;
@@ -106,42 +114,82 @@ async function onClickDeleteFile(file) {
 
 <template>
     <div class="w-full file-item flex flex-col py-2">
-        <div class="file-name flex flex-row justify-between">
+        
+        <!-- <div class="file-name flex flex-row justify-between">
             <div class="text-lg font-bold">
                 <font-awesome-icon :icon="['fa', 'file']" />
                 {{ file.filename }}
             </div>
-            <!-- only if user have permission can assign user -->
-            <div class="file-reviewers" v-if="file.file_permission[store.user.user_id] < 2">
+            <div class="file-reviewers flex flex-row items-center">
                 Assigned Reviewers: 
-                <font-awesome-icon :icon="['fa', 'user']" />
-
-                <Button severity="info"
-                    size="small"
-                    class="ml-2 btn-mini"
-                    @click="togglePopoverAssignUsers"
-                    v-tooltip.bottom="'Assign reviewers for this file.'">
-                    <font-awesome-icon :icon="['fa', 'user-plus']" />
-                    Assign members
+                <Button severity="secondary"
+                    class="mr-1 ml-2" 
+                    @click="togglePopoverAssignedUsers" 
+                    v-tooltip.bottom="'Click for detail'" 
+                    size="small">
+                    <font-awesome-icon :icon="['fa', 'user']"/>
                 </Button>
-
-                <Popover ref="popover_assign_users">
+                <Popover ref="popover_assigned_users">
                     <div class="flex flex-col gap-4 w-[25rem]">
-                        <div class="font-bold">
-                            <div class = "flex justify-center" v-if="store.current_project.members.filter(member => !(member.user_id in file.file_permission)).length === 0">
-                                No members available.
-                            </div>
-                            <li v-for="member in store.current_project.members.filter(member => !(member.user_id in file.file_permission))" :key="member.name" class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border" @click="onClickAssignMember(member, file)">
-                                <div>
-                                    <span class="font-medium">{{ member.name }}</span>
-                                    <div class="text-sm text-surface-500 dark:text-surface-400">{{ member.email }}</div>
+                            <div class="font-bold">
+                                <div class = "flex justify-center" v-if="Object.values(file.file_permission).filter(permission => permission !== 0).length === 0">
+                                    No members available.
                                 </div>
-                            </li>
+                                <li v-for="member in store.current_project?.members.filter(member => (member.user_id in file.file_permission && file.file_permission[member.user_id] !== 0))" class="flex items-center gap-2 px-2 py-3 rounded-border">
+                                    <div class="flex justify-between w-full">
+                                        <div>
+                                            <span class="font-medium">{{ member.name }}</span>
+                                            <div class="text-sm text-surface-500 dark:text-surface-400">{{ member.email }}</div>
+                                        </div>
+                                        <Button
+                                            severity="danger"
+                                            size="small"
+                                            class="m-2 btn-mini">
+                                            <font-awesome-icon :icon="['fa', 'x']" 
+                                            v-tooltip.bottom="'Delete reviewers for this file.'"/>
+                                        </Button>
+                                    </div>
+                                </li>
+                            </div>
                         </div>
-                    </div>
                 </Popover>
+                {{ Object.keys(file.file_permission).filter(key => file.file_permission[key] > 0).length }}
+                <div v-if="file.file_permission[store.user.user_id] == 0">
+                    <Button severity="info"
+                        size="small"
+                        class="ml-2 btn-mini"
+                        @click="togglePopoverAssignUsers"
+                        v-tooltip.bottom="'Assign reviewers for this file.'">
+                        <font-awesome-icon :icon="['fa', 'user-plus']" />
+                        Assign members
+                    </Button>
+                    <Popover ref="popover_assign_users">
+                        <div class="flex flex-col gap-4 w-[25rem]">
+                            <div class="font-bold">
+                                <div class = "flex justify-center" v-if="store.current_project.members.filter(member => !(member.user_id in file.file_permission)).length === 0">
+                                    No members available.
+                                </div>
+                                <li v-for="member in store.current_project?.members.filter(member => !(member.user_id in file.file_permission))" :key="member.name" class="flex items-center gap-2 px-2 py-3">
+                                    <div class="flex justify-between w-full">
+                                        <div>
+                                            <span class="font-medium">{{ member.name }}</span>
+                                            <div class="text-sm text-surface-500 dark:text-surface-400">{{ member.email }}</div>
+                                        </div>
+                                        <Button severity="success"
+                                            class="m-2 btn-mini"
+                                            @click="onClickAssignMember(member, file)" 
+                                            v-tooltip.bottom="'Click to add this member to the file'" 
+                                            size="small">
+                                            <font-awesome-icon :icon="['fa', 'plus']"/>
+                                        </Button>
+                                    </div>
+                                </li>
+                            </div>
+                        </div>
+                    </Popover>
+                </div>
             </div>
-        </div>
+        </div> -->
 
         <div class="file-column flex flex-row mb-2">
             <div class="flex flex-col mr-4">

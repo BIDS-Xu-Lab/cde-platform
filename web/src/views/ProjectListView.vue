@@ -300,9 +300,11 @@ async function onClickUpload() {
 // Member management
 ///////////////////////////////////////////////////////////
 const email_add_member = ref('');
+const project_roles = ref(["mapper","reviewer"]);
+const selected_member_role = ref();
 
 async function onClickAddMember(project) {
-    console.log('* clicked Add Member', email_add_member.value);
+    console.log('* clicked Add Member', email_add_member.value, selected_member_role.value);
 
     let email = email_add_member.value;
     let __email = email.trim();
@@ -311,11 +313,16 @@ async function onClickAddMember(project) {
         store.msg('Please enter an email address.', 'Error', 'error');
         return;
     }
+    if (selected_member_role.value == null) {
+        store.msg('Please select a role.', 'Error', 'error');
+        return;
+    }
 
     // add this email to the project
     let ret = await Jimin.addUserToProjectByEmail(
         project.project_id,
         email_add_member.value,
+        selected_member_role.value,
     )
 
     if (ret.success) {
@@ -545,7 +552,7 @@ onMounted(() => {
                 ({{ store.current_project.members.length }})
             </span>
         </Tab>
-        <Tab value="settings">
+        <Tab value="settings" v-if="store.current_project.user_id === store.user.user_id">
             <i class="fa fa-cog"></i>
             Settings
         </Tab>
@@ -566,7 +573,7 @@ onMounted(() => {
         <!-- tab for managing reviewers -->
         <TabPanel value="members">
         <div class="flex flex-col h-full">
-            <div>
+            <div v-if="store.current_project.user_id === store.user.user_id">
                 <label for=""
                     class="mr-2">
                     Email:
@@ -574,10 +581,17 @@ onMounted(() => {
                 <InputText placeholder="Enter an email address"
                     v-model="email_add_member"
                     class="mr-2" />
+                <Select v-model="selected_member_role"
+                placeholder="Select a role"
+                :options="project_roles"
+                style="width: 12rem;"
+                class="mr-2"
+                v-tooltip.right="'Select a role to this project.'" />
+
                 <Button label="Add member"
                     icon="pi pi-plus"
                     @click="onClickAddMember(store.current_project)"
-                    v-tooltip.right="'Search this email in system and add to this project'" />
+                    v-tooltip.right="'Search this email in system and add to this project'" />   
             </div>
 
             <div>
@@ -585,6 +599,7 @@ onMounted(() => {
                     <div class="flex flex-row justify-start py-2 items-center">
                         <div class="mr-4">
                             <Button severity="danger"
+                                v-if="store.current_project.user_id === store.user.user_id"
                                 :disabled="store.user.user_id == member.user_id"
                                 size="small"
                                 v-tooltip.bottom="'Remove this member from this project.'">
@@ -599,6 +614,9 @@ onMounted(() => {
                             <span class="ml-2">
                                 ({{ member.email }})
                             </span>
+                            <span class="ml-2">
+                                Role: {{ member.role }}
+                            </span>
                         </div>
                     </div>
                 </template>
@@ -607,7 +625,7 @@ onMounted(() => {
         </TabPanel>
 
         <!-- tab for managing settings -->
-        <TabPanel value="settings">
+        <TabPanel value="settings" v-if="store.current_project.user_id === store.user.user_id">
         <div class="flex flex-col h-full">
             <div>
                 <Button v-tooltip.bottom="'Save the project information.'"

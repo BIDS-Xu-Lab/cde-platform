@@ -132,7 +132,7 @@ export const Jimin = {
         return rsp.data;
     },
 
-    addUserToProjectByEmail: async function (project_id, email, role='member') {
+    addUserToProjectByEmail: async function (project_id, email, role) {
         console.log('* add user to project by email', project_id, email);
 
         const rsp = await this.axios_instance.post(
