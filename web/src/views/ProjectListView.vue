@@ -344,6 +344,40 @@ async function onClickAddMember(project) {
     store.projects[idx] = data.project;
 }
 
+const visible_dialog_remove_member = ref();
+const selected_delete_member = ref();
+
+async function onclickDeleteButton(member) {
+    console.log('* clicked Delete Button');
+    visible_dialog_remove_member.value = true;
+    selected_delete_member.value = member;
+}
+
+async function onclickRemoveMember() {
+    const member = selected_delete_member.value;
+    console.log('* clicked Remove Member', member);
+
+    // remove this member from the project
+    let ret = await Jimin.removeUserFromProject(store.current_project.project_id, member.user_id);
+    console.log('* removed member:', ret);
+
+    // update the project info
+    let data = await Jimin.getProject(store.current_project.project_id);
+    
+    // replace the current project with the updated project
+    store.current_project = data.project;
+
+    // also update the project list in the store.projects
+    let idx = store.projects.findIndex((p) => p.project_id == store.current_project.project_id);
+    store.projects[idx] = data.project;
+
+    // close the dialog
+    visible_dialog_remove_member.value = false;
+    selected_delete_member.value = null;
+
+    store.msg(ret.message);
+}
+
 
 async function onClickSaveProject() {
     console.log('* clicked Save Project', store.current_project);
@@ -602,6 +636,7 @@ onMounted(() => {
                                 v-if="store.current_project.user_id === store.user.user_id"
                                 :disabled="store.user.user_id == member.user_id"
                                 size="small"
+                                @click="onclickDeleteButton(member)"
                                 v-tooltip.bottom="'Remove this member from this project.'">
                                 <i class="fa-solid fa-trash"></i>
                             </Button>
@@ -840,6 +875,23 @@ onMounted(() => {
     </div>
     <div class="flex justify-end gap-2">
         <Button label="Create" @click="onClickCreate" severity="secondary" />
+    </div>
+</Dialog>
+
+<Dialog v-model:visible="visible_dialog_remove_member"
+    modal 
+    header="Remove Member" 
+    :style="{ width: '25rem' }">
+    <span class="text-surface-500 dark:text-surface-400 block mb-8">
+        Are you sure you want to remove this member from this project?
+    </span>
+    <div class="flex justify-end gap-2">
+        <Button severity="danger"
+            size="small"
+            @click="onclickRemoveMember()"
+            v-tooltip.bottom="'Confirm to remove.'">
+            <i class="fa-solid fa-trash"> Remove</i>
+        </Button>
     </div>
 </Dialog>
 

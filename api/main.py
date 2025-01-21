@@ -930,6 +930,57 @@ async def add_user_to_project_by_email(
         'message': f'User [{data.email}] is added to project as [{data.role}] successfully',
     }
 
+class RemoveUserFromProjectByEmailModel(BaseModel):
+    project_id: str
+    user_id: str
+
+@app.post('/remove_user_from_project', tags=["project"])
+async def remove_user_from_project(
+    request: Request,
+    data: RemoveUserFromProjectByEmailModel,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Remove a user from a project
+    '''
+    logging.info("remove user from project")
+
+    # check whether the current user is the owner of this project
+    project = await db.projects.find_one({
+        "project_id": data.project_id,
+        "user_id": current_user['user_id']
+    })
+
+    remove_user = await db.users.find_one({
+        "user_id": data.user_id
+    })
+
+    if project is None:
+        raise HTTPException(status_code=404, detail="Not owner of this project")
+
+    
+    # if so, we will return False
+    if not any(member['user_id'] == data.user_id for member in project['members']):
+        return {
+            'success': False,
+            'message': f'User [{data.user_id}] not in the project'
+        }
+
+    # remove this user from the project's members
+    _ = await db.projects.update_one(
+        {"project_id": data.project_id},
+        {"$pull": {
+            "members": {
+                "user_id": data.user_id
+            }
+        }}
+    )
+
+    return {
+        'success': True,
+        'message': f'User [{remove_user['email']}] is removed from project successfully',
+    }
+
 ###########################################################
 # File related APIs
 ###########################################################

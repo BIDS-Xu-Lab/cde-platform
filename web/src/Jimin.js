@@ -146,6 +146,19 @@ export const Jimin = {
 
         return rsp.data;
     },
+    removeUserFromProject: async function (project_id, user_id) {
+        console.log('* remove user from project', project_id, user_id);
+
+        const rsp = await this.axios_instance.post(
+            '/remove_user_from_project',
+            { 
+                project_id: project_id, 
+                user_id: user_id 
+            }
+        );
+
+        return rsp.data;
+    },
 
     ///////////////////////////////////////////////////////
     // File related
