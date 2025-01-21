@@ -378,6 +378,11 @@ async function onclickRemoveMember() {
     store.msg(ret.message);
 }
 
+// helper function to check the role of the current user
+function checkRole(role) {
+    return store.current_project.members.some(member => member.user_id === store.user.user_id && (member.role === role || member.role === 'owner'))
+}
+
 
 async function onClickSaveProject() {
     console.log('* clicked Save Project', store.current_project);
@@ -571,188 +576,204 @@ onMounted(() => {
 
     <Tabs v-if="store.current_project"
         value="files">
-    <TabList>
-        <Tab value="files">
-            <i class="fa-regular fa-folder-open"></i>
-            Files
-            <span v-if="store.files.length > 0">
-                ({{ store.files.length }})
-            </span>
-        </Tab>
-        <Tab value="members">
-            <i class="fa fa-users"></i>
-            Members
-            <span v-if="store.current_project.members.length > 0">
-                ({{ store.current_project.members.length }})
-            </span>
-        </Tab>
-        <Tab value="settings" v-if="store.current_project.user_id === store.user.user_id">
-            <i class="fa fa-cog"></i>
-            Settings
-        </Tab>
-    </TabList>
-    <TabPanels 
-        :style="{ height: 'calc(100vh - 21.5rem)', width: 'calc(100% + 1rem)', overflowY: 'auto' }">
+        <TabList>
+            <Tab value="mapping_files" v-if="checkRole('mapper')">
+                <i class="fa-regular fa-folder-open"></i>
+                Files Mapping
+                <span v-if="store.files.length > 0">
+                    ({{ store.files.length }})
+                </span>
+            </Tab>
+            <Tab value="mapping_files" v-if="checkRole('reviewer')">
+                <i class="fa-regular fa-folder-open"></i>
+                Files Review
+                <span v-if="store.files.length > 0">
+                    ({{ store.files.length }})
+                </span>
+            </Tab>
+            <Tab value="members">
+                <i class="fa fa-users"></i>
+                Members
+                <span v-if="store.current_project.members.length > 0">
+                    ({{ store.current_project.members.length }})
+                </span>
+            </Tab>
+            <Tab value="settings" v-if="checkRole('owner')">
+                <i class="fa fa-cog"></i>
+                Settings
+            </Tab>
+        </TabList>
+        <TabPanels 
+            :style="{ height: 'calc(100vh - 21.5rem)', width: 'calc(100% + 1rem)', overflowY: 'auto' }">
 
-        <!-- tab for mananging files -->
-        <TabPanel value="files">
-        <div class="flex flex-col h-full">
-            <template v-for="file in store.files">
-                <ProjectFileItem 
-                    :file="file" />
-            </template>
-        </div>
-        </TabPanel>
-
-        <!-- tab for managing reviewers -->
-        <TabPanel value="members">
-        <div class="flex flex-col h-full">
-            <div v-if="store.current_project.user_id === store.user.user_id">
-                <label for=""
-                    class="mr-2">
-                    Email:
-                </label>
-                <InputText placeholder="Enter an email address"
-                    v-model="email_add_member"
-                    class="mr-2" />
-                <Select v-model="selected_member_role"
-                placeholder="Select a role"
-                :options="project_roles"
-                style="width: 12rem;"
-                class="mr-2"
-                v-tooltip.right="'Select a role to this project.'" />
-
-                <Button label="Add member"
-                    icon="pi pi-plus"
-                    @click="onClickAddMember(store.current_project)"
-                    v-tooltip.right="'Search this email in system and add to this project'" />   
-            </div>
-
-            <div>
-                <template v-for="member in store.current_project.members">
-                    <div class="flex flex-row justify-start py-2 items-center">
-                        <div class="mr-4">
-                            <Button severity="danger"
-                                v-if="store.current_project.user_id === store.user.user_id"
-                                :disabled="store.user.user_id == member.user_id"
-                                size="small"
-                                @click="onclickDeleteButton(member)"
-                                v-tooltip.bottom="'Remove this member from this project.'">
-                                <i class="fa-solid fa-trash"></i>
-                            </Button>
-                        </div>
-                        <div class="flex flex-row items-center">
-                            <i class="fa fa-user"></i>
-                            <span class="ml-2">
-                                {{ member.name }}
-                            </span>
-                            <span class="ml-2">
-                                ({{ member.email }})
-                            </span>
-                            <span class="ml-2">
-                                Role: {{ member.role }}
-                            </span>
-                        </div>
-                    </div>
+            <!-- tab for mananging mapping files -->
+            <TabPanel value="mapping_files">
+            <div class="flex flex-col h-full">
+                <template v-for="file in store.files">
+                    <ProjectFileItem 
+                        :file="file" />
                 </template>
             </div>
-        </div>
-        </TabPanel>
-
-        <!-- tab for managing settings -->
-        <TabPanel value="settings" v-if="store.current_project.user_id === store.user.user_id">
-        <div class="flex flex-col h-full">
-            <div>
-                <Button v-tooltip.bottom="'Save the project information.'"
-                    severity="success"
-                    @click="onClickSaveProject">
-                    <i class="fa-solid fa-save"></i>
-                    Save settings
-                </Button>
+            </TabPanel>
+            <!-- tab for mananging files -->
+            <TabPanel value="review_files">
+            <div class="flex flex-col h-full">
+                <template v-for="file in store.files">
+                    <ProjectFileItem 
+                        :file="file" />
+                </template>
             </div>
+            </TabPanel>
 
-            <div>
-                <div class="text-xl font-bold mt-4 border-b-2">
-                    <font-awesome-icon icon="fa-solid fa-cog" />
-                    Basic Information
-                </div>
-                <div class="flex flex-col gap-4 mt-4">
-                    <div class="max-w-lg">
-                        <label for="name" class="font-semibold w-24">
-                            Project Name
-                        </label>
-                        <InputText v-model="store.current_project.name"
-                            placeholder="Enter a project name"
-                            class="w-full" />
-                    </div>
-                    
-                    <div class="max-w-lg">
-                        <label for="name" class="font-semibold w-24">
-                            Project Description (optional)
-                        </label>
-                        <InputText v-model="store.current_project.description"
-                            placeholder="Enter a project description"
-                            class="w-full" />
-                    </div>
-                </div>
+            <!-- tab for managing reviewers -->
+            <TabPanel value="members">
+            <div class="flex flex-col h-full">
+                <div v-if="store.current_project.user_id === store.user.user_id">
+                    <label for=""
+                        class="mr-2">
+                        Email:
+                    </label>
+                    <InputText placeholder="Enter an email address"
+                        v-model="email_add_member"
+                        class="mr-2" />
+                    <Select v-model="selected_member_role"
+                    placeholder="Select a role"
+                    :options="project_roles"
+                    style="width: 12rem;"
+                    class="mr-2"
+                    v-tooltip.right="'Select a role to this project.'" />
 
-                <!-- danger zone -->
-                <div class="text-xl font-bold mt-4 border-b-2">
-                    <font-awesome-icon icon="fa-solid fa-exclamation-triangle" />
-                    Danger Zone
+                    <Button label="Add member"
+                        icon="pi pi-plus"
+                        @click="onClickAddMember(store.current_project)"
+                        v-tooltip.right="'Search this email in system and add to this project'" />   
                 </div>
 
-                <div class="border-1">
-
-                    <div class="flex flex-row justify-between mb-4 p-4">
-                        <div class="flex flex-col">
-                            <div class="font-bold">
-                                Transfer ownership
+                <div>
+                    <template v-for="member in store.current_project.members">
+                        <div class="flex flex-row justify-start py-2 items-center">
+                            <div class="mr-4">
+                                <Button severity="danger"
+                                    v-if="store.current_project.user_id === store.user.user_id"
+                                    :disabled="store.user.user_id == member.user_id"
+                                    size="small"
+                                    @click="onclickDeleteButton(member)"
+                                    v-tooltip.bottom="'Remove this member from this project.'">
+                                    <i class="fa-solid fa-trash"></i>
+                                </Button>
                             </div>
-                            <div>
-                                Transfer this project to another user who have the ability to create projects.
-                            </div>
-                        </div>
-                        <div class="flex flex-row justify-end">
-                            <Button severity="danger"
-                                severirty="danger"
-                                class="ml-4"
-                                v-tooltip.bottom="'Transfer this project.'"
-                                @click="store.msg('Transfer this project.')">
-                                <i class="fa-solid fa-trash"></i>
-                                Transfer
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-row justify-between mb-4 p-4">
-                        <div class="flex flex-col">
-                            <div class="font-bold">
-                                Delete this project
-                            </div>
-                            <div>
-                                Once you delete a project, there is no going back. Please be certain.
+                            <div class="flex flex-row items-center">
+                                <i class="fa fa-user"></i>
+                                <span class="ml-2">
+                                    {{ member.name }}
+                                </span>
+                                <span class="ml-2">
+                                    ({{ member.email }})
+                                </span>
+                                <span class="ml-2">
+                                    Role: {{ member.role }}
+                                </span>
                             </div>
                         </div>
-                        <div class="flex flex-row justify-end">
-                            <Button severity="danger"
-                                severirty="danger"
-                                class="ml-4"
-                                v-tooltip.bottom="'Delete this project.'"
-                                @click="onClickDeleteProject(store.current_project)">
-                                <i class="fa-solid fa-trash"></i>
-                                Delete this project
-                            </Button>
-                        </div>
-                    </div>
-
-
+                    </template>
                 </div>
             </div>
-        </div>
-        </TabPanel>
+            </TabPanel>
 
-    </TabPanels>
+            <!-- tab for managing settings -->
+            <TabPanel value="settings" v-if="store.current_project.user_id === store.user.user_id">
+            <div class="flex flex-col h-full">
+                <div>
+                    <Button v-tooltip.bottom="'Save the project information.'"
+                        severity="success"
+                        @click="onClickSaveProject">
+                        <i class="fa-solid fa-save"></i>
+                        Save settings
+                    </Button>
+                </div>
+
+                <div>
+                    <div class="text-xl font-bold mt-4 border-b-2">
+                        <font-awesome-icon icon="fa-solid fa-cog" />
+                        Basic Information
+                    </div>
+                    <div class="flex flex-col gap-4 mt-4">
+                        <div class="max-w-lg">
+                            <label for="name" class="font-semibold w-24">
+                                Project Name
+                            </label>
+                            <InputText v-model="store.current_project.name"
+                                placeholder="Enter a project name"
+                                class="w-full" />
+                        </div>
+                        
+                        <div class="max-w-lg">
+                            <label for="name" class="font-semibold w-24">
+                                Project Description (optional)
+                            </label>
+                            <InputText v-model="store.current_project.description"
+                                placeholder="Enter a project description"
+                                class="w-full" />
+                        </div>
+                    </div>
+
+                    <!-- danger zone -->
+                    <div class="text-xl font-bold mt-4 border-b-2">
+                        <font-awesome-icon icon="fa-solid fa-exclamation-triangle" />
+                        Danger Zone
+                    </div>
+
+                    <div class="border-1">
+
+                        <div class="flex flex-row justify-between mb-4 p-4">
+                            <div class="flex flex-col">
+                                <div class="font-bold">
+                                    Transfer ownership
+                                </div>
+                                <div>
+                                    Transfer this project to another user who have the ability to create projects.
+                                </div>
+                            </div>
+                            <div class="flex flex-row justify-end">
+                                <Button severity="danger"
+                                    severirty="danger"
+                                    class="ml-4"
+                                    v-tooltip.bottom="'Transfer this project.'"
+                                    @click="store.msg('Transfer this project.')">
+                                    <i class="fa-solid fa-trash"></i>
+                                    Transfer
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-row justify-between mb-4 p-4">
+                            <div class="flex flex-col">
+                                <div class="font-bold">
+                                    Delete this project
+                                </div>
+                                <div>
+                                    Once you delete a project, there is no going back. Please be certain.
+                                </div>
+                            </div>
+                            <div class="flex flex-row justify-end">
+                                <Button severity="danger"
+                                    severirty="danger"
+                                    class="ml-4"
+                                    v-tooltip.bottom="'Delete this project.'"
+                                    @click="onClickDeleteProject(store.current_project)">
+                                    <i class="fa-solid fa-trash"></i>
+                                    Delete this project
+                                </Button>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            </TabPanel>
+
+        </TabPanels>
     </Tabs>
 </Panel>
 
