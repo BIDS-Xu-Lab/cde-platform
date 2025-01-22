@@ -224,6 +224,12 @@ async function onClickDeleteFile(file) {
                     {{ file.column_name_values }}
                 </p>
             </div>
+            <div class="flex flex-col mr-4">
+                <div class="text-sm">Round</div>
+                <p class="text-xl font-bold">
+                    {{ file.round.length }}
+                </p>
+            </div>
         </div>
 
         <div class="file-name flex flex-row justify-start">

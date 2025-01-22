@@ -15,7 +15,15 @@ import SearchResultItem from '../components/SearchResultItem.vue';
 
 const store = useDataStore();
 const prograss_visible = ref(false);
+const submit_dialog_visible = ref(false);
 const prograss_value = ref(0);
+
+async function onClickSubmitButton() {
+    console.log('* clicked Submit Button');
+    submit_dialog_visible.value = true;
+}
+
+
 async function onClickRefreshList() {
     console.log('* clicked Refresh List');
 
@@ -176,6 +184,27 @@ async function onClickDownload() {
     // remove extension, let extension be jsonl
     a.download = store.working_file.filename.replace(/\.[^/.]+$/, "") + '.jsonl';
     a.click();
+}
+
+async function onClickSubmitWork() {
+    console.log('* clicked Submit Work');
+    // close the dialog
+    submit_dialog_visible.value = false;
+    // send the current mappings to the server
+    let ret = await Jimin.submitMappingWork(store.working_file.file_id);
+    
+    //unbound the working file
+    store.working_file = null;
+    store.working_file_concepts = [];
+    store.working_concept = null;
+    store.working_mappings = {};
+    // redirect to the project view
+    store.changeView('project_list');
+    if (ret.success) {
+        store.msg(ret.message);
+    } else {
+        store.msg(ret.message, 'error', 'error');
+    }
 }
 
 async function onClickDownloadYAML() {
@@ -491,10 +520,10 @@ onMounted(() => {
             <Button text
                 class="menu-button"
                 v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
-                @click="onClickSaveWork">
-                <font-awesome-icon icon="fa-regular fa-floppy-disk" class="menu-icon" />
+                @click="onClickSubmitButton">
+                <font-awesome-icon icon="fa-solid fa-upload" class="menu-icon" />
                 <span>
-                    Save
+                    Submit
                 </span>
             </Button>
 
@@ -503,7 +532,7 @@ onMounted(() => {
                 :model="downloadOptions"
                 @click="onClickDownload">
                 <div class="flex flex-col">
-                    <font-awesome-icon icon="fa-solid fa-download" class="menu-icon" />
+                    <font-awesome-icon icon="fa-solid fa-download" class="menu-icon mb-2" />
                     <span>
                         Export
                     </span>
@@ -856,6 +885,20 @@ onMounted(() => {
         ({{ (prograss_value / store.working_file_concepts.length * 100).toFixed(2) }}%)
     </p>
     <ProgressBar :value="prograss_value" mode="indeterminate"></ProgressBar>
+</Dialog>
+
+<Dialog v-model:visible="submit_dialog_visible" 
+    modal 
+    header="Do you want to submit the current work?" 
+    :style="{ width: '400px' }" 
+    :closable="false">
+    <p class="text-lg">
+        If you submit the current work, you cannot modify it anymore.
+    </p>
+    <div class="flex justify-end">
+        <Button label="Cancel" class="mr-2" @click="submit_dialog_visible = false" />
+        <Button label="Submit" class="p-button-success" @click="onClickSubmitWork" />
+    </div>
 </Dialog>
 
 </template>

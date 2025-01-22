@@ -1039,7 +1039,16 @@ async def upload_file(
     # set the project_id using the project we found or created
     file_data['project_id'] = project['project_id']
 
-    file_data['file_owner'] = current_user['user_id']    
+    file_data['file_owner'] = current_user['user_id']
+
+    # set the round of file, index is the round number, and detail is the dict
+    file_data['round'] = [
+            {
+                "stage": "mapping", # mapping, reviewing, completed
+                "review_round": 0
+            }
+        ]
+
     # get all the concepts from this file
     concepts = file_data.pop('concepts', None)
 
@@ -1253,6 +1262,65 @@ async def save_file(
         'mappings': formatMappings(mappings)
     }
 
+class SubmitMappingWorkModel(BaseModel):
+    file_id: str
+
+@app.post('/submit_mapping_work', tags=["file"])
+async def submit_mapping_work(
+    request: Request,
+    file_id: SubmitMappingWorkModel,
+    current_user: dict = Depends(authJWTCookie),
+): 
+    file_id = file_id.file_id
+    logging.info(f"submit mapping work for file {file_id}")
+    
+    # get the file
+    file = await db.files.find_one({
+        "file_id": file_id
+    })
+    # check if the file exists
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    # get the round of the file
+    file_round = len(file['round']) - 1
+    if file['round'][file_round]['stage'] != "mapping":
+        raise HTTPException(status_code=403, detail="Not in mapping stage")
+    
+    # get all concepts
+    concepts = await db.concepts.find({
+        "file_id": file_id
+    }).to_list(length=None)
+    
+    # get all mappings
+    mappings = await db.mappings.find({
+        "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
+        "user_id": current_user['user_id'],
+        "round": file_round
+    }).to_list(length=None)
+
+    # check if all concepts have been mapped
+    if len(mappings) != len(concepts):
+        return {
+        'success': False,
+        'message': 'Not all concepts have been mapped'
+    }
+
+    # # check if all mappings already submitted (temporary disabled)
+    # if all(mapping['submitted'] for mapping in mappings):
+    #     raise HTTPException(status_code=403, detail="All mappings have been submitted")
+    
+    # update all mappings submitted as True
+    for mapping in mappings:
+        await db.mappings.update_one(
+            {"mapping_id": mapping['mapping_id']},
+            {"$set": {
+                "submitted": True
+            }}
+        )
+    return {
+        'success': True,
+        'message': 'Mapping work submitted successfully'
+    }
 # @app.get('/assign_file', tags=["file"])
 # async def assign_file(
 #     request: Request,
@@ -1348,6 +1416,10 @@ async def get_concepts_by_file(
         # no ownership and no permission, we will raise an error
         raise HTTPException(status_code=403, detail="Permission denied")
     
+    # get the round of the file by looping through the files['round'] and find the last file['round']['stage'] == "mapping"
+    round = len(file['round']) - 1
+    
+    logging.debug(f"* get round of file {file_id} = {round}")
     # get all concepts
     concepts = await db.concepts.find({
         "file_id": file_id
@@ -1355,7 +1427,8 @@ async def get_concepts_by_file(
 
     mappings = await db.mappings.find({
         "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
-        "user_id": current_user['user_id']
+        "user_id": current_user['user_id'],
+        "round": round
     }).to_list(length=None)
 
     return {
@@ -1504,10 +1577,17 @@ async def search(
                 results.append(_r)
             all_results.append(results)
 
+            # get the round of this file
+            file = await db.files.find_one({
+                "file_id": search_data.queries[i]['file_id']
+            })
+            round = len(file['round']) - 1
+
             # check whether we already have this in mappings 
             m = await db.mappings.find_one({
                 "concept_id": search_data.queries[i]['concept_id'],
-                "user_id": current_user['user_id']
+                "user_id": current_user['user_id'],
+                "round": round
             })
 
             if m is None:
@@ -1516,6 +1596,8 @@ async def search(
                     "mapping_id": str(uuid.uuid4()),
                     "concept_id": search_data.queries[i]['concept_id'],
                     "user_id": current_user['user_id'],
+                    "round": round,
+                    "submitted": False,
                     "source": search_data.source,
                     "collections": search_data.collections,
                     "selected_results": [],

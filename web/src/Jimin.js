@@ -255,6 +255,19 @@ export const Jimin = {
         return rsp.data;
     },
 
+    submitMappingWork: async function (file_id) {
+        console.log('* submit mapping work', file_id);
+
+        const rsp = await this.axios_instance.post(
+            '/submit_mapping_work',
+            {
+                file_id: file_id
+            }
+        );
+
+        return rsp.data;
+    },
+
     ///////////////////////////////////////////////////////
     // Concepts related
     ///////////////////////////////////////////////////////
