@@ -8,6 +8,7 @@ defineProps({
     item_idx: Number,
     flag_selected: Boolean || false,
     flag_enabled_value_mapping: Boolean || false,
+    flag_submitted: Boolean || false,
 });
 
 async function onClickSelectResult(result) {
@@ -184,7 +185,7 @@ async function onClickDeselectValueMapping(item, value) {
         </div>
 
         <div>
-            <Button v-if="!flag_selected"
+            <Button v-if="!flag_selected && !flag_submitted"
                 size="small"
                 icon="pi pi-check"
                 severity="success"
@@ -193,7 +194,7 @@ async function onClickDeselectValueMapping(item, value) {
                 v-tooltip.right="'Select this concept.'"
                 @click="onClickSelectResult(item)">
             </Button>
-            <Button v-if="flag_selected"
+            <Button v-if="flag_selected && !flag_submitted"
                 size="small"
                 severity="warn"
                 icon="pi pi-trash"
@@ -222,6 +223,7 @@ async function onClickDeselectValueMapping(item, value) {
             </div>
 
             <Select v-model="item.value_mapping[value]"
+                :disabled="flag_submitted"
                 @change="onChangeValueMapping(item, value)"
                 filter 
                 :options="item.values"
@@ -229,7 +231,7 @@ async function onClickDeselectValueMapping(item, value) {
                 style="width: 20rem;"
                 v-tooltip.right="'Select a value to map.'" />
 
-            <Button v-if="item.value_mapping[value]"
+            <Button v-if="item.value_mapping[value] && !flag_submitted"
                 severity="danger"
                 size="small"
                 icon="pi pi-trash"

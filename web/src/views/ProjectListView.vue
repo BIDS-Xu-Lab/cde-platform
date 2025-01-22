@@ -102,7 +102,7 @@ async function onClickCreate() {
 }
 
 ///////////////////////////////////////////////////////////
-// Upload file
+// File Related
 ///////////////////////////////////////////////////////////
 const fileupload = ref();
 store.fileupload = fileupload;
@@ -296,6 +296,10 @@ async function onClickUpload() {
     visible_dialog_upload_file.value = false;
 };
 
+function filterFilesByStatus(files, status) {
+    return files.filter((file) => file.round[file.round.length - 1].stage === status);
+
+}
 ///////////////////////////////////////////////////////////
 // Member management
 ///////////////////////////////////////////////////////////
@@ -381,6 +385,16 @@ async function onclickRemoveMember() {
 // helper function to check the role of the current user
 function checkRole(role) {
     return store.current_project.members.some(member => member.user_id === store.user.user_id && (member.role === role || member.role === 'owner'))
+}
+
+function defaultTab(){
+    if (checkRole('mapper')) {
+        return 'mapping_files';
+    } else if (checkRole('reviewer')) {
+        return 'review_files';
+    } else {
+        return 'members';
+    }
 }
 
 
@@ -575,20 +589,20 @@ onMounted(() => {
     </template>
 
     <Tabs v-if="store.current_project"
-        value="files">
+        :value="defaultTab()">
         <TabList>
             <Tab value="mapping_files" v-if="checkRole('mapper')">
                 <i class="fa-regular fa-folder-open"></i>
                 Files Mapping
-                <span v-if="store.files.length > 0">
-                    ({{ store.files.length }})
+                <span v-if="filterFilesByStatus(store.files, 'mapping').length > 0">
+                    ({{ filterFilesByStatus(store.files, "mapping").length }})
                 </span>
             </Tab>
-            <Tab value="mapping_files" v-if="checkRole('reviewer')">
+            <Tab value="review_files" v-if="checkRole('reviewer')">
                 <i class="fa-regular fa-folder-open"></i>
                 Files Review
-                <span v-if="store.files.length > 0">
-                    ({{ store.files.length }})
+                <span v-if="filterFilesByStatus(store.files, 'reviewing').length > 0">
+                    ({{ filterFilesByStatus(store.files, 'reviewing').length }})
                 </span>
             </Tab>
             <Tab value="members">
@@ -609,18 +623,20 @@ onMounted(() => {
             <!-- tab for mananging mapping files -->
             <TabPanel value="mapping_files">
             <div class="flex flex-col h-full">
-                <template v-for="file in store.files">
+                <template v-for="file in filterFilesByStatus(store.files, 'mapping')">
                     <ProjectFileItem 
-                        :file="file" />
+                        :file="file"
+                        :view_mode="'mapping'" />
                 </template>
             </div>
             </TabPanel>
             <!-- tab for mananging files -->
             <TabPanel value="review_files">
             <div class="flex flex-col h-full">
-                <template v-for="file in store.files">
+                <template v-for="file in filterFilesByStatus(store.files, 'reviewing')">
                     <ProjectFileItem 
-                        :file="file" />
+                        :file="file"
+                        :view_mode="'review'" />
                 </template>
             </div>
             </TabPanel>

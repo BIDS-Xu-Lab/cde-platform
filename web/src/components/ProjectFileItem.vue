@@ -1,9 +1,11 @@
 <script setup>
+import { viewDepthKey } from "vue-router";
 import { useDataStore } from "../DataStore";
 import { ref } from "vue";
 
 defineProps({
-    file: Object
+    file: Object,
+    view_mode: String
 });
 
 const store = useDataStore();
@@ -57,7 +59,8 @@ async function onClickMapping(file) {
         ret.mappings.forEach((mapping) => {
             store.working_mappings[mapping.concept_id] = {
                 selected_results: mapping.selected_results,
-                search_results: mapping.search_results
+                search_results: mapping.search_results,
+                submitted: mapping.submitted
             };
         });
 
@@ -69,6 +72,10 @@ async function onClickMapping(file) {
 
     // then, switch to the mapping view
     store.changeView('mapping');
+}
+
+async function onClickReview(file){
+    console.log('* clicked Review');
 }
 
 async function onClickDownload(file) {
@@ -234,6 +241,7 @@ async function onClickDeleteFile(file) {
 
         <div class="file-name flex flex-row justify-start">
             <Button 
+                v-if="view_mode === 'mapping'"
                 severity="secondary"
                 size="small"
                 class="mr-2"
@@ -241,6 +249,17 @@ async function onClickDeleteFile(file) {
                 @click="onClickMapping(file)">
                 <font-awesome-icon :icon="['fa', 'magnifying-glass']" />
                 Mapping
+            </Button>
+
+            <Button 
+                v-if="view_mode === 'review'"
+                severity="secondary"
+                size="small"
+                class="mr-2"
+                v-tooltip.bottom="'Review result for this file.'"
+                @click="onClickReview(file)">
+                <font-awesome-icon :icon="['fa', 'magnifying-glass']" />
+                Review
             </Button>
 
             <Button 

@@ -18,6 +18,15 @@ const prograss_visible = ref(false);
 const submit_dialog_visible = ref(false);
 const prograss_value = ref(0);
 
+function checkSubmitStatus(){
+    for (const mapping of Object.values(store.working_mappings)) {
+        if (mapping.submitted) {
+            return true;
+        }
+    }
+    return false;
+}
+
 async function onClickSubmitButton() {
     console.log('* clicked Submit Button');
     submit_dialog_visible.value = true;
@@ -413,6 +422,7 @@ onMounted(() => {
     <div class="menu-group !ml-2">
         <div class="menu-group-box">
             <Button text
+                :disabled="checkSubmitStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Refresh list.'"
                 @click="onClickRefreshList">
@@ -427,7 +437,8 @@ onMounted(() => {
                     <font-awesome-icon icon="fa-solid fa-database"></font-awesome-icon>
                     Sources
                 </label>
-                <Select v-model="store.mapping.selected_source" 
+                <Select v-model="store.mapping.selected_source"
+                    :disabled="checkSubmitStatus()"
                     :options="store.mapping.sources" 
                     @change="onChangeSource"
                     variant="in"
@@ -449,6 +460,7 @@ onMounted(() => {
                     Collections
                 </label>
                 <MultiSelect v-model="store.mapping.selected_collections" 
+                    :disabled="checkSubmitStatus()"
                     :options="store.mapping.collections" 
                     variant="in"
                     filter 
@@ -464,6 +476,7 @@ onMounted(() => {
             </div>
 
             <Button text
+                :disabled="checkSubmitStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Search CDEs for the current selected concept.'"
                 @click="onClickSearch">
@@ -473,6 +486,7 @@ onMounted(() => {
                 </span>
             </Button>
             <Button text
+                :disabled="checkSubmitStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Search CDEs for all terms.'"
                 @click="onClickSearchAll">
@@ -492,6 +506,7 @@ onMounted(() => {
         <div class="menu-group-box !flex-col justify-start">
             <div class="flex align-center my-1 justify-start">
                 <ToggleSwitch inputId="sw-embedding"
+                    :disabled="checkSubmitStatus()"
                     class="mr-1"
                     v-model="store.features.embedding_search.enabled" />
                 <label for="sw-embedding"
@@ -501,6 +516,7 @@ onMounted(() => {
             </div>
             <div class="flex align-center my-1 justify-start">
                 <ToggleSwitch inputId="sw-query-expansion"
+                    :disabled="checkSubmitStatus()"
                     class="mr-1"
                     v-model="store.features.query_expansion.enabled" />
                 <label for="sw-query-expansion"
@@ -518,6 +534,7 @@ onMounted(() => {
     <div class="menu-group">
         <div class="menu-group-box">
             <Button text
+                :disabled="checkSubmitStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
                 @click="onClickSubmitButton">
@@ -548,6 +565,7 @@ onMounted(() => {
     <div class="menu-group">
         <div class="menu-group-box">
             <Button text
+                :disabled="checkSubmitStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Re-rank the current search results using AI technology.'"
                 @click="onClickRerank">
@@ -558,6 +576,7 @@ onMounted(() => {
             </Button>
 
             <Button text
+                :disabled="checkSubmitStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Automatically link the values to the current CDE\'s values.'"
                 @click="onClickValueLinking">
@@ -837,7 +856,9 @@ onMounted(() => {
                     <SearchResultItem :item="item" 
                         :flag_selected="true"
                         :flag_enabled_value_mapping="true"
-                        :item_idx="item_idx" />
+                        :item_idx="item_idx" 
+                        :flag_submitted="checkSubmitStatus()"
+                        />
                 </template>
 
             </div>
@@ -856,7 +877,9 @@ onMounted(() => {
                 <SearchResultItem :item="item" 
                     :flag_selected="false"
                     :flag_enabled_value_mapping="false"
-                    :item_idx="item_idx" />
+                    :item_idx="item_idx" 
+                    :flag_submitted="checkSubmitStatus()"
+                    />
             </template>
 
             </template>
