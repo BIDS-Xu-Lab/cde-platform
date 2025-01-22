@@ -9,6 +9,7 @@ defineProps({
 });
 
 const store = useDataStore();
+const submissionCount = ref(0);
 // const popover_assign_users = ref(null);
 // const popover_assigned_users = ref(null);
 
@@ -199,6 +200,21 @@ async function onClickDeleteFile(file) {
         </div> -->
 
         <div class="file-column flex flex-row mb-2">
+            <div class="flex flex-col mr-4"
+                v-if="view_mode === 'file'">
+                <div class="text-sm">Mapped / Mapper</div>
+                <p class="text-xl font-bold">
+                    {{ file.n_submitted }} / {{ store.current_project.members.filter(member => member.role === 'mapper').length + 1}}
+                </p>
+            </div>
+            <div class="flex flex-col mr-4"
+                v-if="view_mode === 'file'">
+                <div class="text-sm">Reviewed / Reviewer</div>
+                <p class="text-xl font-bold">
+                    0 / {{ store.current_project.members.filter(member => member.role === 'reviewer').length }}
+                    <!-- {{ file.columns.length }} / {{ 5 }} -->
+                </p>
+            </div>
             <div class="flex flex-col mr-4">
                 <div class="text-sm"># Columns</div>
                 <p class="text-xl font-bold">
@@ -232,7 +248,7 @@ async function onClickDeleteFile(file) {
                 </p>
             </div>
             <div class="flex flex-col mr-4">
-                <div class="text-sm">Round</div>
+                <div class="text-sm">Current Round</div>
                 <p class="text-xl font-bold">
                     {{ file.round.length }}
                 </p>
@@ -241,7 +257,7 @@ async function onClickDeleteFile(file) {
 
         <div class="file-name flex flex-row justify-start">
             <Button 
-                v-if="view_mode === 'mapping'"
+                v-if="view_mode === 'mapping' || view_mode === 'file'"
                 severity="secondary"
                 size="small"
                 class="mr-2"
@@ -252,7 +268,7 @@ async function onClickDeleteFile(file) {
             </Button>
 
             <Button 
-                v-if="view_mode === 'review'"
+                v-if="view_mode === 'review' || view_mode === 'file'"
                 severity="secondary"
                 size="small"
                 class="mr-2"
@@ -275,6 +291,7 @@ async function onClickDeleteFile(file) {
             <Button 
                 severity="danger"
                 size="small"
+                v-if="view_mode === 'file'"
                 :disabled="store.working_file?.file_id == file.file_id"
                 v-tooltip.bottom="'Delete this file.'"
                 @click="onClickDeleteFile(file)">

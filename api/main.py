@@ -1097,6 +1097,14 @@ async def get_files_by_project(
         file['n_concepts'] = await db.concepts.count_documents({
             "file_id": file['file_id']
         })
+
+        # count the unique users who have mapped this file
+        # and the `submitted` is true
+        file['n_submitted'] = len(await db.mappings.distinct("user_id", {
+            "file_id": file['file_id'],
+            "submitted": True
+        }))
+
     return {
         'success': True,
         'files': formatFiles(files)
@@ -1594,6 +1602,7 @@ async def search(
                 # save the mapping
                 mapping = {
                     "mapping_id": str(uuid.uuid4()),
+                    "file_id": search_data.queries[i]['file_id'],
                     "concept_id": search_data.queries[i]['concept_id'],
                     "user_id": current_user['user_id'],
                     "round": round,

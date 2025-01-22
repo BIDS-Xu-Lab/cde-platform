@@ -388,7 +388,9 @@ function checkRole(role) {
 }
 
 function defaultTab(){
-    if (checkRole('mapper')) {
+    if (checkRole('owner')) {
+        return 'files';
+    }else if (checkRole('mapper')) {
         return 'mapping_files';
     } else if (checkRole('reviewer')) {
         return 'review_files';
@@ -591,6 +593,13 @@ onMounted(() => {
     <Tabs v-if="store.current_project"
         :value="defaultTab()">
         <TabList>
+            <Tab value="files" v-if="checkRole('owner')">
+                <i class="fa-regular fa-folder-open"></i>
+                Total Files
+                <span v-if="store.files.length > 0">
+                    ({{ store.files.length }})
+                </span>
+            </Tab>
             <Tab value="mapping_files" v-if="checkRole('mapper')">
                 <i class="fa-regular fa-folder-open"></i>
                 Files Mapping
@@ -619,7 +628,16 @@ onMounted(() => {
         </TabList>
         <TabPanels 
             :style="{ height: 'calc(100vh - 21.5rem)', width: 'calc(100% + 1rem)', overflowY: 'auto' }">
-
+            <!-- tab for managing files -->
+            <TabPanel value="files">
+            <div class="flex flex-col h-full">
+                <template v-for="file in store.files">
+                    <ProjectFileItem 
+                        :file="file"
+                        :view_mode="'file'" />
+                </template>
+            </div>
+            </TabPanel>
             <!-- tab for mananging mapping files -->
             <TabPanel value="mapping_files">
             <div class="flex flex-col h-full">
@@ -630,7 +648,7 @@ onMounted(() => {
                 </template>
             </div>
             </TabPanel>
-            <!-- tab for mananging files -->
+            <!-- tab for mananging review files -->
             <TabPanel value="review_files">
             <div class="flex flex-col h-full">
                 <template v-for="file in filterFilesByStatus(store.files, 'reviewing')">
