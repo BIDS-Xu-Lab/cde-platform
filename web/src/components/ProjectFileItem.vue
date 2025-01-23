@@ -249,12 +249,17 @@ async function onClickMoveStage(file, stage) {
                     {{ file.round.length }}
                 </p>
             </div>
-            <div class="flex flex-col mr-4"
+            <div class="flex flex-col items-center mr-4"
             v-if="view_mode === 'file'">
                 <div class="text-sm">Current Status</div>
-                <p class="text-xl font-bold">
-                    {{ file.round[file.round.length - 1].stage }}
-                </p>
+                <div class="flex flex-row">
+                    <p class="text-xl font-bold">
+                        {{ file.round[file.round.length - 1].stage }}
+                    </p>
+                    <p class="text-xl font-bold" v-if="file.round[file.round.length - 1].stage === 'reviewing'">
+                        : {{ file.round[file.round.length - 1].review_round }}
+                    </p>
+                </div>
             </div>
             <div class="flex flex-col mr-4">
                 <div class="text-sm"># Columns</div>
