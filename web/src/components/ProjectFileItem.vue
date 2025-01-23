@@ -10,6 +10,7 @@ defineProps({
 
 const store = useDataStore();
 const submissionCount = ref(0);
+const visible_dialog_move_file = ref(false);
 // const popover_assign_users = ref(null);
 // const popover_assigned_users = ref(null);
 
@@ -118,6 +119,30 @@ async function onClickDeleteFile(file) {
     await store.updateCurrentProjectFiles();
 }
 
+async function onClickChangeStage(file) {
+    console.log('* clicked Change Stage');
+    visible_dialog_move_file.value = true;
+}
+
+
+async function onClickMoveStage(file, stage) {
+    visible_dialog_move_file.value = false;
+    console.log('* clicked move stage');
+    // delete this file
+    let ret = await Jimin.moveToNextStage(file.file_id, stage);
+    // if this file is the working file, reset the working file
+    if (store.working_file && file.file_id == store.working_file.file_id) {
+        store.working_file = null;
+        store.working_file_concepts = [];
+        store.working_concept = null;
+    }
+
+    store.msg(ret.message);
+
+    // update all files for this project
+    await store.updateCurrentProjectFiles();
+}
+
 </script>
 
 <template>
@@ -198,7 +223,10 @@ async function onClickDeleteFile(file) {
                 </div>
             </div>
         </div> -->
-
+        <div class="text-lg font-bold mb-2">
+                <font-awesome-icon :icon="['fa', 'file']" />
+                {{ file.filename }}
+        </div>
         <div class="file-column flex flex-row mb-2">
             <div class="flex flex-col mr-4"
                 v-if="view_mode === 'file'">
@@ -211,8 +239,21 @@ async function onClickDeleteFile(file) {
                 v-if="view_mode === 'file'">
                 <div class="text-sm">Reviewed / Reviewer</div>
                 <p class="text-xl font-bold">
-                    0 / {{ store.current_project.members.filter(member => member.role === 'reviewer').length }}
+                    0 / {{ store.current_project.members.filter(member => member.role === 'reviewer').length + 1}}
                     <!-- {{ file.columns.length }} / {{ 5 }} -->
+                </p>
+            </div>
+            <div class="flex flex-col mr-4">
+                <div class="text-sm">Current Round</div>
+                <p class="text-xl font-bold">
+                    {{ file.round.length }}
+                </p>
+            </div>
+            <div class="flex flex-col mr-4"
+            v-if="view_mode === 'file'">
+                <div class="text-sm">Current Status</div>
+                <p class="text-xl font-bold">
+                    {{ file.round[file.round.length - 1].stage }}
                 </p>
             </div>
             <div class="flex flex-col mr-4">
@@ -247,17 +288,11 @@ async function onClickDeleteFile(file) {
                     {{ file.column_name_values }}
                 </p>
             </div>
-            <div class="flex flex-col mr-4">
-                <div class="text-sm">Current Round</div>
-                <p class="text-xl font-bold">
-                    {{ file.round.length }}
-                </p>
-            </div>
         </div>
 
         <div class="file-name flex flex-row justify-start">
             <Button 
-                v-if="view_mode === 'mapping' || view_mode === 'file'"
+                v-if="view_mode === 'mapping'"
                 severity="secondary"
                 size="small"
                 class="mr-2"
@@ -268,7 +303,7 @@ async function onClickDeleteFile(file) {
             </Button>
 
             <Button 
-                v-if="view_mode === 'review' || view_mode === 'file'"
+                v-if="view_mode === 'review'"
                 severity="secondary"
                 size="small"
                 class="mr-2"
@@ -278,7 +313,7 @@ async function onClickDeleteFile(file) {
                 Review
             </Button>
 
-            <Button 
+            <!-- <Button 
                 severity="info"
                 size="small"
                 class="mr-2"
@@ -286,11 +321,12 @@ async function onClickDeleteFile(file) {
                 @click="onClickDownload(file)">
                 <font-awesome-icon :icon="['fa', 'download']" />
                 Download
-            </Button>
+            </Button> -->
 
             <Button 
                 severity="danger"
                 size="small"
+                class="mr-2"
                 v-if="view_mode === 'file'"
                 :disabled="store.working_file?.file_id == file.file_id"
                 v-tooltip.bottom="'Delete this file.'"
@@ -298,9 +334,68 @@ async function onClickDeleteFile(file) {
                 <font-awesome-icon :icon="['fa', 'trash']" />
                 Delete
             </Button>
+            <Button 
+                severity="warn"
+                size="small"
+                v-if="view_mode === 'file'"
+                :disabled="file.round[file.round.length - 1].stage === 'completed'"
+                v-tooltip.bottom="'Change the stage.'"
+                @click="onClickChangeStage()">
+                <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                Change Stage
+            </Button>
         </div>
 
     </div>
+    <Dialog v-model:visible="visible_dialog_move_file" title="Move File" width="400px">
+        <div v-if="file.round[file.round.length - 1].stage==='mapping'" class="flex flex-col gap-4">
+            <p>Are you sure you want to move this file to the next stage?</p>
+            <div class="flex flex-row justify-end gap-2">
+                <Button 
+                severity="secondary" 
+                @click="visible_dialog_move_file = false">
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+                Cancel
+                </Button>
+
+                <Button 
+                severity="warn" 
+                @click="onClickMoveStage(file, 'reviewing')">
+                <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                Move Stage
+                </Button>
+            </div>
+        </div>
+        <div v-if="file.round[file.round.length - 1].stage==='reviewing'" class="flex flex-col gap-4">
+            <p>Do you want to review again, move to the next mapping round, or finalize?</p>
+            <div class="flex flex-row justify-end gap-2">
+                <Button 
+                severity="secondary" 
+                @click="visible_dialog_move_file = false">
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+                Cancel
+                </Button>
+                <Button 
+                severity="info" 
+                @click="onClickMoveStage(file, 'reviewing')">
+                <font-awesome-icon :icon="['fas', 'rotate-right']" />
+                Review Again
+                </Button>
+                <Button 
+                severity="warn" 
+                @click="onClickMoveStage(file, 'mapping')">
+                <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                Mapping Again
+                </Button>
+                <Button
+                severity="danger"
+                @click="onClickMoveStage(file, 'completed')">
+                <font-awesome-icon :icon="['fas', 'check']" />
+                Finalize
+                </Button>
+            </div>
+        </div>
+    </Dialog>
 </template>
 
 <style scoped>

@@ -267,6 +267,22 @@ export const Jimin = {
 
         return rsp.data;
     },
+    
+    moveToNextStage: async function (file_id, stage) {
+        console.log('* move to next stage', file_id);
+
+        const rsp = await this.axios_instance.get(
+            '/move_to_next_stage',
+            {
+                params: {
+                    file_id: file_id,
+                    stage: stage
+                }
+            }
+        );
+
+        return rsp.data;
+    },
 
     ///////////////////////////////////////////////////////
     // Concepts related

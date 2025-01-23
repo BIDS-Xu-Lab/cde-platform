@@ -1329,6 +1329,55 @@ async def submit_mapping_work(
         'success': True,
         'message': 'Mapping work submitted successfully'
     }
+
+@app.get('/move_to_next_stage', tags=["file"])
+async def move_to_next_stage(
+    request: Request,
+    file_id: str,
+    stage: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Move a file to the next stage
+    '''
+    logging.info("move to stage")
+    # get the file and check if this file owner is the current user
+    file = await db.files.find_one({
+        "file_id": file_id,
+        "file_owner": current_user['user_id']
+    })
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    # get the round of the file
+    file_round = len(file['round']) - 1
+    # multiple situations to move to the next stage, if the current stage is mapping, change to reviewing
+    if file['round'][file_round]['stage'] == "mapping" and stage == "reviewing":
+        file['round'][file_round]['stage'] = "reviewing"
+        file['round'][file_round]['review_round'] = 0
+    # if the current stage is reviewing, check given stage, if its reviewing, increment the review_round
+    elif file['round'][file_round]['stage'] == "reviewing" and stage == "reviewing":
+        file['round'][file_round]['review_round'] += 1
+    # if the current stage is reviewing, check given stage, if its mapping, add a new round with stage mapping, and mark current round as completed
+    elif file['round'][file_round]['stage'] == "reviewing" and stage == "mapping":
+        file['round'][file_round]['stage'] = "completed"
+        file['round'].append({
+            "stage": "mapping",
+            "review_round": 0
+        })
+    # if the current stage is reviewing, check given stage, if its completed, change the stage to completed
+    elif file['round'][file_round]['stage'] == "reviewing" and stage == "completed":
+        file['round'][file_round]['stage'] = "completed"
+    else:
+        raise HTTPException(status_code=403, detail="Invalid stage transition")
+    # update the file
+    await db.files.update_one(
+        {"file_id": file_id},
+        {"$set": file}
+    )
+    return {
+        'success': True,
+        'message': 'File moved to the next stage successfully'
+    }
 # @app.get('/assign_file', tags=["file"])
 # async def assign_file(
 #     request: Request,
