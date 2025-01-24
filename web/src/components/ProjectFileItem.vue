@@ -66,7 +66,7 @@ async function onClickMapping(file) {
             store.working_mappings[mapping.concept_id] = {
                 selected_results: mapping.selected_results,
                 search_results: mapping.search_results,
-                submitted: mapping.submitted
+                status: mapping.status
             };
         });
 

@@ -20,7 +20,7 @@ const prograss_value = ref(0);
 
 function checkSubmitStatus(){
     for (const mapping of Object.values(store.working_mappings)) {
-        if (mapping.submitted) {
+        if (mapping.status === "submitted") {
             return true;
         }
     }

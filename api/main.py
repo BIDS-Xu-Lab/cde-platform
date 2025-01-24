@@ -1098,12 +1098,12 @@ async def get_files_by_project(
             "file_id": file['file_id']
         })
 
-        submitted = await db.mappings.distinct("user_id", {
+        status = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
-            "submitted": True
+            "status": "submitted"
         })
-        file['n_submitted'] = len(submitted)
-        file['submitted_users'] = submitted
+        file['n_submitted'] = len(status)
+        file['submitted_users'] = status
 
     return {
         'success': True,
@@ -1313,16 +1313,11 @@ async def submit_mapping_work(
         'message': 'Not all concepts have been mapped'
     }
 
-    # # check if all mappings already submitted (temporary disabled)
-    # if all(mapping['submitted'] for mapping in mappings):
-    #     raise HTTPException(status_code=403, detail="All mappings have been submitted")
-    
-    # update all mappings submitted as True
     for mapping in mappings:
         await db.mappings.update_one(
             {"mapping_id": mapping['mapping_id']},
             {"$set": {
-                "submitted": True
+                "status": 'submitted'
             }}
         )
     return {
@@ -1714,7 +1709,7 @@ async def search(
                     "concept_id": search_data.queries[i]['concept_id'],
                     "user_id": current_user['user_id'],
                     "round": round,
-                    "submitted": False,
+                    "status": "unsubmitted",
                     "source": search_data.source,
                     "collections": search_data.collections,
                     "selected_results": [],
