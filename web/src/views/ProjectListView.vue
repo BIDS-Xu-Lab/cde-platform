@@ -650,13 +650,13 @@ onMounted(() => {
             </TabPanel>
             <!-- tab for mananging review files -->
             <TabPanel value="review_files">
-            <div class="flex flex-col h-full">
-                <template v-for="file in filterFilesByStatus(store.files, 'reviewing')">
-                    <ProjectFileItem 
-                        :file="file"
-                        :view_mode="'review'" />
-                </template>
-            </div>
+                <div class="flex flex-col h-full">
+                    <template v-for="file in filterFilesByStatus(store.files, 'reviewing')">
+                        <ProjectFileItem 
+                            :file="file"
+                            :view_mode="'review'" />
+                    </template>
+                </div>
             </TabPanel>
 
             <!-- tab for managing reviewers -->

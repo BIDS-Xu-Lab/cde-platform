@@ -9,8 +9,11 @@ defineProps({
 });
 
 const store = useDataStore();
-const submissionCount = ref(0);
 const visible_dialog_move_file = ref(false);
+const popover_review_results_list = ref(null);
+const togglePopoverReviewResultsList = (event) => {
+    popover_review_results_list.value.toggle(event);
+}
 // const popover_assign_users = ref(null);
 // const popover_assigned_users = ref(null);
 
@@ -78,6 +81,17 @@ async function onClickMapping(file) {
 
 async function onClickReview(file){
     console.log('* clicked Review');
+    // clear the existing mapping data
+    store.clearMappingData();
+
+    // set working project to this project
+    store.working_project = store.current_project;
+
+    // set working file to this file
+    store.working_file = file;
+    // then, switch to the mapping view
+    store.changeView('review');
+    togglePopoverReviewResultsList();
 }
 
 async function onClickDownload(file) {
@@ -249,6 +263,12 @@ async function onClickMoveStage(file, stage) {
                     {{ file.round.length }}
                 </p>
             </div>
+            <div class="flex flex-col mr-4">
+                <div class="text-sm">Review Round</div>
+                <p class="text-xl font-bold">
+                    {{ file.round[file.round.length - 1].review_round + 1}}
+                </p>
+            </div>
             <div class="flex flex-col items-center mr-4"
             v-if="view_mode === 'file'">
                 <div class="text-sm">Current Status</div>
@@ -257,7 +277,7 @@ async function onClickMoveStage(file, stage) {
                         {{ file.round[file.round.length - 1].stage }}
                     </p>
                     <p class="text-xl font-bold" v-if="file.round[file.round.length - 1].stage === 'reviewing'">
-                        : {{ file.round[file.round.length - 1].review_round }}
+                        : {{ file.round[file.round.length - 1].review_round + 1}}
                     </p>
                 </div>
             </div>
@@ -313,10 +333,40 @@ async function onClickMoveStage(file, stage) {
                 size="small"
                 class="mr-2"
                 v-tooltip.bottom="'Review result for this file.'"
-                @click="onClickReview(file)">
-                <font-awesome-icon :icon="['fa', 'magnifying-glass']" />
-                Review
+                @click="togglePopoverReviewResultsList">
+                <font-awesome-icon :icon="['fa', 'list']" />
+                Results List
             </Button>
+            <Popover ref="popover_review_results_list">
+                <div class="flex flex-col gap-4 w-[25rem]">
+                    <div class="font-bold">
+                        <div style="border-bottom: 1px solid var(--bd-color)">
+                            <span class="font-bold">Result List:</span>
+                        </div>
+                        <div class = "flex justify-center" v-if="file.n_submitted === 0">
+                            No review results available. 
+                        </div>
+                        <li v-for="review in file.submitted_users" class="flex items-center gap-2 px-2 py-3 rounded-border">
+                            <div class="flex justify-between w-full mt-1 mb-1">
+                                <div>
+                                    <span class="text-xl font-bold">Name: {{ store.current_project.members.find(member => member.user_id === review)?.name }}</span>
+                                    <div class="text-sm text-surface-500 dark:text-surface-400">Email: {{ store.current_project.members.find(member => member.user_id === review)?.email }}</div>
+                                </div>
+                                <Button
+                                    severity="info"
+                                    size="small"
+                                    class="m-2 btn-mini"
+                                    @click="onClickReview(file)"
+                                    >
+                                    <font-awesome-icon :icon="['fa', 'eye']" 
+                                    v-tooltip.bottom="'View review results for this file.'"/>
+                                    Review
+                                </Button>
+                            </div>
+                        </li>
+                    </div>
+                </div>
+            </Popover>
 
             <!-- <Button 
                 severity="info"

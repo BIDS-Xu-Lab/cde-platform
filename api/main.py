@@ -1100,10 +1100,17 @@ async def get_files_by_project(
 
         # count the unique users who have mapped this file
         # and the `submitted` is true
-        file['n_submitted'] = len(await db.mappings.distinct("user_id", {
+        # file['n_submitted'] = len(await db.mappings.distinct("user_id", {
+        #     "file_id": file['file_id'],
+        #     "submitted": True
+        # }))
+
+        submitted = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
             "submitted": True
-        }))
+        })
+        file['n_submitted'] = len(submitted)
+        file['submitted_users'] = submitted
 
     return {
         'success': True,

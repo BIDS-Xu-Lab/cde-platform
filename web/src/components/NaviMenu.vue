@@ -38,14 +38,14 @@ onMounted(() => {
         </div>
 
         <!-- functions after login -->
-        <div v-show="store.working_file != null"
+        <div v-show="store.working_file != null && store.working_file?.round[store.working_file?.round.length - 1]?.stage == 'mapping'"
             class="navi-item"
             @click="store.changeView('mapping')"
             :class="{'active-page': store.current_view=='mapping'}">
             <font-awesome-icon :icon="['fa-solid', 'arrows-left-right-to-line']" />
             Mapping
         </div>
-        <div v-show="store.working_file != null" 
+        <div v-show="store.working_file != null && store.working_file?.round[store.working_file?.round.length - 1]?.stage == 'reviewing'" 
             class="navi-item"
             @click="store.changeView('review')"
             :class="{'active-page': store.current_view=='review'}">
@@ -97,6 +97,11 @@ onMounted(() => {
                 <font-awesome-icon :icon="['fa', 'file']" class="mr-1" />
                 <span class="italic">
                     {{ store.working_file?.filename }}
+                </span>
+                - 
+                <font-awesome-icon :icon="['fab', 'sourcetree']" class="mr-1"/>
+                <span class="italic">
+                    {{ store.working_file?.round[store.working_file?.round.length - 1]?.stage }}
                 </span>
             </template>
         </div>
