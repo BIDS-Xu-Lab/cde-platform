@@ -102,7 +102,7 @@ MONGO_ALL_COLLECTION_NAMES = [
     'projects',       # project information
     'files',          # file information of projects
     'concepts',       # concepts loaded from files
-    'file_users',     # user permissions on each file
+    'reviews',        # reviews of mappings
     'jobs',           # jobs for OpenAI
     'mappings',       # mappings between concepts and CDEs
 ]
@@ -1098,13 +1098,6 @@ async def get_files_by_project(
             "file_id": file['file_id']
         })
 
-        # count the unique users who have mapped this file
-        # and the `submitted` is true
-        # file['n_submitted'] = len(await db.mappings.distinct("user_id", {
-        #     "file_id": file['file_id'],
-        #     "submitted": True
-        # }))
-
         submitted = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
             "submitted": True
@@ -1433,14 +1426,14 @@ async def move_to_next_stage(
 # Concepts related APIs
 ###########################################################
 
-@app.get('/get_concepts_by_file', tags=["concept"])
-async def get_concepts_by_file(
+@app.get('/get_concepts_and_mapping_by_file', tags=["concept"])
+async def get_concepts_and_mapping_by_file(
     request: Request,
     file_id: str,
     current_user: dict = Depends(authJWTCookie),
 ):
     '''
-    Get all concepts by file
+    Get all concepts and mapping by file
     '''
     logging.info("get concepts by file")
 
@@ -1501,6 +1494,65 @@ async def get_concepts_by_file(
         'mappings': formatMappings(mappings)
     }
 
+@app.get('/get_concepts_and_review_data_by_file', tags=["concept"])
+async def get_concepts_and_review_data_by_file(
+    request: Request,
+    file_id: str,
+    user_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get all concepts and review data by file
+    '''
+    logging.info("get concepts and review data by file")
+    # first at all, check if the current user is the owner of the file, to do this, first we need to get the file and project
+    file = await db.files.find_one({
+        "file_id": file_id
+    })
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    project = await db.projects.find_one({
+        "project_id": file['project_id']
+    })
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    if file['file_owner'] == current_user['user_id']:
+        pass
+    # else if the current user is reviewer of this project, pass
+    elif any(member['user_id'] == current_user['user_id'] and member['role'] == "reviewer" for member in project['members']):
+        pass
+    else:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
+    # get the round of the file by looping through the files['round'] and find the last file['round']['stage'] == "reviewing"
+    round = len(file['round']) - 1
+    logging.debug(f"* get round of file {file_id} = {round}")
+    # get all concepts
+    concepts = await db.concepts.find({
+        "file_id": file_id
+    }).to_list(length=None)
+    
+    # get all mappings
+    mappings = await db.mappings.find({
+        "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
+        "user_id": user_id,
+        "round": round
+    }).to_list(length=None)
+
+    reviews = await db.reviews.find({
+        "mapping_id": {"$in": [mapping['mapping_id'] for mapping in mappings]},
+        "user_id": user_id,
+        "round": round
+    }).to_list(length=None)
+
+    return {
+            'success': True,
+            'concepts': formatConcepts(concepts),
+            'mappings': formatMappings(mappings),
+            'reviews': formatReview(reviews)
+        }
 ###########################################################
 # Mapping data related APIs
 ###########################################################
@@ -1725,6 +1777,7 @@ async def get_mapping(
 
 class UpdateSelectedResultsModel(BaseModel):
     concept_id: str
+    round: int
     selected_results: List[Dict[str, Any]]
 
 @app.post('/update_selected_results', tags=["mapping"])
@@ -1737,10 +1790,10 @@ async def update_selected_results(
     Update selected results
     '''
     logging.info("update selected results")
-
     # update the mapping by concept_id and user_id
     m = await db.mappings.find_one({
         "concept_id": update_data.concept_id,
+        "round": update_data.round,
         "user_id": current_user['user_id']
     })
 
@@ -2080,6 +2133,17 @@ def formatMappings(mappings):
         mapping.pop('_id', None)
 
     return mappings
+
+def formatReview(review):
+    review.pop('_id', None)
+
+    return review
+
+def formatReviews(reviews):
+    for review in reviews:
+        review.pop('_id', None)
+
+    return reviews
 
 if __name__ == '__main__':
     import uvicorn

@@ -395,6 +395,7 @@ async function onClickSelectResult(result) {
     // send selected results to server
     let ret = await Jimin.updateSelectedResults(
         store.working_concept.concept_id,
+        store.working_file.round.length - 1,
         store.working_mappings[store.working_concept.concept_id].selected_results
     );
 

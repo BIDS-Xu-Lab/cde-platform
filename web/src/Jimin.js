@@ -287,14 +287,30 @@ export const Jimin = {
     ///////////////////////////////////////////////////////
     // Concepts related
     ///////////////////////////////////////////////////////
-    getConceptsByFile: async function (file_id) {
+    getConceptAndMappingByFile: async function (file_id) {
         console.log('* get concepts by file', file_id);
 
         const rsp = await this.axios_instance.get(
-            '/get_concepts_by_file',
+            '/get_concepts_and_mapping_by_file',
             {
                 params: {
                     file_id: file_id
+                }
+            }
+        );
+
+        return rsp.data;
+    },
+
+    getConceptAndReviewDataByFile: async function (file_id, user_id) {
+        console.log('* get mapping result by file', file_id, "for the user", user_id);
+
+        const rsp = await this.axios_instance.get(
+            '/get_concepts_and_review_data_by_file',
+            {
+                params: {
+                    file_id: file_id,
+                    user_id: user_id
                 }
             }
         );
@@ -370,13 +386,14 @@ export const Jimin = {
         return rsp.data.results;
     },
 
-    async updateSelectedResults(concept_id, selected_results) {
-        console.log('* update selected results', concept_id, selected_results);
+    async updateSelectedResults(concept_id, round, selected_results) {
+        console.log('* update selected results', concept_id, round, selected_results);
 
         const rsp = await this.axios_instance.post(
             '/update_selected_results',
             {
                 concept_id: concept_id,
+                round: round,
                 selected_results: selected_results
             }
         );

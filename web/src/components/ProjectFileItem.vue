@@ -2,6 +2,7 @@
 import { viewDepthKey } from "vue-router";
 import { useDataStore } from "../DataStore";
 import { ref } from "vue";
+import { Jimin } from "../Jimin";
 
 defineProps({
     file: Object,
@@ -53,7 +54,7 @@ async function onClickMapping(file) {
 
     // set working concepts
     try {
-        let ret = await Jimin.getConceptsByFile(file.file_id);
+        let ret = await Jimin.getConceptAndMappingByFile(file.file_id);
         console.log('* got concepts:', ret);
 
         // set working concepts and mapping to default
@@ -79,8 +80,8 @@ async function onClickMapping(file) {
     store.changeView('mapping');
 }
 
-async function onClickReview(file){
-    console.log('* clicked Review');
+async function onClickReview(file, user_id) {
+    console.log('* clicked Review button');
     // clear the existing mapping data
     store.clearMappingData();
 
@@ -90,8 +91,15 @@ async function onClickReview(file){
     // set working file to this file
     store.working_file = file;
     // then, switch to the mapping view
+    try{
+        let ret = await Jimin.getConceptAndReviewDataByFile(file.file_id, user_id);
+        console.log('* got concept:s', ret);
+    } catch (err) {
+        console.error(err);
+        store.msg(err.message, 'Error', 'error');
+        return;
+    }
     store.changeView('review');
-    togglePopoverReviewResultsList();
 }
 
 async function onClickDownload(file) {
@@ -356,7 +364,7 @@ async function onClickMoveStage(file, stage) {
                                     severity="info"
                                     size="small"
                                     class="m-2 btn-mini"
-                                    @click="onClickReview(file)"
+                                    @click="onClickReview(file, review)"
                                     >
                                     <font-awesome-icon :icon="['fa', 'eye']" 
                                     v-tooltip.bottom="'View review results for this file.'"/>

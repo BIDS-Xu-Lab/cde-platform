@@ -20,6 +20,7 @@ async function onClickSelectResult(result) {
     // send selected results to server
     let ret = await Jimin.updateSelectedResults(
         store.working_concept.concept_id,
+        store.working_file.round.length - 1,
         store.working_mappings[store.working_concept.concept_id].selected_results
     );
 
@@ -38,6 +39,7 @@ async function onClickRemoveResult(result) {
     // send selected results to server
     let ret = await Jimin.updateSelectedResults(
         store.working_concept.concept_id,
+        store.working_file.round.length - 1,
         store.working_mappings[store.working_concept.concept_id].selected_results
     );
 
@@ -81,6 +83,7 @@ async function onChangeValueMapping(item, value) {
     // send selected results to server
     let ret = await Jimin.updateSelectedResults(
         store.working_concept.concept_id,
+        store.working_file.round.length - 1,
         store.working_mappings[store.working_concept.concept_id].selected_results
     );
 
@@ -97,6 +100,7 @@ async function onClickDeselectValueMapping(item, value) {
     // send selected results to server
     let ret = await Jimin.updateSelectedResults(
         store.working_concept.concept_id,
+        store.working_file.round.length - 1,
         store.working_mappings[store.working_concept.concept_id].selected_results
     );
 
