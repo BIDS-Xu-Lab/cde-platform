@@ -251,30 +251,24 @@ async function onClickMoveStage(file, stage) {
         </div>
         <div class="file-column flex flex-row mb-2">
             <div class="flex flex-col mr-4"
-                v-if="view_mode === 'file'">
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage === 'mapping'">
                 <div class="text-sm">Mapped / Mapper</div>
                 <p class="text-xl font-bold">
                     {{ file.n_submitted }} / {{ store.current_project.members.filter(member => member.role === 'mapper').length + 1}}
                 </p>
             </div>
             <div class="flex flex-col mr-4"
-                v-if="view_mode === 'file'">
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage === 'reviewing'">
                 <div class="text-sm">Reviewed / Reviewer</div>
                 <p class="text-xl font-bold">
                     0 / {{ store.current_project.members.filter(member => member.role === 'reviewer').length + 1}}
                     <!-- {{ file.columns.length }} / {{ 5 }} -->
                 </p>
             </div>
-            <div class="flex flex-col mr-4">
-                <div class="text-sm">Current Round</div>
-                <p class="text-xl font-bold">
-                    {{ file.round.length }}
-                </p>
-            </div>
-            <div class="flex flex-col mr-4">
+            <div class="flex flex-col mr-4" v-if="file.round[file.round.length - 1].stage === 'reviewing'">
                 <div class="text-sm">Review Round</div>
                 <p class="text-xl font-bold">
-                    {{ file.round[file.round.length - 1].review_round + 1}}
+                    {{ file.round.length }}
                 </p>
             </div>
             <div class="flex flex-col items-center mr-4"
@@ -283,9 +277,6 @@ async function onClickMoveStage(file, stage) {
                 <div class="flex flex-row">
                     <p class="text-xl font-bold">
                         {{ file.round[file.round.length - 1].stage }}
-                    </p>
-                    <p class="text-xl font-bold" v-if="file.round[file.round.length - 1].stage === 'reviewing'">
-                        : {{ file.round[file.round.length - 1].review_round + 1}}
                     </p>
                 </div>
             </div>
@@ -442,13 +433,7 @@ async function onClickMoveStage(file, stage) {
                 severity="info" 
                 @click="onClickMoveStage(file, 'reviewing')">
                 <font-awesome-icon :icon="['fas', 'rotate-right']" />
-                Review Again
-                </Button>
-                <Button 
-                severity="warn" 
-                @click="onClickMoveStage(file, 'mapping')">
-                <font-awesome-icon :icon="['fas', 'arrow-right']" />
-                Mapping Again
+                Move to Next Round
                 </Button>
                 <Button
                 severity="danger"

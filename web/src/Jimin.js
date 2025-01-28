@@ -268,16 +268,15 @@ export const Jimin = {
         return rsp.data;
     },
     
-    moveToNextStage: async function (file_id, stage) {
+    moveToNextStage: async function (file_id, stage, selected_results = []) {
         console.log('* move to next stage', file_id);
 
-        const rsp = await this.axios_instance.get(
+        const rsp = await this.axios_instance.post(
             '/move_to_next_stage',
             {
-                params: {
-                    file_id: file_id,
-                    stage: stage
-                }
+                file_id: file_id,
+                stage: stage,
+                selected_mapping_results: selected_results
             }
         );
 

@@ -102,7 +102,6 @@ MONGO_ALL_COLLECTION_NAMES = [
     'projects',       # project information
     'files',          # file information of projects
     'concepts',       # concepts loaded from files
-    'reviews',        # reviews of mappings
     'jobs',           # jobs for OpenAI
     'mappings',       # mappings between concepts and CDEs
 ]
@@ -1044,8 +1043,7 @@ async def upload_file(
     # set the round of file, index is the round number, and detail is the dict
     file_data['round'] = [
             {
-                "stage": "mapping", # mapping, reviewing, completed
-                "review_round": 0
+                "stage": "mapping" # mapping, reviewing, completed 
             }
         ]
 
@@ -1100,7 +1098,7 @@ async def get_files_by_project(
 
         status = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
-            "status": "submitted"
+            "status": "mapped"
         })
         file['n_submitted'] = len(status)
         file['submitted_users'] = status
@@ -1280,7 +1278,7 @@ async def submit_mapping_work(
     current_user: dict = Depends(authJWTCookie),
 ): 
     file_id = file_id.file_id
-    logging.info(f"submit mapping work for file {file_id}")
+    logging.info(f"submit work for file {file_id}")
     
     # get the file
     file = await db.files.find_one({
@@ -1291,9 +1289,8 @@ async def submit_mapping_work(
         raise HTTPException(status_code=404, detail="File not found")
     # get the round of the file
     file_round = len(file['round']) - 1
-    if file['round'][file_round]['stage'] != "mapping":
+    if file['round'][file_round]['stage'] != "mapping" and file['round'][file_round]['stage'] != "reviewing":
         raise HTTPException(status_code=403, detail="Not in mapping stage")
-    
     # get all concepts
     concepts = await db.concepts.find({
         "file_id": file_id
@@ -1313,11 +1310,16 @@ async def submit_mapping_work(
         'message': 'Not all concepts have been mapped'
     }
 
+    if file['round'][file_round]['stage'] == "mapping":
+        status = "mapped"
+    else:
+        status = "reviewing_submitted"
+
     for mapping in mappings:
         await db.mappings.update_one(
             {"mapping_id": mapping['mapping_id']},
             {"$set": {
-                "status": 'submitted'
+                "status": status
             }}
         )
     return {
@@ -1325,16 +1327,25 @@ async def submit_mapping_work(
         'message': 'Mapping work submitted successfully'
     }
 
-@app.get('/move_to_next_stage', tags=["file"])
+class MoveToNextStageModel(BaseModel):
+    file_id: str
+    stage: str
+    selected_mapping_results: List[Dict[str, Any]] | None
+
+
+
+@app.post('/move_to_next_stage', tags=["file"])
 async def move_to_next_stage(
     request: Request,
-    file_id: str,
-    stage: str,
+    move_to_next_stage_data: MoveToNextStageModel,
     current_user: dict = Depends(authJWTCookie),
 ):
     '''
     Move a file to the next stage
     '''
+    file_id = move_to_next_stage_data.file_id
+    stage = move_to_next_stage_data.stage
+    selected_mapping_results = move_to_next_stage_data.selected_mapping_results
     logging.info("move to stage")
     # get the file and check if this file owner is the current user
     file = await db.files.find_one({
@@ -1348,17 +1359,20 @@ async def move_to_next_stage(
     # multiple situations to move to the next stage, if the current stage is mapping, change to reviewing
     if file['round'][file_round]['stage'] == "mapping" and stage == "reviewing":
         file['round'][file_round]['stage'] = "reviewing"
-        file['round'][file_round]['review_round'] = 0
-    # if the current stage is reviewing, check given stage, if its reviewing, increment the review_round
-    elif file['round'][file_round]['stage'] == "reviewing" and stage == "reviewing":
-        file['round'][file_round]['review_round'] += 1
     # if the current stage is reviewing, check given stage, if its mapping, add a new round with stage mapping, and mark current round as completed
-    elif file['round'][file_round]['stage'] == "reviewing" and stage == "mapping":
-        file['round'][file_round]['stage'] = "completed"
-        file['round'].append({
-            "stage": "mapping",
-            "review_round": 0
-        })
+    elif file['round'][file_round]['stage'] == "reviewing" and stage == "reviewing":
+        # before moving to the next stage, we need to update the selected_mapping_results
+        if selected_mapping_results is not None:
+            file['round'][file_round]['stage'] = "completed"
+            file['round'].append({
+                "stage": "reviewing"
+            })
+            # will adding function here, for now, leave it empty
+
+
+            #end here
+        else:
+            raise HTTPException(status_code=403, detail="No selected mapping results")
     # if the current stage is reviewing, check given stage, if its completed, change the stage to completed
     elif file['round'][file_round]['stage'] == "reviewing" and stage == "completed":
         file['round'][file_round]['stage'] = "completed"
@@ -1528,25 +1542,55 @@ async def get_concepts_and_review_data_by_file(
     concepts = await db.concepts.find({
         "file_id": file_id
     }).to_list(length=None)
-    
-    # get all mappings
+    #First, check if there is already a review data for this user, if so, return the review data
     mappings = await db.mappings.find({
         "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
         "user_id": user_id,
+        "status": {"$in": ["reviewing", "reviewed"]},
+        "round": round
+    }).to_list(length=None)
+    if mappings:
+        return {
+            'success': True,
+            'concepts': formatConcepts(concepts),
+            'mappings': formatMappings(mappings)
+        }
+    # if not, get all mappings
+    mappings = await db.mappings.find({
+        "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
+        "user_id": user_id,
+        "status": "mapped",
         "round": round
     }).to_list(length=None)
 
-    reviews = await db.reviews.find({
-        "mapping_id": {"$in": [mapping['mapping_id'] for mapping in mappings]},
-        "user_id": user_id,
-        "round": round
-    }).to_list(length=None)
+    # create new mappings data with mappings, set reviewed_results to empty, and status to reviewing, and save it to the database, then return the new mappings data
+    _mappings = []
+    for mapping in mappings:
+        reviewed_result_template = {
+            "Agreement": None,
+            "Comment": None
+        }
+        _mapping = {
+            "mapping_id": str(uuid.uuid4()),
+            "file_id": file_id,
+            "concept_id": mapping['concept_id'],
+            "user_id": current_user['user_id'],
+            "reviewing_mapping_id": mapping['mapping_id'],
+            "round": round,
+            "status": "reviewing",
+            "source": mapping['source'],
+            "collections": mapping['collections'],
+            "selected_results": mapping['selected_results'],
+            "reviewed_results": [reviewed_result_template for _ in range(len(mapping['selected_results']))],
+            "search_results": mapping['search_results']
+        }
+        await db.mappings.insert_one(_mapping)
+        _mappings.append(_mapping)
 
     return {
             'success': True,
             'concepts': formatConcepts(concepts),
-            'mappings': formatMappings(mappings),
-            'reviews': formatReview(reviews)
+            'mappings': formatMappings(_mappings),
         }
 ###########################################################
 # Mapping data related APIs
@@ -1708,11 +1752,13 @@ async def search(
                     "file_id": search_data.queries[i]['file_id'],
                     "concept_id": search_data.queries[i]['concept_id'],
                     "user_id": current_user['user_id'],
+                    "reviewing_mapping_id": None,
                     "round": round,
                     "status": "unsubmitted",
                     "source": search_data.source,
                     "collections": search_data.collections,
                     "selected_results": [],
+                    "reviewed_results": [],
                     "search_results": results,
                     "created": datetime.datetime.now(),
                     "updated": datetime.datetime.now(),
@@ -2128,17 +2174,6 @@ def formatMappings(mappings):
         mapping.pop('_id', None)
 
     return mappings
-
-def formatReview(review):
-    review.pop('_id', None)
-
-    return review
-
-def formatReviews(reviews):
-    for review in reviews:
-        review.pop('_id', None)
-
-    return reviews
 
 if __name__ == '__main__':
     import uvicorn
