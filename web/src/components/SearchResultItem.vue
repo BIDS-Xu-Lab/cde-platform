@@ -1,16 +1,30 @@
 <script setup>
 import { useDataStore } from "../DataStore";
-import { ref } from "vue";
+import { ref, defineProps } from "vue";
 const store = useDataStore();
 
-defineProps({
+const props = defineProps({
     item: Object,
     item_idx: Number,
     flag_selected: Boolean || false,
     flag_enabled_value_mapping: Boolean || false,
     flag_submitted: Boolean || false,
+    view_mode: String,
 });
 
+const popover_disagree_comments = ref(null);
+
+const togglePpoverDisagreeComments = (event) => {
+    popover_disagree_comments.value.toggle(event);
+}
+
+const popover_view_comments = ref(null);
+
+const togglePpoverviewComments = (event) => {
+    popover_view_comments.value.toggle(event);
+}
+
+const comments = ref('');
 async function onClickSelectResult(result) {
     console.log('* clicked Select Result:', result);
 
@@ -108,7 +122,75 @@ async function onClickDeselectValueMapping(item, value) {
 
     // show a message
     store.msg(ret.message);
+}
 
+function checkRemoveButtonAuth() {
+    // check the props.item_idx, if item_idx larger than store.working_mappings[store.working_concept.concept_id].reviewed_results.length - 1, then return true
+    if (props.flag_selected && !props.flag_submitted) {
+        if (props.view_mode === 'reviewing' && props.item_idx < store.working_mappings[store.working_concept.concept_id].reviewed_results.length) {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
+}
+
+async function onClickAgree(item_idx){
+    console.log('* clicked Agree:', props.item, item_idx);
+    // update store
+    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement = true;
+    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment = "Agreed by reviewer.";
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_file.round.length - 1,
+        store.working_mappings[store.working_concept.concept_id].selected_results,
+        store.working_mappings[store.working_concept.concept_id].reviewed_results
+    );
+
+    console.log('* updated selected results:', ret);
+    // show a message
+    store.msg(ret.message);
+}
+
+async function onClickDisagreeSubmit(item_idx, comment) {
+    console.log('* clicked disagree:', props.item, item_idx);
+    // update store
+    // close the popover
+    togglePpoverDisagreeComments();
+    
+    // check if the comment is empty
+    if (comment === ''){
+        comment = "No comment.";
+    }
+    // update store
+    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement = false;
+    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment = comment;
+    // clear the comment
+    comments.value = '';
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_file.round.length - 1,
+        store.working_mappings[store.working_concept.concept_id].selected_results,
+        store.working_mappings[store.working_concept.concept_id].reviewed_results
+    );
+
+    console.log('* updated selected results:', ret);
+    // show a message
+    store.msg(ret.message);
+
+}
+function displayAgreementInfo(){
+    if (store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx].agreement === true){
+        return "Agreed";
+    } else if (store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx].agreement === false){
+        return "Disagreed";
+    } else {
+        return "Not reviewed";
+    }
 }
 
 </script>
@@ -198,7 +280,7 @@ async function onClickDeselectValueMapping(item, value) {
                 v-tooltip.right="'Select this concept.'"
                 @click="onClickSelectResult(item)">
             </Button>
-            <Button v-if="flag_selected && !flag_submitted"
+            <Button v-if="checkRemoveButtonAuth()"
                 size="small"
                 severity="warn"
                 icon="pi pi-trash"
@@ -207,6 +289,82 @@ async function onClickDeselectValueMapping(item, value) {
                 v-tooltip.right="'Remove this concept.'"
                 @click="onClickRemoveResult(item)">
             </Button>
+            <div class = "flex flex-row" v-if="view_mode === 'reviewing' && flag_selected && !flag_submitted && !checkRemoveButtonAuth()">
+                <div class="flex flex-row">
+                    <p class="font-bold mr-2">{{ displayAgreementInfo()}}</p>
+                    <div class="font-bold" v-if="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === false">
+                        <Button
+                    size="small"
+                    severity="info"
+                    icon="pi pi-eye"
+                    label="comments"
+                    class="mr-2"
+                    v-tooltip.right="'Disagree this selection'"
+                    @click="togglePpoverviewComments">
+                </Button>
+                <Popover ref="popover_view_comments">
+                    <div class="flex flex-col gap-4 w-[25rem]">
+                        <div class="font-bold">
+                            <div style="border-bottom: 1px solid var(--bd-color)">
+                                <span class="font-bold">Comments</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <p class="mt-4 mb-2 w-[24rem]">{{store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment}}</p>
+                                <Button
+                                    severity="secondary"
+                                    size="small"
+                                    class="btn-mini w-24"
+                                    @click="togglePpoverviewComments"
+                                    >
+                                    Close
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Popover>
+                    </div>
+                </div>
+                <Button
+                    :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === true"
+                    size="small"
+                    severity="success"
+                    icon="pi pi-check"
+                    label="Agree"
+                    class="mr-2"
+                    v-tooltip.right="'Aggree this selection'"
+                    @click="onClickAgree(item_idx)">
+                </Button>
+                <Button
+                    :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === false"
+                    size="small"
+                    severity="danger"
+                    icon="pi pi-times"
+                    label="Disagree"
+                    class="mr-2"
+                    v-tooltip.right="'Disagree this selection'"
+                    @click="togglePpoverDisagreeComments">
+                </Button>
+                <Popover ref="popover_disagree_comments">
+                    <div class="flex flex-col gap-4 w-[25rem]">
+                        <div class="font-bold">
+                            <div style="border-bottom: 1px solid var(--bd-color)">
+                                <span class="font-bold">Comments</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <Textarea class="mt-4 mb-2 w-[24rem]" v-model="comments" rows="5" cols="30" placeholder="Input comments here, or press submit without comments." />
+                                <Button
+                                    severity="secondary"
+                                    size="small"
+                                    class="btn-mini w-24"
+                                    @click="onClickDisagreeSubmit(item_idx, comments)"
+                                    >
+                                    Submit
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </Popover>
+            </div>
         </div>
     </div>
 

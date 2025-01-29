@@ -66,6 +66,7 @@ async function onClickMapping(file) {
             store.working_mappings[mapping.concept_id] = {
                 selected_results: mapping.selected_results,
                 search_results: mapping.search_results,
+                reviewed_results: mapping.reviewed_results,
                 status: mapping.status
             };
         });
@@ -93,7 +94,20 @@ async function onClickReview(file, user_id) {
     // then, switch to the mapping view
     try{
         let ret = await Jimin.getConceptAndReviewDataByFile(file.file_id, user_id);
-        console.log('* got concept:s', ret);
+        console.log('* got concept:', ret);
+                // set working concepts and mapping to default
+                store.working_file_concepts = ret.concepts;
+                store.working_mappings = {};
+
+                // put all concepts into the working mappings
+                ret.mappings.forEach((mapping) => {
+                    store.working_mappings[mapping.concept_id] = {
+                        selected_results: mapping.selected_results,
+                        search_results: mapping.search_results,
+                        reviewed_results: mapping.reviewed_results,
+                        status: mapping.status
+                    };
+                });
     } catch (err) {
         console.error(err);
         store.msg(err.message, 'Error', 'error');
@@ -265,20 +279,20 @@ async function onClickMoveStage(file, stage) {
                     <!-- {{ file.columns.length }} / {{ 5 }} -->
                 </p>
             </div>
+            <div class="flex flex-col items-center mr-4"
+                v-if="view_mode === 'file'">
+                    <div class="text-sm">Current Status</div>
+                    <div class="flex flex-row">
+                        <p class="text-xl font-bold">
+                            {{ file.round[file.round.length - 1].stage }}
+                        </p>
+                    </div>
+            </div>
             <div class="flex flex-col mr-4" v-if="file.round[file.round.length - 1].stage === 'reviewing'">
                 <div class="text-sm">Review Round</div>
                 <p class="text-xl font-bold">
                     {{ file.round.length }}
                 </p>
-            </div>
-            <div class="flex flex-col items-center mr-4"
-            v-if="view_mode === 'file'">
-                <div class="text-sm">Current Status</div>
-                <div class="flex flex-row">
-                    <p class="text-xl font-bold">
-                        {{ file.round[file.round.length - 1].stage }}
-                    </p>
-                </div>
             </div>
             <div class="flex flex-col mr-4">
                 <div class="text-sm"># Columns</div>

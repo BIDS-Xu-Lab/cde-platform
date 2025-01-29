@@ -1,9 +1,9 @@
 <script setup>
 import ToggleSwitch from 'primevue/toggleswitch';
 import Papa from 'papaparse'
-import { parse, stringify } from 'yaml'
+import { stringify } from 'yaml'
 import { useDataStore } from '../DataStore';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { Button } from 'primevue';
 
 import * as CDEHelper from '../CDEHelper';
@@ -20,24 +20,6 @@ const prograss_value = ref(0);
 async function onClickSubmitButton() {
     console.log('* clicked Submit Button');
     submit_dialog_visible.value = true;
-}
-
-
-async function onClickRefreshList() {
-    console.log('* clicked Refresh List');
-
-    // load source data
-    let sources = await Jimin.getSources();
-
-    store.msg('Loaded ' + sources.length + ' sources.');
-
-    // update store
-    store.mapping.sources = sources.map((item) => {
-        return {
-            name: item,
-            code: item
-        };
-    });
 }
 
 async function onChangeSource() {
@@ -372,32 +354,6 @@ function fmtScore(score) {
     return score.toFixed(2);
 }
 
-///////////////////////////////////////////////////////////
-// Selection related
-///////////////////////////////////////////////////////////
-
-async function onClickSelectResult(result) {
-    console.log('* clicked Select Result:', result);
-
-    // update store
-    store.addSelectedResultToWorkingConcept(result);
-
-    // send selected results to server
-    let ret = await Jimin.updateSelectedResults(
-        store.working_concept.concept_id,
-        store.working_file.round.length - 1,
-        store.working_mappings[store.working_concept.concept_id].selected_results
-    );
-
-    console.log('* updated selected results:', ret);
-
-    // show a message
-    store.msg(ret.message);
-}
-
-const selected_results_panel = ref();
-const search_results_panel = ref();
-
 </script>
 
 <template>
@@ -408,7 +364,7 @@ const search_results_panel = ref();
                 :disabled="CDEHelper.checkSubmitStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Refresh list.'"
-                @click="onClickRefreshList">
+                @click="CDEHelper.onClickRefreshListGetSources">
                 <font-awesome-icon icon="fa-solid fa-rotate" class="menu-icon" />
                 <span>
                     Refresh

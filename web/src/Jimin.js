@@ -385,7 +385,7 @@ export const Jimin = {
         return rsp.data.results;
     },
 
-    async updateSelectedResults(concept_id, round, selected_results) {
+    async updateSelectedResults(concept_id, round, selected_results, reviewed_results = []) {
         console.log('* update selected results', concept_id, round, selected_results);
 
         const rsp = await this.axios_instance.post(
@@ -393,7 +393,8 @@ export const Jimin = {
             {
                 concept_id: concept_id,
                 round: round,
-                selected_results: selected_results
+                selected_results: selected_results,
+                reviewed_results: reviewed_results
             }
         );
 

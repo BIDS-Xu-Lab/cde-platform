@@ -1567,8 +1567,8 @@ async def get_concepts_and_review_data_by_file(
     _mappings = []
     for mapping in mappings:
         reviewed_result_template = {
-            "Agreement": None,
-            "Comment": None
+            "agreement": None,
+            "comment": None
         }
         _mapping = {
             "mapping_id": str(uuid.uuid4()),
@@ -1754,7 +1754,7 @@ async def search(
                     "user_id": current_user['user_id'],
                     "reviewing_mapping_id": None,
                     "round": round,
-                    "status": "unsubmitted",
+                    "status": "mapping",
                     "source": search_data.source,
                     "collections": search_data.collections,
                     "selected_results": [],
@@ -1820,6 +1820,8 @@ class UpdateSelectedResultsModel(BaseModel):
     concept_id: str
     round: int
     selected_results: List[Dict[str, Any]]
+    reviewed_results: List[Dict[str, Any]]
+
 
 @app.post('/update_selected_results', tags=["mapping"])
 async def update_selected_results(
@@ -1831,10 +1833,28 @@ async def update_selected_results(
     Update selected results
     '''
     logging.info("update selected results")
+
+    # get the file by using the concept_id in concepts
+    concept = await db.concepts.find_one({
+        "concept_id": update_data.concept_id
+    })
+
+    if concept is None:
+        raise HTTPException(status_code=404, detail="Concept not found")
+    
+    # get the file
+    file = await db.files.find_one({
+        "file_id": concept['file_id']
+    })
+
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
     # update the mapping by concept_id and user_id
     m = await db.mappings.find_one({
         "concept_id": update_data.concept_id,
         "round": update_data.round,
+        "status": file['round'][update_data.round]['stage'],
         "user_id": current_user['user_id']
     })
 
@@ -1846,6 +1866,11 @@ async def update_selected_results(
         "selected_results": update_data.selected_results,
         "updated": datetime.datetime.now(),
     }
+
+    # update the reviewed results if provided
+    if update_data.reviewed_results:
+        _mapping["reviewed_results"] = update_data.reviewed_results
+    print(_mapping)
     mapping = await db.mappings.update_one(
         {"mapping_id": m['mapping_id']},
         {"$set": _mapping},
