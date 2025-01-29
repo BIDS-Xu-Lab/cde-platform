@@ -1313,7 +1313,7 @@ async def submit_mapping_work(
     if file['round'][file_round]['stage'] == "mapping":
         status = "mapped"
     else:
-        status = "reviewing_submitted"
+        status = "reviewed"
 
     for mapping in mappings:
         await db.mappings.update_one(
@@ -1870,7 +1870,17 @@ async def update_selected_results(
     # update the reviewed results if provided
     if update_data.reviewed_results:
         _mapping["reviewed_results"] = update_data.reviewed_results
-    print(_mapping)
+
+    # if review_results is not provided, first check the file satus by the last round, if its in mapping, give the template of review_results by length of selected result
+    if not update_data.reviewed_results:
+        if file['round'][update_data.round]['stage'] == "mapping":
+            reviewed_result_template = {
+                "agreement": None,
+                "comment": None
+            }
+            _mapping["reviewed_results"] = [reviewed_result_template for _ in range(len(update_data.selected_results))]
+
+
     mapping = await db.mappings.update_one(
         {"mapping_id": m['mapping_id']},
         {"$set": _mapping},
