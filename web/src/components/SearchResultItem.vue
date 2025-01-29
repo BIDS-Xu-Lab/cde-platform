@@ -24,6 +24,12 @@ const togglePpoverviewComments = (event) => {
     popover_view_comments.value.toggle(event);
 }
 
+const agree_comment_dialog_visible = ref(false);
+
+const agreeOptions = [
+    { label: 'With Comments', icon: 'pi pi-check', command: () => { agree_comment_dialog_visible.value = true; } }
+];
+
 const comments = ref('');
 async function onClickSelectResult(result) {
     console.log('* clicked Select Result:', result);
@@ -141,7 +147,7 @@ async function onClickAgree(item_idx){
     console.log('* clicked Agree:', props.item, item_idx);
     // update store
     store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement = true;
-    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment = "Agreed by reviewer.";
+    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment = "No comment.";
     // send selected results to server
     let ret = await Jimin.updateSelectedResults(
         store.working_concept.concept_id,
@@ -155,18 +161,22 @@ async function onClickAgree(item_idx){
     store.msg(ret.message);
 }
 
-async function onClickDisagreeSubmit(item_idx, comment) {
+async function onClickAgreementSubmit(item_idx, agree, comment) {
     console.log('* clicked disagree:', props.item, item_idx);
     // update store
     // close the popover
-    togglePpoverDisagreeComments();
-    
+    if(agree === false){
+        togglePpoverDisagreeComments();
+    }
+    if(agree === true){
+        agree_comment_dialog_visible.value = false;
+    }
     // check if the comment is empty
     if (comment === ''){
         comment = "No comment.";
     }
     // update store
-    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement = false;
+    store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement = agree;
     store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment = comment;
     // clear the comment
     comments.value = '';
@@ -292,7 +302,7 @@ function displayAgreementInfo(){
             <div class = "flex flex-row" v-if="view_mode === 'reviewing' && flag_selected && !flag_submitted && !checkRemoveButtonAuth()">
                 <div class="flex flex-row">
                     <p class="font-bold mr-2">{{ displayAgreementInfo()}}</p>
-                    <div class="font-bold" v-if="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === false">
+                    <div class="font-bold" v-if="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement !== null">
                         <Button
                     size="small"
                     severity="info"
@@ -324,7 +334,7 @@ function displayAgreementInfo(){
                 </Popover>
                     </div>
                 </div>
-                <Button
+                <SplitButton
                     :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === true"
                     size="small"
                     severity="success"
@@ -332,8 +342,10 @@ function displayAgreementInfo(){
                     label="Agree"
                     class="mr-2"
                     v-tooltip.right="'Aggree this selection'"
-                    @click="onClickAgree(item_idx)">
-                </Button>
+                    @click="onClickAgreementSubmit(item_idx, true, comments)"
+                    :model="agreeOptions"
+                    >
+                </SplitButton>
                 <Button
                     :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === false"
                     size="small"
@@ -356,7 +368,7 @@ function displayAgreementInfo(){
                                     severity="secondary"
                                     size="small"
                                     class="btn-mini w-24"
-                                    @click="onClickDisagreeSubmit(item_idx, comments)"
+                                    @click="onClickAgreementSubmit(item_idx, false, comments)"
                                     >
                                     Submit
                                 </Button>
@@ -404,6 +416,27 @@ function displayAgreementInfo(){
         </div>
     </div>
 </div>
+<Dialog v-model:visible="agree_comment_dialog_visible" 
+    modal 
+    header="Comments" 
+    :style="{ width: '400px' }" 
+    :closable="true">
+    <div class="flex flex-col gap-4 w-[25rem]">
+        <div class="font-bold">
+            <div class="flex flex-col items-center">
+                <Textarea class="mt-4 mb-2 w-[24rem]" v-model="comments" rows="5" cols="30" placeholder="Input comments here, or press submit without comments." />
+                <Button
+                    severity="secondary"
+                    size="small"
+                    class="btn-mini w-24"
+                    @click="onClickAgreementSubmit(item_idx, true, comments)"
+                    >
+                    Submit
+                </Button>
+            </div>
+        </div>
+    </div>
+</Dialog>
 </template>
 
 <style scoped>
