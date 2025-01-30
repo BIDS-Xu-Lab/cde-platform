@@ -111,12 +111,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <MappingReviewMenuItem :view_mode="'reviewing'" />
+    <MappingReviewMenuItem :view_mode="'mapping'" />
 
 <!-- main -->
 <div class="main flex-row">
     <!-- concept list -->
-     <ConceptListItem :view_mode="'reviewing'"/>
+     <ConceptListItem :view_mode="'mapping'"/>
     <div class="flex flex-col w-full h-full result-list">
         <Panel ref="search_results_panel"
             class="w-full">

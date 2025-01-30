@@ -67,6 +67,8 @@ async function onClickMapping(file) {
                 selected_results: mapping.selected_results,
                 search_results: mapping.search_results,
                 reviewed_results: mapping.reviewed_results,
+                mapper_suggestion: mapping.mapper_suggestion,
+                reviewer_suggestion: mapping.reviewer_suggestion,
                 status: mapping.status
             };
         });
@@ -105,6 +107,8 @@ async function onClickReview(file, user_id) {
                         selected_results: mapping.selected_results,
                         search_results: mapping.search_results,
                         reviewed_results: mapping.reviewed_results,
+                        mapper_suggestion: mapping.mapper_suggestion,
+                        reviewer_suggestion: mapping.reviewer_suggestion,
                         status: mapping.status
                     };
                 });
@@ -415,7 +419,7 @@ async function onClickMoveStage(file, stage) {
         </div>
 
     </div>
-    <Dialog v-model:visible="visible_dialog_move_file" title="Move File" width="400px">
+    <Dialog v-model:visible="visible_dialog_move_file" header="Move File" width="400px">
         <div v-if="file.round[file.round.length - 1].stage==='mapping'" class="flex flex-col gap-4">
             <p>Are you sure you want to move this file to the next stage?</p>
             <div class="flex flex-row justify-end gap-2">

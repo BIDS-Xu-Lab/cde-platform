@@ -1,11 +1,12 @@
 <script setup>
 import { useDataStore } from '../DataStore';
 import { onMounted, ref } from 'vue';
-import { Button } from 'primevue';
+import { Button, Popover } from 'primevue';
+import { Jimin } from '../Jimin';
 
 const store = useDataStore();
 
-defineProps({
+const props = defineProps({
     view_mode: String
 });
 
@@ -44,6 +45,34 @@ const sort_results_options = [
 async function onClickConcept(concept) {
     console.log('* clicked concept:', concept);
     store.working_concept = concept;
+}
+
+const visible_dialog_propose_cde = ref(false);
+
+function onclickProposeCDE(concept) {
+    console.log('* clicked propose CDE', concept);
+    visible_dialog_propose_cde.value = true;
+}
+
+async function onClickSuggest() {
+    console.log('* clicked suggest', store.working_concept);
+    visible_dialog_propose_cde.value = false;
+    let ret = await Jimin.suggestConceptToCDE(store.working_concept.concept_id, props.view_mode);
+    // if ret.success, then update all mappings
+    if (ret.success) {
+        ret.mappings.forEach((mapping) => {
+            store.working_mappings[mapping.concept_id] = {
+                selected_results: mapping.selected_results,
+                search_results: mapping.search_results,
+                reviewed_results: mapping.reviewed_results,
+                mapper_suggestion: mapping.mapper_suggestion,
+                reviewer_suggestion: mapping.reviewer_suggestion,
+                status: mapping.status
+            };
+        });
+    }
+    console.log(ret.message);
+    
 }
 </script>
 <template>
@@ -133,10 +162,16 @@ async function onClickConcept(concept) {
                             <div class="term-concept">
                                 <div class="flex flex-col text-small">
                                     <div class="flex items-center">
-                                        <template v-if="store.hasSelectedResults(item)">
+                                        <template v-if = "store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
+                                            <i class="fa fa-exclamation-triangle mr-1"></i>
+                                            Suggest as CDE.
+                                        </template>
+
+                                        <template v-else-if="store.hasSelectedResults(item)">
                                             <i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>
                                             {{ store.getSelectedResults(item).length }} Mapped Recommended.
                                         </template>
+
                                         <template v-else>
                                             <i class="fa fa-exclamation-triangle mr-1"></i>
                                             Not Mapped.
@@ -161,17 +196,88 @@ async function onClickConcept(concept) {
                                 </b>
                                 {{ item.description }}
                             </div>
-                            <div>
-                                <b>
-                                    Values:
-                                </b>
-                                <span v-if="item.values?.length > 0">
-                                    {{ item.values.length }} values.
-                                </span>
-                                <span v-else class="text-sm">
-                                    <font-awesome-icon icon="fa-solid fa-info-circle" />
-                                    No values available.
-                                </span>
+                            <div class="flex justify-between">
+                                <div>
+                                    <b>
+                                        Values:
+                                    </b>
+                                    <span v-if="item.values?.length > 0">
+                                        {{ item.values.length }} values.
+                                    </span>
+                                    <span v-else class="text-sm">
+                                        <font-awesome-icon icon="fa-solid fa-info-circle" />
+                                        No values available.
+                                    </span>
+                                </div>
+                                <div v-if="view_mode === 'mapping'">
+                                    <Button 
+                                        class="btn-mini mr-2"
+                                        :disabled="store.working_concept !== item"
+                                        v-if="!store.working_mappings[item.concept_id]?.mapper_suggestion" 
+                                        severity="warn"
+                                        v-tooltip.bottom="'Recommend this concept as CDE.'"
+                                        @click="onclickProposeCDE(item)">
+                                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                                        Propose CDE
+                                    </Button>
+                                    <Button 
+                                        class="btn-mini mr-2"
+                                        :disabled="store.working_concept !== item"
+                                        v-if="store.working_mappings[item.concept_id]?.mapper_suggestion" 
+                                        severity="danger"
+                                        v-tooltip.bottom="'Deselect this concept as CDE.'"
+                                        @click="onClickSuggest()">
+                                        <i class="fa-solid fa-minus"></i>
+                                        Recall propose
+                                    </Button>
+                                </div>
+                                <div v-if="view_mode === 'reviewing'">
+                                    <div class="flex flex-col items-end" v-if="store.working_mappings[item.concept_id].mapper_suggestion">
+                                        <p class = "mb-2 mr-2">Suggested as CDE by mapper</p>
+                                        <Button 
+                                            class="btn-mini mr-2"
+                                            :disabled="store.working_concept !== item"
+                                            v-if="store.working_mappings[item.concept_id]?.reviewer_suggestion" 
+                                            severity="danger"
+                                            v-tooltip.bottom="'Deselect this concept as CDE.'"
+                                            @click="onClickSuggest()">
+                                            <i class="fa-solid fa-times"></i>
+                                            Disagree
+                                        </Button>
+                                        <Button 
+                                            class="btn-mini mr-2"
+                                            :disabled="store.working_concept !== item"
+                                            v-if="!store.working_mappings[item.concept_id]?.reviewer_suggestion" 
+                                            severity="warn"
+                                            v-tooltip.bottom="'Deselect this concept as CDE.'"
+                                            @click="onClickSuggest()">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                            Recall
+                                        </Button>
+                                    </div>
+                                    <div v-else>
+                                        <Button 
+                                            class="btn-mini mr-2"
+                                            :disabled="store.working_concept !== item"
+                                            v-if="!store.working_mappings[item.concept_id]?.reviewer_suggestion" 
+                                            severity="warn"
+                                            v-tooltip.bottom="'Recommend this concept as CDE.'"
+                                            @click="onclickProposeCDE(item)">
+                                            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                                            Propose CDE
+                                        </Button>
+                                        <Button 
+                                            class="btn-mini mr-2"
+                                            :disabled="store.working_concept !== item"
+                                            v-if="store.working_mappings[item.concept_id]?.reviewer_suggestion" 
+                                            severity="danger"
+                                            v-tooltip.bottom="'Deselect this concept as CDE.'"
+                                            @click="onClickSuggest()">
+                                            <i class="fa-solid fa-minus"></i>
+                                            Recall propose
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="term-additional mt-2">
@@ -216,6 +322,30 @@ async function onClickConcept(concept) {
             </div>
         </Panel>
     </div>
+    <Dialog v-model:visible="visible_dialog_propose_cde" 
+        modal
+        header="Are you sure you want to suggest this concept to CDE?"
+        width="400px" 
+        :closable="false">
+        <div class="flex flex-col gap-4">
+            
+            <div class="flex flex-row justify-end gap-2">
+                <Button 
+                severity="secondary" 
+                @click="visible_dialog_propose_cde = false">
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+                No
+                </Button>
+
+                <Button 
+                severity="primary" 
+                @click="onClickSuggest()">
+                <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                    suggest
+                </Button>
+            </div>
+        </div>
+    </Dialog>
 </template>
 <style scoped>
 .term-list {

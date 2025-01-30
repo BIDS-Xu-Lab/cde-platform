@@ -1582,7 +1582,9 @@ async def get_concepts_and_review_data_by_file(
             "collections": mapping['collections'],
             "selected_results": mapping['selected_results'],
             "reviewed_results": [reviewed_result_template for _ in range(len(mapping['selected_results']))],
-            "search_results": mapping['search_results']
+            "search_results": mapping['search_results'],
+            "mapper_suggestion": mapping['mapper_suggestion'],
+            "reviewer_suggestion": mapping['mapper_suggestion']
         }
         await db.mappings.insert_one(_mapping)
         _mappings.append(_mapping)
@@ -1760,6 +1762,8 @@ async def search(
                     "selected_results": [],
                     "reviewed_results": [],
                     "search_results": results,
+                    "mapper_suggestion": False,
+                    "reviewer_suggestion": False,
                     "created": datetime.datetime.now(),
                     "updated": datetime.datetime.now(),
                 }
@@ -1890,6 +1894,121 @@ async def update_selected_results(
         'success': True,
         'message': 'Selected results updated successfully',
     }
+
+class SuggestConceptToCDEModel(BaseModel):
+    concept_id: str
+    stage: str
+
+@app.post('/suggest_concept_to_cde', tags=["mapping"])
+async def suggest_concept_to_cde(
+    request: Request,
+    suggest_data: SuggestConceptToCDEModel,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    set suggestion on selected cde
+    '''
+    logging.info("suggest concept to cde")
+    # fisrt get the file by using the concept_id in concepts
+    concept = await db.concepts.find_one({
+        "concept_id": suggest_data.concept_id
+    })
+
+    if concept is None:
+        raise HTTPException(status_code=404, detail="Concept not found")
+    
+    # get the file
+    file = await db.files.find_one({
+        "file_id": concept['file_id']
+    })
+
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # get the round and current stage of the file
+    round = len(file['round']) - 1
+
+    # ok, now we check the suggest_data.stage, if its mapping, we need find in mapping collection, if we found, we will toggle the suggestion, if not, we will create a new mapping with suggestion as true
+    if suggest_data.stage == "mapping":
+        m = await db.mappings.find_one({
+            "concept_id": suggest_data.concept_id,
+            "round": round,
+            "status": "mapping",
+            "user_id": current_user['user_id']
+        })
+
+        if m is None:
+            # create a new mapping
+            mapping = {
+                "mapping_id": str(uuid.uuid4()),
+                "file_id": concept['file_id'],
+                "concept_id": suggest_data.concept_id,
+                "user_id": current_user['user_id'],
+                "reviewing_mapping_id": None,
+                "round": round,
+                "status": "mapping",
+                "source": None,
+                "collections": [],
+                "selected_results": [],
+                "reviewed_results": [],
+                "search_results": [],
+                "mapper_suggestion": True,
+                "reviewer_suggestion": True,
+                "created": datetime.datetime.now(),
+                "updated": datetime.datetime.now(),
+            }
+            await db.mappings.insert_one(mapping)
+            logging.debug(f"* saved mapping {mapping['mapping_id']}")
+        else:
+                    
+            print(m['mapper_suggestion'])
+            # update the mapping
+            _mapping = {
+                "mapper_suggestion": not m['mapper_suggestion'],
+                "updated": datetime.datetime.now(),
+            }
+            mapping = await db.mappings.update_one(
+                {"mapping_id": m['mapping_id']},
+                {"$set": _mapping},
+            )
+            logging.debug(f"* updated mapping {m['mapping_id']}")
+    # if the stage is reviewing, we need to find in mapping collection, if we found, we will toggle the suggestion, if not, throw an error
+    elif suggest_data.stage == "reviewing":
+        m = await db.mappings.find_one({
+            "concept_id": suggest_data.concept_id,
+            "round": round,
+            "status": "reviewing",
+            "user_id": current_user['user_id']
+        })
+
+        if m is None:
+            raise HTTPException(status_code=404, detail="Mapping not found")
+
+        # update the mapping
+        _mapping = {
+            "reviewer_suggestion": not m['reviewer_suggestion'],
+            "updated": datetime.datetime.now(),
+        }
+        mapping = await db.mappings.update_one(
+            {"mapping_id": m['mapping_id']},
+            {"$set": _mapping},
+        )
+        logging.debug(f"* updated mapping {m['mapping_id']}")
+
+    # finally, return all the mappings to the user, we will return all the mappings in the current round
+    mappings = await db.mappings.find({
+        "file_id": file['file_id'],
+        "user_id": current_user['user_id'],
+        "status": suggest_data.stage,
+        "round": round
+    }).to_list(length=None)
+    return {
+        'success': True,
+        'mappings': formatMappings(mappings),
+        'message': 'Suggestion updated successfully',
+    }
+
+        
 
 
 # @app.post("/users/{user_id}", response_model=Dict[str, Any], summary="Create or Update User Document", dependencies=[Depends(validate_token)])

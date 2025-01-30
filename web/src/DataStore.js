@@ -331,6 +331,13 @@ actions: {
             return this.working_mappings[concept.concept_id].selected_results;
         }
         return [];
-    }
+    },
+    
+    hasSuggestions(concept) {
+        if (this.working_mappings[concept.concept_id]) {
+            return true;
+        }
+        return false;
+    },
 }
 });

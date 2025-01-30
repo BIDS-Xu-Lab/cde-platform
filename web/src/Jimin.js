@@ -414,5 +414,18 @@ export const Jimin = {
         );
 
         return rsp.data.mapping;
+    },
+    async suggestConceptToCDE(concept_id, stage) {
+        console.log('* suggest concept to CDE', concept_id);
+
+        const rsp = await this.axios_instance.post(
+            '/suggest_concept_to_cde',
+            {
+                concept_id: concept_id,
+                stage: stage
+            }
+        );
+
+        return rsp.data;
     }
 }

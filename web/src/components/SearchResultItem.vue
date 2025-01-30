@@ -1,6 +1,6 @@
 <script setup>
 import { useDataStore } from "../DataStore";
-import { ref, defineProps } from "vue";
+import { ref } from "vue";
 const store = useDataStore();
 
 const props = defineProps({
