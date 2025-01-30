@@ -145,7 +145,7 @@ async function onClickSuggest() {
                             @click="onClickConcept(item)">
                             <div class="term-name">
                                 <div class="mr-1">
-                                    <template v-if="store.hasSelectedResults(item)">
+                                    <template v-if="store.hasSelectedResults(item) || store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
                                         <Tag :value="item.id + 1" severity="success" />
                                     </template>
                                     <template v-else-if="store.hasSearchResults(item)">
@@ -163,7 +163,7 @@ async function onClickSuggest() {
                                 <div class="flex flex-col text-small">
                                     <div class="flex items-center">
                                         <template v-if = "store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
-                                            <i class="fa fa-exclamation-triangle mr-1"></i>
+                                            <i class="fa-solid fa-arrow-up-from-bracket mr-1"></i>
                                             Suggest as CDE.
                                         </template>
 
@@ -212,7 +212,7 @@ async function onClickSuggest() {
                                 <div v-if="view_mode === 'mapping'">
                                     <Button 
                                         class="btn-mini mr-2"
-                                        :disabled="store.working_concept !== item"
+                                        :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'mapped'"
                                         v-if="!store.working_mappings[item.concept_id]?.mapper_suggestion" 
                                         severity="warn"
                                         v-tooltip.bottom="'Recommend this concept as CDE.'"
@@ -222,7 +222,7 @@ async function onClickSuggest() {
                                     </Button>
                                     <Button 
                                         class="btn-mini mr-2"
-                                        :disabled="store.working_concept !== item"
+                                        :disabled="store.working_concept !== item|| store.working_mappings[item.concept_id]?.status === 'mapped'"
                                         v-if="store.working_mappings[item.concept_id]?.mapper_suggestion" 
                                         severity="danger"
                                         v-tooltip.bottom="'Deselect this concept as CDE.'"
@@ -236,20 +236,20 @@ async function onClickSuggest() {
                                         <p class = "mb-2 mr-2">Suggested as CDE by mapper</p>
                                         <Button 
                                             class="btn-mini mr-2"
-                                            :disabled="store.working_concept !== item"
+                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed'"
                                             v-if="store.working_mappings[item.concept_id]?.reviewer_suggestion" 
                                             severity="danger"
-                                            v-tooltip.bottom="'Deselect this concept as CDE.'"
+                                            v-tooltip.bottom="'Disagree this to CDE.'"
                                             @click="onClickSuggest()">
                                             <i class="fa-solid fa-times"></i>
                                             Disagree
                                         </Button>
                                         <Button 
                                             class="btn-mini mr-2"
-                                            :disabled="store.working_concept !== item"
+                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed'"
                                             v-if="!store.working_mappings[item.concept_id]?.reviewer_suggestion" 
-                                            severity="warn"
-                                            v-tooltip.bottom="'Deselect this concept as CDE.'"
+                                            severity="info"
+                                            v-tooltip.bottom="'Recall disagree.'"
                                             @click="onClickSuggest()">
                                             <i class="fa-solid fa-rotate-left"></i>
                                             Recall
@@ -258,7 +258,7 @@ async function onClickSuggest() {
                                     <div v-else>
                                         <Button 
                                             class="btn-mini mr-2"
-                                            :disabled="store.working_concept !== item"
+                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed'"
                                             v-if="!store.working_mappings[item.concept_id]?.reviewer_suggestion" 
                                             severity="warn"
                                             v-tooltip.bottom="'Recommend this concept as CDE.'"
@@ -268,7 +268,7 @@ async function onClickSuggest() {
                                         </Button>
                                         <Button 
                                             class="btn-mini mr-2"
-                                            :disabled="store.working_concept !== item"
+                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed'"
                                             v-if="store.working_mappings[item.concept_id]?.reviewer_suggestion" 
                                             severity="danger"
                                             v-tooltip.bottom="'Deselect this concept as CDE.'"
