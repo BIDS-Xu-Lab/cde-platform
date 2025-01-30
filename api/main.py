@@ -1096,12 +1096,19 @@ async def get_files_by_project(
             "file_id": file['file_id']
         })
 
-        status = await db.mappings.distinct("user_id", {
+        mapped = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
             "status": "mapped"
         })
-        file['n_submitted'] = len(status)
-        file['submitted_users'] = status
+        file['n_submitted'] = len(mapped)
+        file['submitted_users'] = mapped
+
+        reviewed = await db.mappings.distinct("user_id", {
+            "file_id": file['file_id'],
+            "status": "reviewed"
+        })
+        file['n_reviewed'] = len(reviewed)
+        file['reviewed_users'] = reviewed
 
     return {
         'success': True,
@@ -1300,7 +1307,8 @@ async def submit_mapping_work(
     mappings = await db.mappings.find({
         "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
         "user_id": current_user['user_id'],
-        "round": file_round
+        "round": file_round,
+        "status": file['round'][file_round]['stage']
     }).to_list(length=None)
 
     # check if all concepts have been mapped

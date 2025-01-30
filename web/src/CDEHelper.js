@@ -21,7 +21,7 @@ export async function onClickRefreshListGetSources() {
 
 export function checkSubmitStatus(){
     for (const mapping of Object.values(store.working_mappings)) {
-        if (mapping.status === "mapped") {
+        if (mapping.status === "mapped" || mapping.status === "reviewed") {
             return true;
         }
     }

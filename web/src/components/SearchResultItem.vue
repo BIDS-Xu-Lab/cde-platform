@@ -299,7 +299,7 @@ function displayAgreementInfo(){
                 v-tooltip.right="'Remove this concept.'"
                 @click="onClickRemoveResult(item)">
             </Button>
-            <div class = "flex flex-row" v-if="view_mode === 'reviewing' && flag_selected && !flag_submitted && !checkRemoveButtonAuth()">
+            <div class = "flex flex-row" v-if="view_mode === 'reviewing' && flag_selected && !checkRemoveButtonAuth()">
                 <div class="flex flex-row">
                     <p class="font-bold mr-2">{{ displayAgreementInfo()}}</p>
                     <div class="font-bold" v-if="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement !== null">
@@ -309,7 +309,7 @@ function displayAgreementInfo(){
                     icon="pi pi-eye"
                     label="comments"
                     class="mr-2"
-                    v-tooltip.right="'Disagree this selection'"
+                    v-tooltip.right="'View comments'"
                     @click="togglePpoverviewComments">
                 </Button>
                 <Popover ref="popover_view_comments">
@@ -335,6 +335,7 @@ function displayAgreementInfo(){
                     </div>
                 </div>
                 <SplitButton
+                    v-if="!flag_submitted"
                     :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === true"
                     size="small"
                     severity="success"
@@ -347,6 +348,7 @@ function displayAgreementInfo(){
                     >
                 </SplitButton>
                 <Button
+                    v-if="!flag_submitted"
                     :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === false"
                     size="small"
                     severity="danger"

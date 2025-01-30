@@ -279,8 +279,7 @@ async function onClickMoveStage(file, stage) {
                 v-if="view_mode === 'file' && file.round[file.round.length - 1].stage === 'reviewing'">
                 <div class="text-sm">Reviewed / Reviewer</div>
                 <p class="text-xl font-bold">
-                    0 / {{ store.current_project.members.filter(member => member.role === 'reviewer').length + 1}}
-                    <!-- {{ file.columns.length }} / {{ 5 }} -->
+                    {{ file.n_reviewed }} / {{ store.current_project.members.filter(member => member.role === 'reviewer').length + 1}}
                 </p>
             </div>
             <div class="flex flex-col items-center mr-4"
