@@ -180,6 +180,7 @@ async function onClickSubmitWork() {
     store.working_concept = null;
     store.working_mappings = {};
     // redirect to the project view
+    await store.updateCurrentProjectFiles();
     store.changeView('project_list');
     if (ret.success) {
         store.msg(ret.message);

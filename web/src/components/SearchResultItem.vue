@@ -194,10 +194,13 @@ async function onClickAgreementSubmit(item_idx, agree, comment) {
 
 }
 function displayAgreementInfo(){
-    if (store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx].agreement === true){
+    if (store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.agreement === true){
         return "Agreed";
-    } else if (store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx].agreement === false){
+    } else if (store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.agreement === false){
         return "Disagreed";
+    } 
+    else if (store.working_mappings[store.working_concept.concept_id].reviewed_results.length < props.item_idx + 1){
+        return "Reviewer selected";
     } else {
         return "Not reviewed";
     }
@@ -302,8 +305,9 @@ function displayAgreementInfo(){
             <div class = "flex flex-row" v-if="view_mode === 'reviewing' && flag_selected && !checkRemoveButtonAuth()">
                 <div class="flex flex-row">
                     <p class="font-bold mr-2">{{ displayAgreementInfo()}}</p>
-                    <div class="font-bold" v-if="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement !== null">
+                    <div class="font-bold">
                         <Button
+                        :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx] === undefined"
                     size="small"
                     severity="info"
                     icon="pi pi-eye"
