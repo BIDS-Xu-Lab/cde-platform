@@ -316,6 +316,19 @@ export const Jimin = {
 
         return rsp.data;
     },
+    getConceptAndGrantReviewByFile: async function (file_id) {
+        console.log('* get grant review by file', file_id);
+
+        const rsp = await this.axios_instance.get(
+            '/get_concepts_and_grant_review_by_file',
+            {
+                params: {
+                    file_id: file_id
+                }
+            }
+        );
+        return rsp.data;
+    },
 
 
 

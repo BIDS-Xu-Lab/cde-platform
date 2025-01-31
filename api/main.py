@@ -1368,19 +1368,21 @@ async def move_to_next_stage(
     if file['round'][file_round]['stage'] == "mapping" and stage == "reviewing":
         file['round'][file_round]['stage'] = "reviewing"
     # if the current stage is reviewing, check given stage, if its mapping, add a new round with stage mapping, and mark current round as completed
-    elif file['round'][file_round]['stage'] == "reviewing" and stage == "reviewing":
-        # before moving to the next stage, we need to update the selected_mapping_results
-        if selected_mapping_results is not None:
-            file['round'][file_round]['stage'] = "completed"
-            file['round'].append({
-                "stage": "reviewing"
-            })
-            # will adding function here, for now, leave it empty
+    elif file['round'][file_round]['stage'] == "reviewing" and stage == "grant_review":
+        file['round'][file_round]['stage'] = "grant_review"
+        # this part on hold
+        # # before moving to the next stage, we need to update the selected_mapping_results
+        # if selected_mapping_results is not None:
+        #     file['round'][file_round]['stage'] = "completed"
+        #     file['round'].append({
+        #         "stage": "reviewing"
+        #     })
+        #     # will adding function here, for now, leave it empty
 
 
-            #end here
-        else:
-            raise HTTPException(status_code=403, detail="No selected mapping results")
+        #     #end here
+        # else:
+        #     raise HTTPException(status_code=403, detail="No selected mapping results")
     # if the current stage is reviewing, check given stage, if its completed, change the stage to completed
     elif file['round'][file_round]['stage'] == "reviewing" and stage == "completed":
         file['round'][file_round]['stage'] = "completed"
@@ -1391,8 +1393,12 @@ async def move_to_next_stage(
         {"file_id": file_id},
         {"$set": file}
     )
+    updated_file = await db.files.find_one({
+        "file_id": file_id
+    })
     return {
         'success': True,
+        'file': formatFile(updated_file),
         'message': 'File moved to the next stage successfully'
     }
 # @app.get('/assign_file', tags=["file"])
@@ -1602,6 +1608,77 @@ async def get_concepts_and_review_data_by_file(
             'concepts': formatConcepts(concepts),
             'mappings': formatMappings(_mappings),
         }
+
+@app.get('/get_concepts_and_grant_review_by_file', tags=["concept"])
+async def get_concepts_and_grant_review_by_file(
+    request: Request,
+    file_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Get all concepts and grant review by file
+    '''
+    logging.info("get concepts and grant review by file")
+    # first at all, check if the current user is the owner of the file, to do this, first we need to get the file and project
+    file = await db.files.find_one({
+        "file_id": file_id,
+        "file_owner": current_user['user_id']
+    })
+    if file is None:
+        raise HTTPException(status_code=404, detail="File not found or not owned by the user")
+    
+    # get all concepts
+    concepts = await db.concepts.find({
+        "file_id": file_id
+    }).to_list(length=None)
+    # get the round of the file by looping through the files['round'] and find the last file['round']['stage'] == "grant_review"
+    round = len(file['round']) - 1
+    logging.debug(f"* get round of file {file_id} = {round}")
+    '''
+    now we need create a new data structure for grant review, to do this, we need filter the mappings data by reviewer, which 
+    the data structure will be like this:
+    [
+        {
+            reviewer_id: "user_id",
+            mappings: [
+                # all mappings data related to this reviewer
+            ]
+    ]
+    '''
+    # get all reviewers in mappings distict by file id and round
+    reviewers = await db.mappings.distinct("user_id", {
+        "file_id": file_id,
+        "round": round,
+        "status": "reviewed"
+    })
+    # create the data structure
+    grant_review_data = []
+    for reviewer in reviewers:
+        mappings = await db.mappings.find({
+            "file_id": file_id,
+            "user_id": reviewer,
+            "round": round,
+            "status": "reviewed"
+        }).to_list(length=None)
+
+        user_data = await db.users.find_one({
+            "user_id": reviewer
+        })
+
+        grant_review_data.append({
+            "reviewer_id": reviewer,
+            "reviewer_name": user_data['name'],
+            "reviewer_email": user_data['email'],
+            "mappings": formatMappings(mappings)
+        })
+    return {
+        'success': True,
+        'concepts': formatConcepts(concepts),
+        'grant_review_data': grant_review_data
+    }
+
+
+
 ###########################################################
 # Mapping data related APIs
 ###########################################################

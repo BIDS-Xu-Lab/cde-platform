@@ -64,6 +64,8 @@ state: () => ({
     // }
     working_mappings: {},
 
+    grant_review_data: [],
+
     // for mapping
     mapping: {
         sources: [],
@@ -268,6 +270,7 @@ actions: {
         this.working_concept = null;
         this.working_file_concepts = [];
         this.working_mappings = {};
+        this.grant_review_data = [];
     },
 
     addSelectedResultToWorkingConcept(result) {

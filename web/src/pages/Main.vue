@@ -11,6 +11,7 @@ import ReviewView from '../views/ReviewView.vue';
 import VisView from '../views/VisView.vue';
 import TeamView from '../views/TeamView.vue';
 import SettingView from '../views/SettingView.vue';
+import GrantReviewView from '../views/GrantReviewView.vue';
 import AdminView from '../views/AdminView.vue';
 
 import { onMounted } from 'vue';
@@ -72,6 +73,9 @@ onMounted(() => {
 
 <!-- Setting view -->
 <SettingView v-if="store.current_view == 'setting'" />
+
+<!-- Grant review view -->
+<GrantReviewView v-if="store.current_view == 'grant_review'" />
 
 <!-- Admin view -->
 <AdminView v-if="store.current_view == 'admin' && store.user?.role == 'admin'" />

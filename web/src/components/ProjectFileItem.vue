@@ -175,6 +175,7 @@ async function onClickMoveStage(file, stage) {
         store.working_file = null;
         store.working_file_concepts = [];
         store.working_concept = null;
+        store.grant_review_data = [];
     }
 
     store.msg(ret.message);
@@ -182,6 +183,34 @@ async function onClickMoveStage(file, stage) {
     // update all files for this project
     await store.updateCurrentProjectFiles();
 }
+
+async function onClickGrantReview(file) {
+    console.log('* clicked Grant Review');
+    let ret = await Jimin.moveToNextStage(file.file_id, "grant_review");
+    store.msg(ret.message);
+    // update files by related project
+    await store.updateCurrentProjectFiles();
+    await onClickContinue(store.files.find(f => f.file_id === file.file_id));
+}
+
+async function onClickContinue(file) {
+    console.log('* clicked Continue Grant Review');
+    store.clearMappingData();
+
+    try {
+        let ret = await Jimin.getConceptAndGrantReviewByFile(file.file_id);
+        console.log('* got concept:', ret);
+        store.working_file_concepts = ret.concepts;
+        store.grant_review_data = ret.grant_review_data;
+        store.working_file = file;
+        store.working_project = store.current_project;
+    } catch (err) {
+        console.error(err);
+        store.msg(err.message, 'Error', 'error');
+        return;
+    }
+    store.changeView('grant_review');
+}                  
 
 </script>
 
@@ -268,18 +297,18 @@ async function onClickMoveStage(file, stage) {
                 {{ file.filename }}
         </div>
         <div class="file-column flex flex-row mb-2">
-            <div class="flex flex-col mr-4"
+            <div class="flex flex-col items-center mr-4"
                 v-if="view_mode === 'file' && file.round[file.round.length - 1].stage === 'mapping'">
                 <div class="text-sm">Mapped / Mapper</div>
                 <p class="text-xl font-bold">
                     {{ file.n_submitted }} / {{ store.current_project.members.filter(member => member.role === 'mapper').length + 1}}
                 </p>
             </div>
-            <div class="flex flex-col mr-4"
+            <div class="flex flex-col items-center mr-4"
                 v-if="view_mode === 'file' && file.round[file.round.length - 1].stage === 'reviewing'">
-                <div class="text-sm">Reviewed / Reviewer</div>
+                <div class="text-sm">Reviewed / Mapped Result</div>
                 <p class="text-xl font-bold">
-                    {{ file.n_reviewed }} / {{ store.current_project.members.filter(member => member.role === 'reviewer').length + 1}}
+                    {{ file.n_reviewed }} / {{ file.n_submitted * (store.current_project.members.filter(member => member.role === 'reviewer').length + 1)}}
                 </p>
             </div>
             <div class="flex flex-col items-center mr-4"
@@ -408,12 +437,22 @@ async function onClickMoveStage(file, stage) {
             <Button 
                 severity="warn"
                 size="small"
-                v-if="view_mode === 'file'"
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage !=='grant_review'"
                 :disabled="file.round[file.round.length - 1].stage === 'completed'"
                 v-tooltip.bottom="'Change the stage.'"
                 @click="onClickChangeStage()">
                 <font-awesome-icon :icon="['fas', 'arrow-right']" />
                 Change Stage
+            </Button>
+            <Button 
+                severity="info"
+                size="small"
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage ==='grant_review'"
+                :disabled="file.round[file.round.length - 1].stage === 'completed'"
+                v-tooltip.bottom="'Grant Review.'"
+                @click="onClickContinue(file)">
+                <font-awesome-icon :icon="['fas', 'fa-eye']" />
+                Continue Grant Review
             </Button>
         </div>
 
@@ -438,7 +477,7 @@ async function onClickMoveStage(file, stage) {
             </div>
         </div>
         <div v-if="file.round[file.round.length - 1].stage==='reviewing'" class="flex flex-col gap-4">
-            <p>Do you want to review again, move to the next mapping round, or finalize?</p>
+            <p>Do you want grant rview all review result, or finalize?</p>
             <div class="flex flex-row justify-end gap-2">
                 <Button 
                 severity="secondary" 
@@ -448,9 +487,9 @@ async function onClickMoveStage(file, stage) {
                 </Button>
                 <Button 
                 severity="info" 
-                @click="onClickMoveStage(file, 'reviewing')">
+                @click="onClickGrantReview(file)">
                 <font-awesome-icon :icon="['fas', 'rotate-right']" />
-                Move to Next Round
+                Grant Review
                 </Button>
                 <Button
                 severity="danger"
