@@ -160,7 +160,8 @@ async function onClickSuggest() {
                                 </div>
                             </div>
                             <div class="term-concept">
-                                <div class="flex flex-col text-small">
+                                <div v-if="view_mode !== 'grant_review'"
+                                    class="flex flex-col text-small">
                                     <div class="flex items-center">
                                         <template v-if = "store.working_mappings[item.concept_id]?.selected_results.length === 0 & store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
                                             <i class="fa-solid fa-arrow-up-from-bracket mr-1"></i>
