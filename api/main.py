@@ -1714,7 +1714,8 @@ async def get_concepts_and_grand_review_by_file(
                         _selected_result['suggestion'].append(user_info)
                     selected_results.append(_selected_result)
             grand_review_data.append({
-                "selected_result":selected_results,
+                "concept_id": concept["concept_id"],
+                "selected_results":selected_results,
                 "suggest_cde": suggest_cde
                 })
 
