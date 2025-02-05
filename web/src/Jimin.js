@@ -316,11 +316,11 @@ export const Jimin = {
 
         return rsp.data;
     },
-    getConceptAndGrantReviewByFile: async function (file_id) {
-        console.log('* get grant review by file', file_id);
+    getConceptAndgrandReviewByFile: async function (file_id) {
+        console.log('* get grand review by file', file_id);
 
         const rsp = await this.axios_instance.get(
-            '/get_concepts_and_grant_review_by_file',
+            '/get_concepts_and_grand_review_by_file',
             {
                 params: {
                     file_id: file_id

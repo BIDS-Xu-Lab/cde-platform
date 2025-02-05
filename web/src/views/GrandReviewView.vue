@@ -7,7 +7,7 @@ import ConceptListItem from '../components/ConceptListItem.vue';
 import * as CDEHelper from '../CDEHelper';
 import { Jimin } from '../Jimin';
 onMounted(() => {
-    console.log('* mounted GrantReviewView');
+    console.log('* mounted grandReviewView');
 });
 
 const store = useDataStore();
@@ -21,7 +21,7 @@ function countReviewedConcept(concept) {
 
     const concept_id = concept.concept_id;
 
-    store.grant_review_data.forEach(review => {
+    store.grand_review_data.forEach(review => {
         review.mappings.forEach(mapping => {
             if (mapping.concept_id == concept_id) {
                 count++;
@@ -69,7 +69,7 @@ function countReviewedConcept(concept) {
     </div>
     <div class="main flex-row">
     <!-- concept list -->
-     <ConceptListItem :view_mode="'grant_review'"/>
+     <ConceptListItem :view_mode="'grand_review'"/>
      <div class="flex flex-col w-full h-full result-list">
         <Panel class="w-full">
             <template #header>

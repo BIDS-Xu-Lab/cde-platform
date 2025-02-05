@@ -52,10 +52,10 @@ onMounted(() => {
             <font-awesome-icon :icon="['fa-solid', 'code-compare']" />
             Review
         </div>
-        <div v-show="store.working_file != null && store.working_file?.round[store.working_file?.round.length - 1]?.stage == 'grant_review'"
+        <div v-show="store.working_file != null && store.working_file?.round[store.working_file?.round.length - 1]?.stage == 'grand_review'"
             class="navi-item"
-            @click="store.changeView('grant_review')"
-            :class="{'active-page': store.current_view=='grant_review'}">
+            @click="store.changeView('grand_review')"
+            :class="{'active-page': store.current_view=='grand_review'}">
             <font-awesome-icon :icon="['fas', 'users-viewfinder']" />
             Grand Review
         </div>

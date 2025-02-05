@@ -175,7 +175,7 @@ async function onClickMoveStage(file, stage) {
         store.working_file = null;
         store.working_file_concepts = [];
         store.working_concept = null;
-        store.grant_review_data = [];
+        store.grand_review_data = [];
     }
 
     store.msg(ret.message);
@@ -184,9 +184,9 @@ async function onClickMoveStage(file, stage) {
     await store.updateCurrentProjectFiles();
 }
 
-async function onClickGrantReview(file) {
-    console.log('* clicked Grant Review');
-    let ret = await Jimin.moveToNextStage(file.file_id, "grant_review");
+async function onClickgrandReview(file) {
+    console.log('* clicked Grand Review');
+    let ret = await Jimin.moveToNextStage(file.file_id, "grand_review");
     store.msg(ret.message);
     // update files by related project
     await store.updateCurrentProjectFiles();
@@ -194,14 +194,14 @@ async function onClickGrantReview(file) {
 }
 
 async function onClickContinue(file) {
-    console.log('* clicked Continue Grant Review');
+    console.log('* clicked Continue Grand Review');
     store.clearMappingData();
 
     try {
-        let ret = await Jimin.getConceptAndGrantReviewByFile(file.file_id);
+        let ret = await Jimin.getConceptAndgrandReviewByFile(file.file_id);
         console.log('* got concept:', ret);
         store.working_file_concepts = ret.concepts;
-        store.grant_review_data = ret.grant_review_data;
+        store.grand_review_data = ret.grand_review_data;
         store.working_file = file;
         store.working_project = store.current_project;
     } catch (err) {
@@ -209,7 +209,7 @@ async function onClickContinue(file) {
         store.msg(err.message, 'Error', 'error');
         return;
     }
-    store.changeView('grant_review');
+    store.changeView('grand_review');
 }                  
 
 </script>
@@ -437,7 +437,7 @@ async function onClickContinue(file) {
             <Button 
                 severity="warn"
                 size="small"
-                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage !=='grant_review'"
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage !=='grand_review'"
                 :disabled="file.round[file.round.length - 1].stage === 'completed'"
                 v-tooltip.bottom="'Change the stage.'"
                 @click="onClickChangeStage()">
@@ -447,12 +447,12 @@ async function onClickContinue(file) {
             <Button 
                 severity="info"
                 size="small"
-                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage ==='grant_review'"
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage ==='grand_review'"
                 :disabled="file.round[file.round.length - 1].stage === 'completed'"
-                v-tooltip.bottom="'Grant Review.'"
+                v-tooltip.bottom="'Grand Review.'"
                 @click="onClickContinue(file)">
                 <font-awesome-icon :icon="['fas', 'fa-eye']" />
-                Continue Grant Review
+                Continue Grand Review
             </Button>
         </div>
 
@@ -477,7 +477,7 @@ async function onClickContinue(file) {
             </div>
         </div>
         <div v-if="file.round[file.round.length - 1].stage==='reviewing'" class="flex flex-col gap-4">
-            <p>Do you want grant rview all review result, or finalize?</p>
+            <p>Do you want grand rview all review result, or finalize?</p>
             <div class="flex flex-row justify-end gap-2">
                 <Button 
                 severity="secondary" 
@@ -487,9 +487,9 @@ async function onClickContinue(file) {
                 </Button>
                 <Button 
                 severity="info" 
-                @click="onClickGrantReview(file)">
+                @click="onClickgrandReview(file)">
                 <font-awesome-icon :icon="['fas', 'rotate-right']" />
-                Grant Review
+                Grand Review
                 </Button>
                 <Button
                 severity="danger"

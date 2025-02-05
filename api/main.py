@@ -1368,8 +1368,8 @@ async def move_to_next_stage(
     if file['round'][file_round]['stage'] == "mapping" and stage == "reviewing":
         file['round'][file_round]['stage'] = "reviewing"
     # if the current stage is reviewing, check given stage, if its mapping, add a new round with stage mapping, and mark current round as completed
-    elif file['round'][file_round]['stage'] == "reviewing" and stage == "grant_review":
-        file['round'][file_round]['stage'] = "grant_review"
+    elif file['round'][file_round]['stage'] == "reviewing" and stage == "grand_review":
+        file['round'][file_round]['stage'] = "grand_review"
         # this part on hold
         # # before moving to the next stage, we need to update the selected_mapping_results
         # if selected_mapping_results is not None:
@@ -1609,16 +1609,16 @@ async def get_concepts_and_review_data_by_file(
             'mappings': formatMappings(_mappings),
         }
 
-@app.get('/get_concepts_and_grant_review_by_file', tags=["concept"])
-async def get_concepts_and_grant_review_by_file(
+@app.get('/get_concepts_and_grand_review_by_file', tags=["concept"])
+async def get_concepts_and_grand_review_by_file(
     request: Request,
     file_id: str,
     current_user: dict = Depends(authJWTCookie),
 ):
     '''
-    Get all concepts and grant review by file
+    Get all concepts and grand review by file
     '''
-    logging.info("get concepts and grant review by file")
+    logging.info("get concepts and grand review by file")
     # first at all, check if the current user is the owner of the file, to do this, first we need to get the file and project
     file = await db.files.find_one({
         "file_id": file_id,
@@ -1631,50 +1631,97 @@ async def get_concepts_and_grant_review_by_file(
     concepts = await db.concepts.find({
         "file_id": file_id
     }).to_list(length=None)
-    # get the round of the file by looping through the files['round'] and find the last file['round']['stage'] == "grant_review"
+    # get the round of the file by looping through the files['round'] and find the last file['round']['stage'] == "grand_review"
     round = len(file['round']) - 1
     logging.debug(f"* get round of file {file_id} = {round}")
-    '''
-    now we need create a new data structure for grant review, to do this, we need filter the mappings data by reviewer, which 
-    the data structure will be like this:
-    [
-        {
-            reviewer_id: "user_id",
-            mappings: [
-                # all mappings data related to this reviewer
-            ]
-    ]
-    '''
-    # get all reviewers in mappings distict by file id and round
-    reviewers = await db.mappings.distinct("user_id", {
-        "file_id": file_id,
-        "round": round,
-        "status": "reviewed"
-    })
     # create the data structure
-    grant_review_data = []
-    for reviewer in reviewers:
+    grand_review_data = []
+    for concept in concepts:
+        # statistics for this concept, get all mappings for this concept
+        selected_results = []
         mappings = await db.mappings.find({
+            "concept_id": concept['concept_id'],
             "file_id": file_id,
-            "user_id": reviewer,
             "round": round,
             "status": "reviewed"
         }).to_list(length=None)
+        suggest_cde = []
+        # Then, we need get all selected results for this concept, for each mapping, check if the selected result is in the selected_results, if not, add it
+        # also we need to check review_results, because review_reuslt is one-to-one correspondence with selected_results, so is same index agreement is true
+        # add agreement to the selected_results, if not, add disagreement, if no index in review, its means it suggest by reviewer, so add suggestion
+        for mapping in mappings:
+            # create user info
+            user = await db.users.find_one({
+                "user_id": mapping['user_id']
+            })
 
-        user_data = await db.users.find_one({
-            "user_id": reviewer
-        })
+            user_info = {
+                "user_id": user['user_id'],
+                "name": user['name'],
+                "email": user['email']
+            }
 
-        grant_review_data.append({
-            "reviewer_id": reviewer,
-            "reviewer_name": user_data['name'],
-            "reviewer_email": user_data['email'],
-            "mappings": formatMappings(mappings)
-        })
+            # get mapper info
+            mapped_user = None
+            if mapping['reviewing_mapping_id']:
+                reviewed_mapping = await db.mappings.find_one({
+                    "mapping_id": mapping['reviewing_mapping_id']
+                })
+                _mapped_user = await db.users.find_one({
+                    "user_id": reviewed_mapping['user_id']
+                })
+                mapped_user = {
+                    "user_id": _mapped_user['user_id'],
+                    "name": _mapped_user['name'],
+                    "email": _mapped_user['email']
+                }
+
+            # if mapping['reviewer_suggestion'] is True, add to suggest_cde
+            if mapping["reviewer_suggestion"]:
+                suggest_cde.append(user_info)
+            # looping through selected_results
+            for index, selected_result in enumerate(mapping['selected_results']):
+                existing_entry = next(
+                    (item for item in selected_results if item.get("term_id") == selected_result.get("term_id")), 
+                    None
+                )
+                # prevent duplicate selected_results
+                if existing_entry:
+                    if mapped_user not in existing_entry['mapped_users']:
+                        existing_entry['mapped_users'].append(mapped_user)
+                    if len(mapping['reviewed_results']) > index:
+                        if mapping['reviewed_results'][index]['agreement'] is True:
+                            existing_entry['agreement'].append(user_info)
+                        else:
+                            existing_entry['disagreement'].append(user_info)
+                    else:
+                        existing_entry['suggestion'].append(user_info)
+                # create selected_results data
+                else:
+                    _selected_result = {
+                        "selected_result": selected_result,
+                        "mapped_users": [mapped_user],
+                        "agreement": [],
+                        "disagreement": [],
+                        "suggestion": []
+                    }
+                    if len(mapping['reviewed_results']) > index:
+                        if mapping['reviewed_results'][index]['agreement'] is True:
+                            _selected_result['agreement'].append(user_info)
+                        else:
+                            _selected_result['disagreement'].append(user_info)
+                    else:
+                        _selected_result['suggestion'].append(user_info)
+                    selected_results.append(_selected_result)
+            grand_review_data.append({
+                "selected_result":selected_results,
+                "suggest_cde": suggest_cde
+                })
+
     return {
         'success': True,
         'concepts': formatConcepts(concepts),
-        'grant_review_data': grant_review_data
+        'grand_review_data': grand_review_data
     }
 
 
