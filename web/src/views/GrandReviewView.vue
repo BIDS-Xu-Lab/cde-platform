@@ -9,6 +9,9 @@ import * as CDEHelper from '../CDEHelper';
 import { Jimin } from '../Jimin';
 onMounted(() => {
     console.log('* mounted grandReviewView');
+    if (!store.working_mappings) {
+        CDEHelper.getGrandReviewData();
+    }
 });
 
 const store = useDataStore();
@@ -148,5 +151,9 @@ const togglePopoverSuggestions = (event) => {
 }
 .select-sources {
     width: 10rem;
+}
+.result-list-scroller {
+    width: calc(100% + 1rem);
+    overflow-y: auto;
 }
 </style>

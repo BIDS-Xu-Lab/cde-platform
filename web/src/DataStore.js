@@ -274,6 +274,7 @@ actions: {
     },
 
     addSelectedResultToWorkingConcept(result) {
+        console.log('addSelectedResultToWorkingConcept:', result);
         if (!this.working_concept) {
             return;
         }

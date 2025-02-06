@@ -1,5 +1,6 @@
 <script setup>
 import { useDataStore } from "../DataStore";
+import { Jimin } from "../Jimin";
 import { ref } from "vue";
 const store = useDataStore();
 
@@ -12,48 +13,10 @@ const agree_color = ref('#91ff85');
 const disagree_color = ref('#ff4383');
 const suggest_color = ref('#ffac43');
 
-
-async function onClickSelectResult(result) {
-    console.log('* clicked Select Result:', result);
-
-    // update store
-    store.addSelectedResultToWorkingConcept(result);
-
-    // send selected results to server
-    let ret = await Jimin.updateSelectedResults(
-        store.working_concept.concept_id,
-        store.working_file.round.length - 1,
-        store.working_mappings[store.working_concept.concept_id].selected_results
-    );
-
-    console.log('* updated selected results:', ret);
-
-    // show a message
-    store.msg(ret.message);
-}
-
-async function onClickRemoveResult(result) {
-    console.log('* clicked Remove Result:', result);
-
-    // update store
-    store.removeSelectedResultFromWorkingConcept(result);
-
-    // send selected results to server
-    let ret = await Jimin.updateSelectedResults(
-        store.working_concept.concept_id,
-        store.working_file.round.length - 1,
-        store.working_mappings[store.working_concept.concept_id].selected_results
-    );
-
-    console.log('* updated selected results:', ret);
-
-    // show a message
-    store.msg(ret.message);
-}
-
+// helper functions
 function fmtScore(score) {
     return score.toFixed(2);
-}
+};
 function chartData (item){ 
         return {
         labels: ['Yes', 'No', 'Suggest'], 
@@ -64,9 +27,7 @@ function chartData (item){
             }
         ]
     }
-}
-;
-
+};
 const chartOptions = ref({
     responsive: true,
     aspectRatio: 2,
@@ -96,6 +57,30 @@ const chartOptions = ref({
     }
 });
 
+async function onClickIntoFinal(item) {
+    console.log('* clicked into final:', item);
+    // Jimin.addFinalResultToWorkingConcept(item);
+}
+
+async function onClickToNext(item) {
+    console.log('* clicked into next:', item);
+    // Jimin.removeSelectedResultFromWorkingConcept(item);
+    // check if store.working_mapping has current concept
+    // if not, create a new one
+    
+    if (store.working_mappings[store.working_concept.concept_id] === undefined) {
+        store.working_mappings[store.working_concept.concept_id] = {
+            selected_results: [],
+            search_results: [],
+            reviewed_results: [],
+            mapper_suggestion:false,
+            reviewer_suggestion:false,
+            status: 'mapping'
+        };
+    }
+    store.addSelectedResultToWorkingConcept(item.selected_result);
+
+}
 </script>
 
 <template>
@@ -147,21 +132,21 @@ const chartOptions = ref({
             <div>
                 <Button
                     size="small"
-                    icon="pi pi-check"
+                    icon="fa-solid fa-check-double"
                     severity="success"
-                    label="Select"
+                    label="Finalize"
                     class="mr-2"
-                    v-tooltip.right="'Select this concept.'"
-                    @click="onClickSelectResult(item)">
+                    v-tooltip.right="'Select this concept to final.'"
+                    @click="onClickIntoFinal(item)">
                 </Button>
                 <Button
                     size="small"
                     severity="warn"
-                    icon="pi pi-trash"
-                    label="Remove"
+                    icon="fa-solid fa-arrow-right"
+                    label="Into Next Round"
                     class="mr-2"
-                    v-tooltip.right="'Remove this concept.'"
-                    @click="onClickRemoveResult(item)">
+                    v-tooltip.right="'Select this concept to next round.'"
+                    @click="onClickToNext(item)">
                 </Button>
             </div>
         </div>

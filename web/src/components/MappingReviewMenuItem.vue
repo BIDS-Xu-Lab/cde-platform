@@ -69,7 +69,11 @@ async function onClickSearch() {
     } else {
         store.working_mappings[store.working_concept.concept_id] = {
             search_results: results[0],
-            selected_results: []
+            selected_results: [],
+            reviewed_results: [],
+            mapper_suggestion: false,
+            reviewer_suggestion: false,
+            status: 'mapping'
         }
     }
 }
@@ -106,7 +110,11 @@ async function onClickSearchAll() {
         } else {
             store.working_mappings[concept.concept_id] = {
                 search_results: results[0],
-                selected_results: []
+                selected_results: [],
+                reviewed_results: [],
+                mapper_suggestion: false,
+                reviewer_suggestion: false,
+                status: 'mapping'
             }
         }
         await new Promise(resolve => setTimeout(resolve, 100));

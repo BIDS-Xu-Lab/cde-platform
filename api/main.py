@@ -1559,7 +1559,7 @@ async def get_concepts_and_review_data_by_file(
     #First, check if there is already a review data for this user, if so, return the review data
     mappings = await db.mappings.find({
         "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
-        "user_id": user_id,
+        "user_id": current_user['user_id'],
         "status": {"$in": ["reviewing", "reviewed"]},
         "round": round
     }).to_list(length=None)
@@ -1636,6 +1636,7 @@ async def get_concepts_and_grand_review_by_file(
     logging.debug(f"* get round of file {file_id} = {round}")
     # create the data structure
     grand_review_data = []
+    grand_mappings = []
     for concept in concepts:
         # statistics for this concept, get all mappings for this concept
         selected_results = []
@@ -1682,7 +1683,8 @@ async def get_concepts_and_grand_review_by_file(
             # looping through selected_results
             for index, selected_result in enumerate(mapping['selected_results']):
                 existing_entry = next(
-                    (item for item in selected_results if item.get("term_id") == selected_result.get("term_id")), 
+                    (item for item in selected_results 
+                    if item["selected_result"]["term_id"] == selected_result["term_id"]), 
                     None
                 )
                 # prevent duplicate selected_results
@@ -1713,15 +1715,46 @@ async def get_concepts_and_grand_review_by_file(
                     else:
                         _selected_result['suggestion'].append(user_info)
                     selected_results.append(_selected_result)
-            grand_review_data.append({
-                "concept_id": concept["concept_id"],
-                "selected_results":selected_results,
-                "suggest_cde": suggest_cde
-                })
-
+        grand_review_data.append({
+            "concept_id": concept["concept_id"],
+            "selected_results":selected_results,
+            "suggest_cde": suggest_cde
+            })
+        # check if there are mappings(grand review) for this concept, if so, get all mappings for this concept
+        grand_mapping = await db.mappings.find_one({
+            "concept_id": concept['concept_id'],
+            "user_id": current_user['user_id'],
+            "file_id": file_id,
+            "round": round + 1,
+            "status": "mapping"
+        })
+        if grand_mapping:
+            grand_mappings.append(grand_mapping)
+        else:
+            _new_mapping = {
+                "mapping_id": str(uuid.uuid4()),
+                "file_id": concept['file_id'],
+                "concept_id": concept['concept_id'],
+                "user_id": current_user['user_id'],
+                "reviewing_mapping_id": None,
+                "round": round + 1,
+                "status": "mapping",
+                "source": None,
+                "collections": [],
+                "selected_results": [selected_result['selected_result'] for selected_result in selected_results],
+                "reviewed_results": [{"agreement": None, "comment": None} for _ in range(len(selected_results))],
+                "search_results": [],
+                "mapper_suggestion": False,
+                "reviewer_suggestion": False,
+                "created": datetime.datetime.now(),
+                "updated": datetime.datetime.now(),
+            }
+            grand_mappings.append(_new_mapping)
+            await db.mappings.insert_one(_new_mapping)
     return {
         'success': True,
         'concepts': formatConcepts(concepts),
+        'mappings': formatMappings(grand_mappings),
         'grand_review_data': grand_review_data
     }
 
@@ -2093,8 +2126,6 @@ async def suggest_concept_to_cde(
             await db.mappings.insert_one(mapping)
             logging.debug(f"* saved mapping {mapping['mapping_id']}")
         else:
-                    
-            print(m['mapper_suggestion'])
             # update the mapping
             _mapping = {
                 "mapper_suggestion": not m['mapper_suggestion'],

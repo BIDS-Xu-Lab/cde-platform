@@ -199,11 +199,22 @@ async function onClickContinue(file) {
 
     try {
         let ret = await Jimin.getConceptAndgrandReviewByFile(file.file_id);
+        store.working_mappings = {};
         console.log('* got concept:', ret);
         store.working_file_concepts = ret.concepts;
         store.grand_review_data = ret.grand_review_data;
         store.working_file = file;
         store.working_project = store.current_project;
+        ret.mappings.forEach((mapping) => {
+                    store.working_mappings[mapping.concept_id] = {
+                        selected_results: mapping.selected_results,
+                        search_results: mapping.search_results,
+                        reviewed_results: mapping.reviewed_results,
+                        mapper_suggestion: mapping.mapper_suggestion,
+                        reviewer_suggestion: mapping.reviewer_suggestion,
+                        status: mapping.status
+                    };
+                });
     } catch (err) {
         console.error(err);
         store.msg(err.message, 'Error', 'error');
