@@ -485,7 +485,7 @@ function fmtScore(score) {
     <div class="menu-group">
         <div class="menu-group-box">
             <Button text
-                :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                :disabled="Object.values(store.working_mappings).some(mapping => mapping.status === 'mapped' || mapping.status === 'reviewed')"
                 class="menu-button"
                 v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
                 @click="onClickSubmitButton">

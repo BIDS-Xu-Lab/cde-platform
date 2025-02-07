@@ -1326,10 +1326,27 @@ async def submit_mapping_work(
         status = "reviewed"
 
     for mapping in mappings:
+        new_reviewed_results = []
+        # check if the mapping is in reviewing stage, if so, add default agreement and comment to None agreement
+        if mapping['status'] == "reviewing":
+            for r in mapping['reviewed_results']:
+                if r['agreement'] == None:
+                    new_reviewed_results.append({
+                        "agreement": True,
+                        "comment": "Default"
+                    })
+                else:
+                    new_reviewed_results.append(r)
+        # if the mapping is in mapping stage, add default agreement and comment to None agreement
+        else:
+            new_reviewed_results = mapping['reviewed_results']
+                
+            
         await db.mappings.update_one(
             {"mapping_id": mapping['mapping_id']},
             {"$set": {
-                "status": status
+                "status": status,
+                "reviewed_results": new_reviewed_results
             }}
         )
     return {
