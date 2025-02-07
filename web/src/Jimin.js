@@ -329,7 +329,20 @@ export const Jimin = {
         );
         return rsp.data;
     },
+    finalizeConcept: async function (concept_id) {
+        console.log('* finalize concept', concept_id);
 
+        const rsp = await this.axios_instance.get(
+            '/finalize_concept',
+            {
+                params: {
+                    concept_id: concept_id
+                }
+            }
+        );
+
+        return rsp.data;
+    },
 
 
     ///////////////////////////////////////////////////////

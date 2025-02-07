@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { useToast } from "primevue/usetoast";
 import { hasResults } from './CDEHelper';
 import router from './router';
+import { toRaw } from 'vue';
 import { Jimin } from './Jimin';
 
 export const useDataStore = defineStore('jarvis', {
@@ -299,16 +300,23 @@ actions: {
     },
 
     removeSelectedResultFromWorkingConcept(result) {
+        console.log('removeSelectedResultFromWorkingConcept:', result);
         if (!this.working_concept) {
+            console.log('no working concept');
             return;
         }
 
         if (!this.working_mappings[this.working_concept.concept_id]) {
+            console.log('no working mappings');
             return;
         }
 
         // remove the result
-        this.working_mappings[this.working_concept.concept_id].selected_results = this.working_mappings[this.working_concept.concept_id].selected_results.filter(r => r != result);
+        this.working_mappings[this.working_concept.concept_id].selected_results = 
+            this.working_mappings[this.working_concept.concept_id].selected_results.filter(r => 
+                // stringify to avoid the object reference issue
+                JSON.stringify(r) !== JSON.stringify(result)
+            );
     },
 
     ///////////////////////////////////////////////////////

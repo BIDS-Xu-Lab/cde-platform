@@ -1061,6 +1061,8 @@ async def upload_file(
             concept['file_id'] = file_data['file_id']
             # add the user_id
             concept['user_id'] = current_user['user_id']
+            # add a final flag
+            concept['final'] = False
             await db.concepts.insert_one(concept)
         logging.debug(f"* saved {len(concepts)} concepts")
 
@@ -1758,6 +1760,36 @@ async def get_concepts_and_grand_review_by_file(
         'grand_review_data': grand_review_data
     }
 
+@app.get('/finalize_concept', tags=["concept"])
+async def finalize_concept(
+    request: Request,
+    concept_id: str,
+    current_user: dict = Depends(authJWTCookie),
+):
+    '''
+    Finalize a concept
+    '''
+    logging.info("finalize concept" + concept_id)
+    # get the concept
+    concept = await db.concepts.find_one({
+        "concept_id": concept_id
+    })
+    if concept is None:
+        raise HTTPException(status_code=404, detail="Concept not found")
+    # check if the current user is the owner of the concept
+    if concept['user_id'] != current_user['user_id']:
+        raise HTTPException(status_code=403, detail="Permission denied")
+    # update the concept
+    result = await db.concepts.update_one(
+        {"concept_id": concept_id},
+        {"$set": {
+            "final": True
+        }}
+    )
+    return {
+        'success': True,
+        'message': 'Concept finalized successfully'
+    }
 
 
 ###########################################################
@@ -2020,11 +2052,12 @@ async def update_selected_results(
     if file is None:
         raise HTTPException(status_code=404, detail="File not found")
     
+    status = file['round'][update_data.round]['stage'] if update_data.round < len(file['round']) else "mapping"
     # update the mapping by concept_id and user_id
     m = await db.mappings.find_one({
         "concept_id": update_data.concept_id,
         "round": update_data.round,
-        "status": file['round'][update_data.round]['stage'],
+        "status": status,
         "user_id": current_user['user_id']
     })
 
@@ -2043,7 +2076,7 @@ async def update_selected_results(
 
     # if review_results is not provided, first check the file satus by the last round, if its in mapping, give the template of review_results by length of selected result
     if not update_data.reviewed_results:
-        if file['round'][update_data.round]['stage'] == "mapping":
+        if status == "mapping":
             reviewed_result_template = {
                 "agreement": None,
                 "comment": None

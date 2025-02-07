@@ -159,7 +159,7 @@ async function onClickDeleteFile(file) {
     await store.updateCurrentProjectFiles();
 }
 
-async function onClickChangeStage(file) {
+async function onClickChangeStage() {
     console.log('* clicked Change Stage');
     visible_dialog_move_file.value = true;
 }
@@ -453,7 +453,7 @@ async function onClickContinue(file) {
                 v-tooltip.bottom="'Change the stage.'"
                 @click="onClickChangeStage()">
                 <font-awesome-icon :icon="['fas', 'arrow-right']" />
-                Change Stage
+                Change the Status
             </Button>
             <Button 
                 severity="info"
@@ -470,7 +470,7 @@ async function onClickContinue(file) {
     </div>
     <Dialog v-model:visible="visible_dialog_move_file" header="Move File" width="400px">
         <div v-if="file.round[file.round.length - 1].stage==='mapping'" class="flex flex-col gap-4">
-            <p>Are you sure you want to move this file to the next stage?</p>
+            <p>Please confirm all mappers finished</p>
             <div class="flex flex-row justify-end gap-2">
                 <Button 
                 severity="secondary" 
@@ -483,7 +483,7 @@ async function onClickContinue(file) {
                 severity="warn" 
                 @click="onClickMoveStage(file, 'reviewing')">
                 <font-awesome-icon :icon="['fas', 'arrow-right']" />
-                Move Stage
+                Set Review
                 </Button>
             </div>
         </div>
@@ -502,12 +502,12 @@ async function onClickContinue(file) {
                 <font-awesome-icon :icon="['fas', 'rotate-right']" />
                 Grand Review
                 </Button>
-                <Button
+                <!-- <Button
                 severity="danger"
                 @click="onClickMoveStage(file, 'completed')">
                 <font-awesome-icon :icon="['fas', 'check']" />
                 Finalize
-                </Button>
+                </Button> -->
             </div>
         </div>
     </Dialog>

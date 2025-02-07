@@ -72,7 +72,24 @@ async function onClickSuggest() {
         });
     }
     console.log(ret.message);
-    
+}
+
+const visible_dialog_final_decision = ref(false);
+function onClickFinal() {
+    console.log('* clicked final');
+    visible_dialog_final_decision.value = true;
+}
+
+async function onClickYesToFinal() {
+    console.log('* clicked yes to final');
+    console.log('store.working_concept:', store.working_concept);
+    visible_dialog_final_decision.value = false;
+    let ret = await Jimin.finalizeConcept(store.working_concept.concept_id);
+    if (ret.success) {
+        store.working_concept.final = true;
+    }
+    store.working_concept = null;
+    store.msg(ret.message);
 }
 </script>
 <template>
@@ -141,8 +158,8 @@ async function onClickSuggest() {
                     :style="{ height: 'calc(100vh - 18rem)'}">
                     <template v-for="item in store.filtered_working_file_concepts">
                         <div class="term-line"
-                            :class="{ 'working-term': store.isWorkingConcept(item) }"
-                            @click="onClickConcept(item)">
+                            :class="{ 'working-term': store.isWorkingConcept(item), 'disabled-term': item.final }"
+                            @click="!item.final && onClickConcept(item)">
                             <div class="term-name">
                                 <div class="mr-1">
                                     <template v-if="store.hasSelectedResults(item) || store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
@@ -158,6 +175,10 @@ async function onClickSuggest() {
                                 <div :class="{ 'font-bold': store.isWorkingConcept(item) }">
                                     {{ item.term }}
                                 </div>
+                                <span v-if="item.final" class="text-lg ml-10">
+                                        <i class="fa-solid fa-flag-checkered"></i>
+                                        This concept in final
+                                </span>
                             </div>
                             <div class="term-concept">
                                 <div v-if="view_mode !== 'grand_review'"
@@ -279,6 +300,18 @@ async function onClickSuggest() {
                                         </Button>
                                     </div>
                                 </div>
+                                <div v-if="view_mode ==='grand_review'">
+                                    <Button 
+                                        class="btn-mini mr-2"
+                                        :disabled="store.working_concept !== item || store.working_concept.final"
+                                        v-if:="!item.final"
+                                        severity="info"
+                                        v-tooltip.bottom="'Disagree this to CDE.'"
+                                        @click="onClickFinal()">
+                                        <i class="fa-solid fa-flag-checkered"></i>
+                                        Set to Final
+                                    </Button>
+                                </div>
                             </div>
 
                             <div class="term-additional mt-2">
@@ -347,6 +380,29 @@ async function onClickSuggest() {
             </div>
         </div>
     </Dialog>
+    <Dialog v-model:visible="visible_dialog_final_decision" 
+        modal
+        header="Are you sure you want this concept to Final?"
+        width="400px" 
+        :closable="false">
+        <div class="flex flex-col gap-4">
+            <p>You cannot modify this concept after it has been finalized.</p>
+            <div class="flex flex-row justify-end gap-2">
+                <Button 
+                severity="secondary" 
+                @click="visible_dialog_final_decision = false">
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+                No
+                </Button>
+                <Button 
+                severity="primary" 
+                @click="onClickYesToFinal()">
+                <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                    Yes
+                </Button>
+            </div>
+        </div>
+    </Dialog>
 </template>
 <style scoped>
 .term-list {
@@ -405,5 +461,10 @@ async function onClickSuggest() {
 .result-list-scroller {
     width: calc(100% + 1rem);
     overflow-y: auto;
+}
+
+.disabled-term {
+    pointer-events: none;
+    opacity: 0.5; 
 }
 </style>

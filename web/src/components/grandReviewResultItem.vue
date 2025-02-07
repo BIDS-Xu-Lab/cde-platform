@@ -57,28 +57,42 @@ const chartOptions = ref({
     }
 });
 
-async function onClickIntoFinal(item) {
-    console.log('* clicked into final:', item);
-    // Jimin.addFinalResultToWorkingConcept(item);
+function inWorking(item) {
+    return store.working_mappings[store.working_concept.concept_id].selected_results
+        .find(r => JSON.stringify(r) === JSON.stringify(item.selected_result)) !== undefined;
 }
 
-async function onClickToNext(item) {
-    console.log('* clicked into next:', item);
-    // Jimin.removeSelectedResultFromWorkingConcept(item);
-    // check if store.working_mapping has current concept
-    // if not, create a new one
-    
-    if (store.working_mappings[store.working_concept.concept_id] === undefined) {
-        store.working_mappings[store.working_concept.concept_id] = {
-            selected_results: [],
-            search_results: [],
-            reviewed_results: [],
-            mapper_suggestion:false,
-            reviewer_suggestion:false,
-            status: 'mapping'
-        };
-    }
+async function onClickExclude(item) {
+    console.log('* clicked onClickExclude:', item);
+    // remove from selected_results
+    store.removeSelectedResultFromWorkingConcept(item.selected_result);
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_file.round.length,
+        store.working_mappings[store.working_concept.concept_id].selected_results
+    );
+        console.log('* updated selected results:', ret);
+
+        // show a message
+        store.msg(ret.message);
+}
+
+async function onClickInclude(item) {
+    console.log('* clicked onClickInclude:', item);
+
     store.addSelectedResultToWorkingConcept(item.selected_result);
+    
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_file.round.length,
+        store.working_mappings[store.working_concept.concept_id].selected_results
+    );
+
+    store.addSelectedResultToWorkingConcept(item.selected_result);
+    console.log('* updated selected results:', ret);
+
+    // show a message
+    store.msg(ret.message);
 
 }
 </script>
@@ -131,22 +145,24 @@ async function onClickToNext(item) {
             </div>
             <div>
                 <Button
+                    v-if="inWorking(item)"
                     size="small"
-                    icon="fa-solid fa-check-double"
-                    severity="success"
-                    label="Finalize"
+                    icon="fa-solid fa-xmark"
+                    severity="danger"
+                    label="Exclude"
                     class="mr-2"
                     v-tooltip.right="'Select this concept to final.'"
-                    @click="onClickIntoFinal(item)">
+                    @click="onClickExclude(item)">
                 </Button>
                 <Button
+                    v-if="!inWorking(item)"
                     size="small"
                     severity="warn"
-                    icon="fa-solid fa-arrow-right"
-                    label="Into Next Round"
+                    icon="fa-solid fa-arrows-rotate"
+                    label="Include"
                     class="mr-2"
                     v-tooltip.right="'Select this concept to next round.'"
-                    @click="onClickToNext(item)">
+                    @click="onClickInclude(item)">
                 </Button>
             </div>
         </div>
