@@ -158,8 +158,8 @@ async function onClickYesToFinal() {
                     :style="{ height: 'calc(100vh - 18rem)'}">
                     <template v-for="item in store.filtered_working_file_concepts">
                         <div class="term-line"
-                            :class="{ 'working-term': store.isWorkingConcept(item), 'disabled-term': item.final }"
-                            @click="!item.final && onClickConcept(item)">
+                            :class="{ 'working-term': store.isWorkingConcept(item)}"
+                            @click="onClickConcept(item)">
                             <div class="term-name">
                                 <div class="mr-1">
                                     <template v-if="store.hasSelectedResults(item) || store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
@@ -231,7 +231,8 @@ async function onClickYesToFinal() {
                                         No values available.
                                     </span>
                                 </div>
-                                <div v-if="view_mode === 'mapping'">
+                                <div v-if="view_mode === 'mapping'"
+                                    :class="{ 'disabled-term': item.final }">
                                     <Button 
                                         class="btn-mini mr-2"
                                         :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'mapped'"
@@ -253,7 +254,8 @@ async function onClickYesToFinal() {
                                         Recall propose
                                     </Button>
                                 </div>
-                                <div v-if="view_mode === 'reviewing'">
+                                <div v-if="view_mode === 'reviewing'"
+                                    :class="{ 'disabled-term': item.final }">
                                     <div class="flex flex-col items-end" v-if="store.working_mappings[item.concept_id].mapper_suggestion">
                                         <p class = "mb-2 mr-2">Suggested as CDE by mapper</p>
                                         <Button 

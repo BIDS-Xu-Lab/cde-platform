@@ -191,7 +191,7 @@ onMounted(() => {
                             :flag_selected="true"
                             :flag_enabled_value_mapping="true"
                             :item_idx="item_idx" 
-                            :flag_submitted="CDEHelper.checkSubmitStatus()"
+                            :flag_submitted="CDEHelper.checkSubmitAndFinalStatus()"
                             :view_mode="'reviewing'"
                             />
                     </template>
@@ -213,7 +213,7 @@ onMounted(() => {
                         :flag_selected="false"
                         :flag_enabled_value_mapping="false"
                         :item_idx="item_idx" 
-                        :flag_submitted="CDEHelper.checkSubmitStatus()"
+                        :flag_submitted="CDEHelper.checkSubmitAndFinalStatus()"
                         :view_mode="'reviewing'"
                         />
                 </template>

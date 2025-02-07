@@ -19,7 +19,10 @@ export async function onClickRefreshListGetSources() {
     });
 }
 
-export function checkSubmitStatus(){
+export function checkSubmitAndFinalStatus(){
+    if (store.working_concept?.final) {
+        return true;
+    }
     for (const mapping of Object.values(store.working_mappings)) {
         if (mapping.status === "mapped" || mapping.status === "reviewed") {
             return true;

@@ -90,7 +90,10 @@ async function onClickSearchAll() {
     for (let i=0; i < store.working_file_concepts.length; i++) {
         prograss_value.value = i + 1;
         let concept = store.working_file_concepts[i];
-
+        // skip final concepts
+        if(concept.final){
+            continue;
+        }
         // search CDEs on the working concept
         let results = await Jimin.search(
             store.mapping.selected_source,
@@ -370,7 +373,7 @@ function fmtScore(score) {
     <div class="menu-group !ml-2">
         <div class="menu-group-box">
             <Button text
-                :disabled="CDEHelper.checkSubmitStatus()"
+                :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Refresh list.'"
                 @click="CDEHelper.onClickRefreshListGetSources">
@@ -386,7 +389,7 @@ function fmtScore(score) {
                     Sources
                 </label>
                 <Select v-model="store.mapping.selected_source"
-                    :disabled="CDEHelper.checkSubmitStatus()"
+                    :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                     :options="store.mapping.sources" 
                     @change="onChangeSource"
                     variant="in"
@@ -408,7 +411,7 @@ function fmtScore(score) {
                     Collections
                 </label>
                 <MultiSelect v-model="store.mapping.selected_collections" 
-                    :disabled="CDEHelper.checkSubmitStatus()"
+                    :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                     :options="store.mapping.collections" 
                     variant="in"
                     filter 
@@ -424,7 +427,7 @@ function fmtScore(score) {
             </div>
 
             <Button text
-                :disabled="CDEHelper.checkSubmitStatus()"
+                :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Search CDEs for the current selected concept.'"
                 @click="onClickSearch">
@@ -434,7 +437,7 @@ function fmtScore(score) {
                 </span>
             </Button>
             <Button text
-                :disabled="CDEHelper.checkSubmitStatus()"
+                :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Search CDEs for all terms.'"
                 @click="onClickSearchAll">
@@ -454,7 +457,7 @@ function fmtScore(score) {
         <div class="menu-group-box !flex-col justify-start">
             <div class="flex align-center my-1 justify-start">
                 <ToggleSwitch inputId="sw-embedding"
-                    :disabled="CDEHelper.checkSubmitStatus()"
+                    :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                     class="mr-1"
                     v-model="store.features.embedding_search.enabled" />
                 <label for="sw-embedding"
@@ -464,7 +467,7 @@ function fmtScore(score) {
             </div>
             <div class="flex align-center my-1 justify-start">
                 <ToggleSwitch inputId="sw-query-expansion"
-                    :disabled="CDEHelper.checkSubmitStatus()"
+                    :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                     class="mr-1"
                     v-model="store.features.query_expansion.enabled" />
                 <label for="sw-query-expansion"
@@ -482,7 +485,7 @@ function fmtScore(score) {
     <div class="menu-group">
         <div class="menu-group-box">
             <Button text
-                :disabled="CDEHelper.checkSubmitStatus()"
+                :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
                 @click="onClickSubmitButton">
@@ -513,7 +516,7 @@ function fmtScore(score) {
     <div class="menu-group">
         <div class="menu-group-box">
             <Button text
-                :disabled="CDEHelper.checkSubmitStatus()"
+                :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Re-rank the current search results using AI technology.'"
                 @click="onClickRerank">
@@ -524,7 +527,7 @@ function fmtScore(score) {
             </Button>
 
             <Button text
-                :disabled="CDEHelper.checkSubmitStatus()"
+                :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Automatically link the values to the current CDE\'s values.'"
                 @click="onClickValueLinking">

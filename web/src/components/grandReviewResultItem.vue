@@ -98,7 +98,9 @@ async function onClickInclude(item) {
 </script>
 
 <template>
-<div class="result-line">
+<div class="result-line"
+    :class="{ 'disabled-term': store.working_concept.final }"
+    >
     <div class="result-tags">
         <div class="flex flex-row">
             <Badge :value="fmtScore(item.selected_result.score)" 
@@ -197,4 +199,11 @@ async function onClickInclude(item) {
 .badge-score {
     background-color: #857100;
 }
+
+
+.disabled-term {
+    pointer-events: none;
+    opacity: 0.6; 
+}
+
 </style>
