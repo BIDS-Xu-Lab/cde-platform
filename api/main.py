@@ -1402,9 +1402,44 @@ async def move_to_next_stage(
         #     #end here
         # else:
         #     raise HTTPException(status_code=403, detail="No selected mapping results")
-    # if the current stage is reviewing, check given stage, if its completed, change the stage to completed
-    elif file['round'][file_round]['stage'] == "reviewing" and stage == "completed":
+    # if the current stage is grand_review, set currnet stage to completed, and add a new round with stage reviewing
+    elif file['round'][file_round]['stage'] == "grand_review" and stage == "completed":
         file['round'][file_round]['stage'] = "completed"
+        file['round'].append({
+            "stage": "reviewing"
+        })
+        # update the mappings
+        mappings = await db.mappings.find({
+            "file_id": file_id,
+            "user_id": current_user['user_id'],
+            "round": file_round + 1,
+            "status": "mapping"
+        }).to_list(length=None)
+
+        for mapping in mappings:
+            await db.mappings.update_one(
+            {"mapping_id": mapping["mapping_id"]},
+            {"$set": {"status": "mapped"}}
+        )
+    
+    elif file['round'][file_round]['stage'] == "grand_review" and stage == "finalized":
+        file['round'][file_round]['stage'] = "completed"
+        file['round'].append({
+            "stage": "finalized"
+        })
+
+        mappings = await db.mappings.find({
+            "file_id": file_id,
+            "user_id": current_user['user_id'],
+            "round": file_round + 1,
+            "status": "mapping"
+        }).to_list(length=None)
+
+        for mapping in mappings:
+            await db.mappings.update_one(
+            {"mapping_id": mapping["mapping_id"]},
+            {"$set": {"status": "finalized"}}
+        )
     else:
         raise HTTPException(status_code=403, detail="Invalid stage transition")
     # update the file

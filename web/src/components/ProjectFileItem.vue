@@ -448,8 +448,8 @@ async function onClickContinue(file) {
             <Button 
                 severity="warn"
                 size="small"
-                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage !=='grand_review'"
-                :disabled="file.round[file.round.length - 1].stage === 'completed'"
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage !== 'grand_review' && file.round[file.round.length - 1].stage !== 'finalized'"
+                :disabled="(file.round[file.round.length - 1].stage === 'mapping' && file.n_submitted === 0) || file.round[file.round.length - 1].stage === 'reviewing' && file.n_reviewed === 0"
                 v-tooltip.bottom="'Change the stage.'"
                 @click="onClickChangeStage()">
                 <font-awesome-icon :icon="['fas', 'arrow-right']" />

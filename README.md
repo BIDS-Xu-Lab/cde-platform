@@ -95,6 +95,12 @@ TBD
 
 # Change log
 
+## 8.0.0
+- Added basic mapping function
+- Added review function
+- Added grand review function
+- Added finalize file and multi round review function
+
 ## 0.7.2
 
 - Added user registration and login
