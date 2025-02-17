@@ -1097,9 +1097,10 @@ async def get_files_by_project(
         file['n_concepts'] = await db.concepts.count_documents({
             "file_id": file['file_id']
         })
-
+        file_round = len(file['round']) - 1
         mapped = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
+            "round": file_round,
             "status": "mapped"
         })
         file['n_submitted'] = len(mapped)
@@ -1107,6 +1108,7 @@ async def get_files_by_project(
 
         reviewed = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
+            "round": file_round,
             "status": "reviewed"
         })
         file['n_reviewed'] = len(reviewed)
