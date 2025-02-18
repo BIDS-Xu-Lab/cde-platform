@@ -65,7 +65,18 @@ async function onClickSearch() {
 
     // check whether store.working_concept.id is in store.working_mappings
     if (store.working_concept.concept_id in store.working_mappings) {
-        store.working_mappings[store.working_concept.concept_id].search_results = results[0];
+        // get the current stored selected_results
+        const selectedResults = store.working_mappings[store.working_concept.concept_id].selected_results;
+
+        // remove duplicates based on term_id + term_source as unique key
+        const uniqueResults = Array.from(
+            new Map(results[0].map(item => [`${item.term_id}-${item.term_source}`, item])).values()
+        );
+
+        // filter out the items that are already in selected_results
+        store.working_mappings[store.working_concept.concept_id].search_results = uniqueResults.filter(
+            item => !selectedResults.some(sel => sel.term_id === item.term_id && sel.term_source === item.term_source)
+        );
     } else {
         store.working_mappings[store.working_concept.concept_id] = {
             search_results: results[0],
@@ -109,7 +120,18 @@ async function onClickSearchAll() {
 
         // check whether store.working_concept.id is in store.working_mappings
         if (concept.concept_id in store.working_mappings) {
-            store.working_mappings[concept.concept_id].search_results = results[0];
+            // get the current stored selected_results
+            const selectedResults = store.working_mappings[concept.concept_id].selected_results;
+
+            // remove duplicates based on term_id + term_source as unique key
+            const uniqueResults = Array.from(
+                new Map(results[0].map(item => [`${item.term_id}-${item.term_source}`, item])).values()
+            );
+
+            // filter out the items that are already in selected_results
+            store.working_mappings[concept.concept_id].search_results = uniqueResults.filter(
+                item => !selectedResults.some(sel => sel.term_id === item.term_id && sel.term_source === item.term_source)
+            );
         } else {
             store.working_mappings[concept.concept_id] = {
                 search_results: results[0],
