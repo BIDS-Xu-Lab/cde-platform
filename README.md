@@ -95,7 +95,7 @@ TBD
 
 # Change log
 
-## 8.0.0
+## 0.8.0
 - Added basic mapping function
 - Added review function
 - Added grand review function

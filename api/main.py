@@ -1793,10 +1793,16 @@ async def get_concepts_and_grand_review_by_file(
                     if mapped_user not in existing_entry['mapped_users']:
                         existing_entry['mapped_users'].append(mapped_user)
                     if len(mapping['reviewed_results']) > index:
+                        user_with_comment = {
+                            "user_id": user_info['user_id'],
+                            "name": user_info['name'],
+                            "email": user_info['email'],
+                            "comment": mapping['reviewed_results'][index]['comment']
+                        }
                         if mapping['reviewed_results'][index]['agreement'] is True:
-                            existing_entry['agreement'].append(user_info)
+                            existing_entry['agreement'].append(user_with_comment)
                         else:
-                            existing_entry['disagreement'].append(user_info)
+                            existing_entry['disagreement'].append(user_with_comment)
                     else:
                         existing_entry['suggestion'].append(user_info)
                 # create selected_results data
@@ -1809,10 +1815,16 @@ async def get_concepts_and_grand_review_by_file(
                         "suggestion": []
                     }
                     if len(mapping['reviewed_results']) > index:
+                        user_with_comment = {
+                            "user_id": user_info['user_id'],
+                            "name": user_info['name'],
+                            "email": user_info['email'],
+                            "comment": mapping['reviewed_results'][index]['comment']
+                        }
                         if mapping['reviewed_results'][index]['agreement'] is True:
-                            _selected_result['agreement'].append(user_info)
+                            _selected_result['agreement'].append(user_with_comment)
                         else:
-                            _selected_result['disagreement'].append(user_info)
+                            _selected_result['disagreement'].append(user_with_comment)
                     else:
                         _selected_result['suggestion'].append(user_info)
                     selected_results.append(_selected_result)
