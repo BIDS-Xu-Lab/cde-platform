@@ -1097,7 +1097,7 @@ async def get_files_by_project(
         file['n_concepts'] = await db.concepts.count_documents({
             "file_id": file['file_id']
         })
-        file_round = len(file['round']) - 1
+        file_round = len(file['round']) - 1            
         mapped = await db.mappings.distinct("user_id", {
             "file_id": file['file_id'],
             "round": file_round,
@@ -1106,13 +1106,57 @@ async def get_files_by_project(
         file['n_submitted'] = len(mapped)
         file['submitted_users'] = mapped
 
-        reviewed = await db.mappings.distinct("user_id", {
-            "file_id": file['file_id'],
-            "round": file_round,
-            "status": "reviewed"
-        })
-        file['n_reviewed'] = len(reviewed)
-        file['reviewed_users'] = reviewed
+        reviewed_aggregate = await db.mappings.aggregate(
+            [
+                {
+                    "$match": {
+                        "file_id": file["file_id"],
+                        "round": file_round,
+                        "status": "reviewed"
+                    }
+                },
+                {
+                    "$lookup": {
+                        "from": "mappings",
+                        "localField": "reviewing_mapping_id",
+                        "foreignField": "mapping_id",
+                        "as": "mapping_info"
+                    }
+                },
+                {
+                    "$unwind": "$mapping_info" 
+                },
+                {
+                    "$project": {
+                        "_id": 0,
+                        "reviewer_user_id": "$user_id", 
+                        "mapping_user_id": "$mapping_info.user_id"
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": {
+                            "reviewer_user_id": "$reviewer_user_id",
+                            "mapping_user_id": "$mapping_user_id"
+                        }
+                    }
+                }
+            ]
+
+        ).to_list(length=None)
+
+        reviewed_mapped = [
+                {
+                    "reviewer": entry["_id"]["reviewer_user_id"], 
+                    "mapper": entry["_id"]["mapping_user_id"]
+                }
+
+                for entry in reviewed_aggregate
+            ]
+
+        file["n_reviewed"] = len(reviewed_mapped)
+        file["reviewed_mappings_tuple"] = reviewed_mapped
+
 
     return {
         'success': True,
@@ -1612,27 +1656,28 @@ async def get_concepts_and_review_data_by_file(
     concepts = await db.concepts.find({
         "file_id": file_id
     }).to_list(length=None)
-    #First, check if there is already a review data for this user, if so, return the review data
-    mappings = await db.mappings.find({
-        "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
-        "user_id": current_user['user_id'],
-        "status": {"$in": ["reviewing", "reviewed"]},
-        "round": round
-    }).to_list(length=None)
-    if mappings:
-        return {
-            'success': True,
-            'concepts': formatConcepts(concepts),
-            'mappings': formatMappings(mappings)
-        }
-    # if not, get all mappings
+    # First, get all mappings
     mappings = await db.mappings.find({
         "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
         "user_id": user_id,
         "status": "mapped",
         "round": round
     }).to_list(length=None)
+    #Then, check if there is already a review data for this user, if so, return the review data
+    _mappings = await db.mappings.find({
+        "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
+        "reviewing_mapping_id": {"$in": [mapping['mapping_id'] for mapping in mappings]},
+        "user_id": current_user['user_id'],
+        "status": {"$in": ["reviewing", "reviewed"]},
+        "round": round
+    }).to_list(length=None)
 
+    if _mappings:
+        return {
+            'success': True,
+            'concepts': formatConcepts(concepts),
+            'mappings': formatMappings(_mappings)
+        }
     # create new mappings data with mappings, set reviewed_results to empty, and status to reviewing, and save it to the database, then return the new mappings data
     _mappings = []
     for mapping in mappings:
