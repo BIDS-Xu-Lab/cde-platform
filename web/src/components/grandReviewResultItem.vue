@@ -9,9 +9,9 @@ const props = defineProps({
     item_idx: Number
 });
 
-const agree_color = ref('#91ff85');
-const disagree_color = ref('#ff4383');
-const suggest_color = ref('#ffac43');
+const agree_color = ref('#5CB85C');
+const disagree_color = ref('#D9534F');
+const suggest_color = ref('#F0AD4E');
 
 // helper functions
 function fmtScore(score) {
@@ -34,25 +34,26 @@ const chartOptions = ref({
     maintainAspectRatio: true,
     plugins: {
         legend: {
-            position: 'right',
-            labels: {
-                font: {
-                    size: 10
-                },
-                boxWidth: 10, 
-                padding: 5,
-                generateLabels: (chart) => {
-                    let labels = chart.data.labels;
-                    let dataset = chart.data.datasets[0].data;
+            display: false
+            // position: 'right',
+            // labels: {
+            //     font: {
+            //         size: 10
+            //     },
+            //     boxWidth: 10, 
+            //     padding: 5,
+            //     generateLabels: (chart) => {
+            //         let labels = chart.data.labels;
+            //         let dataset = chart.data.datasets[0].data;
 
-                    return labels.map((label, i) => ({
-                        text: `${label}: ${dataset[i]}`,
-                        fillStyle: chart.data.datasets[0].backgroundColor[i],
-                        hidden: chart.getDatasetMeta(0).data[i].hidden,
-                        index: i
-                    }));
-                }
-            }
+            //         return labels.map((label, i) => ({
+            //             text: `${label}: ${dataset[i]}`,
+            //             fillStyle: chart.data.datasets[0].backgroundColor[i],
+            //             hidden: chart.getDatasetMeta(0).data[i].hidden,
+            //             index: i
+            //         }));
+            //     }
+            // }
         }
     }
 });
@@ -95,6 +96,22 @@ async function onClickInclude(item) {
     store.msg(ret.message);
 
 }
+
+// popover related
+const popover_yes = ref();
+const togglePopoverYes = (event) => {
+    popover_yes.value.toggle(event);
+};
+
+const popover_no = ref();
+const togglePopoverNo = (event) => {
+    popover_no.value.toggle(event);
+};
+
+const popover_suggest = ref();
+const togglePopoverSuggest = (event) => {
+    popover_suggest.value.toggle(event);
+};
 </script>
 
 <template>
@@ -141,9 +158,84 @@ async function onClickInclude(item) {
     <div class="mt-4">
         <span class="font-bold text-lg mb-2">Statistics:</span>
         <div class="flex flex-row mt-2 mb-1 items-baseline justify-between">
-            <div class="flex flex-col justify-center items-center">
-                <span class="font-bold text-lg">Number of reviewer</span>
-                <Chart type="pie" :data="chartData(item)" :options="chartOptions" class="md:w-[10em] h-[5em]" />
+            <div class="flex flex-row">
+                <div class="flex flex-col justify-center items-center">
+                    <span class="font-bold text-lg">Number of reviewer</span>
+                    <Chart type="pie" :data="chartData(item)" :options="chartOptions" class="md:w-[15em] h-[8em]" />
+                </div>
+                <div class="ml-4 flex flex-col justify-center items-center">
+                    <!-- Agreement info component -->
+                    <Button
+                        size="small"
+                        :disabled="item.agreement.length === 0"
+                        severity="secondary"
+                        :style="{ backgroundColor: agree_color, color: 'white' }"
+                        label="Yes"
+                        class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
+                        v-tooltip.top="'Click to view detail.'"
+                        @click="togglePopoverYes">
+                    </Button>
+                    <Popover ref="popover_yes">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-lg">Agree: {{ item.agreement.length }}</span>
+                            <span class="text-sm">Details:</span>
+                            <div class="card">
+                                <DataTable :value="item.agreement" tableStyle="min-width: 30rem">
+                                    <Column field="name" header="Name"></Column>
+                                    <Column field="email" header="Email"></Column>
+                                    <Column field="comment" header="Comment"></Column>
+                                </DataTable>
+                            </div>
+                        </div>
+                    </Popover>
+                    <!-- Dissagree info component -->
+                    <Button
+                        size="small"
+                        :disabled="item.disagreement.length === 0"
+                        severity="secondary"
+                        :style="{ backgroundColor: disagree_color, color: 'white' }"
+                        label="No"
+                        class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
+                        v-tooltip.top="'Click to view detail.'"
+                        @click="togglePopoverNo">
+                    </Button>
+                    <Popover ref="popover_no">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-lg">Dissagree: {{ item.disagreement.length }}</span>
+                            <span class="text-sm">Details:</span>
+                            <div class="card">
+                                <DataTable :value="item.disagreement" tableStyle="min-width: 30rem">
+                                    <Column field="name" header="Name"></Column>
+                                    <Column field="email" header="Email"></Column>
+                                    <Column field="comment" header="Comment"></Column>
+                                </DataTable>
+                            </div>
+                        </div>
+                    </Popover>
+                    <!-- Suggest info component -->
+                    <Button
+                        size="small"
+                        :disabled="item.suggestion.length === 0"
+                        severity="secondary"
+                        :style="{ backgroundColor: suggest_color, color: 'white' }"
+                        label="Suggest"
+                        class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
+                        v-tooltip.top="'Click to view detail.'"
+                        @click="togglePopoverSuggest">
+                    </Button>
+                    <Popover ref="popover_suggest">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-lg">Suggest: {{ item.suggestion.length }}</span>
+                            <span class="text-sm">Details:</span>
+                            <div class="card">
+                                <DataTable :value="item.agreement" tableStyle="min-width: 18rem">
+                                    <Column field="name" header="Name"></Column>
+                                    <Column field="email" header="Email"></Column>
+                                </DataTable>
+                            </div>
+                        </div>
+                    </Popover>
+                </div>
             </div>
             <div>
                 <Button
@@ -153,7 +245,7 @@ async function onClickInclude(item) {
                     severity="danger"
                     label="Exclude"
                     class="mr-2"
-                    v-tooltip.right="'Select this concept to final.'"
+                    v-tooltip.right="'Exclude this concept to next reviewing round.'"
                     @click="onClickExclude(item)">
                 </Button>
                 <Button
