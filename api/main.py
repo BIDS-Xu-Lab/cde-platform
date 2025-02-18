@@ -2176,8 +2176,30 @@ async def update_selected_results(
         raise HTTPException(status_code=404, detail="Mapping not found")
     
     # update the selected results
+    m_selected_results = m['selected_results']
+    # find element in m_selected_results that is not in update_data.selected_results
+    
+    resolved_selected_results = [
+        result for result in m_selected_results
+        if result not in update_data.selected_results
+    ]
+
+    selected_term_keys = {(result["term_id"], result["term_source"]) for result in update_data.selected_results}
+    
+    filtered_search_results = [
+        result for result in m["search_results"]
+        if (result["term_id"], result["term_source"]) not in selected_term_keys
+    ]
+
+    if len(resolved_selected_results) != 0:
+        # put the resolved selected results back to filtered_search_results (check unique first)
+        for result in resolved_selected_results:
+            if result not in filtered_search_results:
+                filtered_search_results.append(result)
+
     _mapping = {
         "selected_results": update_data.selected_results,
+        "search_results": filtered_search_results,
         "updated": datetime.datetime.now(),
     }
 
