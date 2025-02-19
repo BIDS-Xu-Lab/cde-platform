@@ -160,81 +160,91 @@ const togglePopoverSuggest = (event) => {
         <div class="flex flex-row mt-2 mb-1 items-baseline justify-between">
             <div class="flex flex-row">
                 <div class="flex flex-col justify-center items-center">
-                    <span class="font-bold text-lg">Number of reviewer</span>
+                    <span class="font-bold text-lg">Distribution</span>
                     <Chart type="pie" :data="chartData(item)" :options="chartOptions" class="md:w-[15em] h-[8em]" />
                 </div>
                 <div class="ml-4 flex flex-col justify-center items-center">
                     <!-- Agreement info component -->
-                    <Button
-                        size="small"
-                        :disabled="item.agreement.length === 0"
-                        severity="secondary"
-                        :style="{ backgroundColor: agree_color, color: 'white' }"
-                        label="Yes"
-                        class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
-                        v-tooltip.top="'Click to view detail.'"
-                        @click="togglePopoverYes">
-                    </Button>
-                    <Popover ref="popover_yes">
-                        <div class="flex flex-col">
-                            <span class="font-bold text-lg">Agree: {{ item.agreement.length }}</span>
-                            <span class="text-sm">Details:</span>
-                            <div class="card">
-                                <DataTable :value="item.agreement" tableStyle="min-width: 30rem">
-                                    <Column field="name" header="Name"></Column>
-                                    <Column field="email" header="Email"></Column>
-                                    <Column field="comment" header="Comment"></Column>
-                                </DataTable>
+                    <div class="flex flex-row items-center">
+                        <Button
+                            size="small"
+                            :disabled="item.agreement.length === 0"
+                            severity="secondary"
+                            :style="{ backgroundColor: agree_color, color: 'white' }"
+                            label="Yes"
+                            class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
+                            v-tooltip.top="'Click to view detail.'"
+                            @click="togglePopoverYes">
+                        </Button>
+                        
+                        <Popover ref="popover_yes">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-lg">Agree: {{ item.agreement.length }}</span>
+                                <span class="text-sm">Details:</span>
+                                <div class="card">
+                                    <DataTable :value="item.agreement" tableStyle="min-width: 30rem">
+                                        <Column field="name" header="Name"></Column>
+                                        <Column field="email" header="Email"></Column>
+                                        <Column field="comment" header="Comment"></Column>
+                                    </DataTable>
+                                </div>
                             </div>
-                        </div>
-                    </Popover>
+                        </Popover>
+                        <span class="ml-2"><font-awesome-icon :icon="['fas', 'user']" />: {{ item.agreement.length }}</span>
+                    </div>
                     <!-- Dissagree info component -->
-                    <Button
-                        size="small"
-                        :disabled="item.disagreement.length === 0"
-                        severity="secondary"
-                        :style="{ backgroundColor: disagree_color, color: 'white' }"
-                        label="No"
-                        class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
-                        v-tooltip.top="'Click to view detail.'"
-                        @click="togglePopoverNo">
-                    </Button>
-                    <Popover ref="popover_no">
-                        <div class="flex flex-col">
-                            <span class="font-bold text-lg">Dissagree: {{ item.disagreement.length }}</span>
-                            <span class="text-sm">Details:</span>
-                            <div class="card">
-                                <DataTable :value="item.disagreement" tableStyle="min-width: 30rem">
-                                    <Column field="name" header="Name"></Column>
-                                    <Column field="email" header="Email"></Column>
-                                    <Column field="comment" header="Comment"></Column>
-                                </DataTable>
+                    <div class="flex flex-row items-center">
+                        <Button
+                            size="small"
+                            :disabled="item.disagreement.length === 0"
+                            severity="secondary"
+                            :style="{ backgroundColor: disagree_color, color: 'white' }"
+                            label="No"
+                            class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
+                            v-tooltip.top="'Click to view detail.'"
+                            @click="togglePopoverNo">
+                        </Button>
+                        <Popover ref="popover_no">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-lg">Dissagree: {{ item.disagreement.length }}</span>
+                                <span class="text-sm">Details:</span>
+                                <div class="card">
+                                    <DataTable :value="item.disagreement" tableStyle="min-width: 30rem">
+                                        <Column field="name" header="Name"></Column>
+                                        <Column field="email" header="Email"></Column>
+                                        <Column field="comment" header="Comment"></Column>
+                                    </DataTable>
+                                </div>
                             </div>
-                        </div>
-                    </Popover>
+                        </Popover>
+                        <span class="ml-2"><font-awesome-icon :icon="['fas', 'user']" />: {{ item.disagreement.length }}</span>
+                    </div>
                     <!-- Suggest info component -->
-                    <Button
-                        size="small"
-                        :disabled="item.suggestion.length === 0"
-                        severity="secondary"
-                        :style="{ backgroundColor: suggest_color, color: 'white' }"
-                        label="Suggest"
-                        class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
-                        v-tooltip.top="'Click to view detail.'"
-                        @click="togglePopoverSuggest">
-                    </Button>
-                    <Popover ref="popover_suggest">
-                        <div class="flex flex-col">
-                            <span class="font-bold text-lg">Suggest: {{ item.suggestion.length }}</span>
-                            <span class="text-sm">Details:</span>
-                            <div class="card">
-                                <DataTable :value="item.agreement" tableStyle="min-width: 18rem">
-                                    <Column field="name" header="Name"></Column>
-                                    <Column field="email" header="Email"></Column>
-                                </DataTable>
+                    <div class="flex flex-row items-center">
+                        <Button
+                            size="small"
+                            :disabled="item.suggestion.length === 0"
+                            severity="secondary"
+                            :style="{ backgroundColor: suggest_color, color: 'white' }"
+                            label="Suggest"
+                            class="mb-1 text-xs px-2 py-1 h-6 w-20 hover:brightness-110"
+                            v-tooltip.top="'Click to view detail.'"
+                            @click="togglePopoverSuggest">
+                        </Button>
+                        <Popover ref="popover_suggest">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-lg">Suggest: {{ item.suggestion.length }}</span>
+                                <span class="text-sm">Details:</span>
+                                <div class="card">
+                                    <DataTable :value="item.agreement" tableStyle="min-width: 18rem">
+                                        <Column field="name" header="Name"></Column>
+                                        <Column field="email" header="Email"></Column>
+                                    </DataTable>
+                                </div>
                             </div>
-                        </div>
-                    </Popover>
+                        </Popover>
+                        <span class="ml-2"><font-awesome-icon :icon="['fas', 'user']" />: {{ item.suggestion.length }}</span>
+                    </div>
                 </div>
             </div>
             <div>

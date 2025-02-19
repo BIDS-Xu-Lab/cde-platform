@@ -1,7 +1,7 @@
 <script setup>
 import { useDataStore } from '../DataStore';
-import { onMounted, ref } from 'vue';
-import { Button, Popover } from 'primevue';
+import { computed, onMounted, ref } from 'vue';
+import { Button, Popover, ProgressBar } from 'primevue';
 import { Jimin } from '../Jimin';
 
 const store = useDataStore();
@@ -90,6 +90,19 @@ async function onClickYesToFinal() {
     }
     store.working_concept = null;
     store.msg(ret.message);
+}
+
+function agreeConsistency(item) {
+    const mapping = store.grand_review_data.find(mapping => mapping.concept_id === item.concept_id);
+    if (!mapping) return 0;
+
+    const { total, agree } = mapping.selected_results.reduce((acc, result) => {
+        acc.total += result.agreement.length + result.disagreement.length + result.suggestion.length;
+        acc.agree += result.agreement.length;
+        return acc;
+    }, { total: 0, agree: 0 });
+
+    return total === 0 ? 0 : (agree / total) * 100;
 }
 </script>
 <template>
@@ -198,6 +211,12 @@ async function onClickYesToFinal() {
                                             <i class="fa fa-exclamation-triangle mr-1"></i>
                                             Not Mapped.
                                         </template>
+                                    </div>
+                                </div>
+                                <div v-else class="flex flex-row items-center text-small">
+                                    <span class="mr-2">Consistency:</span>
+                                    <div style="width: 100px;">
+                                        <ProgressBar :value="agreeConsistency(item)"></ProgressBar>
                                     </div>
                                 </div>
                                 <div class="mr-1">
