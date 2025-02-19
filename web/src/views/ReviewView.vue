@@ -100,6 +100,14 @@ async function onClickSelectResult(result) {
 const selected_results_panel = ref();
 const search_results_panel = ref();
 
+
+function isFinalized() {
+    if (store.working_file?.round[store.working_file?.round.length - 1]?.stage == 'finalized') {
+        return "finalized";
+    }
+    return "reviewing";
+}
+
 onMounted(() => {
     console.log('* mounted MappingView');
 
@@ -111,12 +119,12 @@ onMounted(() => {
 </script>
 
 <template>
-    <MappingReviewMenuItem :view_mode="'reviewing'" />
+    <MappingReviewMenuItem :view_mode="isFinalized()" />
 
 <!-- main -->
 <div class="main flex-row">
     <!-- concept list -->
-     <ConceptListItem :view_mode="'reviewing'"/>
+     <ConceptListItem :view_mode="isFinalized()"/>
     <div class="flex flex-col w-full h-full result-list">
         <Panel ref="search_results_panel"
             class="w-full">
@@ -192,7 +200,7 @@ onMounted(() => {
                             :flag_enabled_value_mapping="true"
                             :item_idx="item_idx" 
                             :flag_submitted="CDEHelper.checkSubmitAndFinalStatus()"
-                            :view_mode="'reviewing'"
+                            :view_mode="isFinalized()"
                             />
                     </template>
 
@@ -201,30 +209,31 @@ onMounted(() => {
                 </template>
 
                 <!-- result list -->
-                <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
+                 <div v-if="isFinalized()==='reviewing'">
+                    <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
+                        <div class="text-lg font-bold mt-4">
+                            <i class="fa-solid fa-list-ul"></i>
+                            Search Results
+                            ({{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length}})
+                        </div>
+                        <template v-for="item, item_idx in store.working_mappings_search_results_without_selected">
+                            <SearchResultItem :item="item" 
+                                :flag_selected="false"
+                                :flag_enabled_value_mapping="false"
+                                :item_idx="item_idx" 
+                                :flag_submitted="CDEHelper.checkSubmitAndFinalStatus()"
+                                :view_mode="isFinalized()"
+                                />
+                        </template>
 
-                <div class="text-lg font-bold mt-4">
-                    <i class="fa-solid fa-list-ul"></i>
-                    Search Results
-                    ({{ store.working_mappings[store.working_concept?.concept_id]?.search_results.length}})
+                    </template>
+                    <template v-else>
+                        <div class="">
+                            <i class="fa-solid fa-info-circle"></i>
+                            No search results
+                        </div>
+                    </template>
                 </div>
-                <template v-for="item, item_idx in store.working_mappings_search_results_without_selected">
-                    <SearchResultItem :item="item" 
-                        :flag_selected="false"
-                        :flag_enabled_value_mapping="false"
-                        :item_idx="item_idx" 
-                        :flag_submitted="CDEHelper.checkSubmitAndFinalStatus()"
-                        :view_mode="'reviewing'"
-                        />
-                </template>
-
-                </template>
-                <template v-else>
-                    <div class="">
-                        <i class="fa-solid fa-info-circle"></i>
-                        No search results
-                    </div>
-                </template>
             </div>
         </Panel>
     </div>

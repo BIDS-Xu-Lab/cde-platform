@@ -8,7 +8,7 @@ import { Button } from 'primevue';
 
 import * as CDEHelper from '../CDEHelper';
 import { Jimin } from '../Jimin';
-defineProps({
+const props = defineProps({
     view_mode: String
 });
 
@@ -374,25 +374,11 @@ const sort_results_options = [
 ];
 
 
-const sort_order_options = [
-    { name: 'Descent', code: 'desc' },
-    { name: 'Ascent', code: 'asc' }
-];
-
-async function onClickConcept(concept) {
-    console.log('* clicked concept:', concept);
-    store.working_concept = concept;
-}
-
-function fmtScore(score) {
-    return score.toFixed(2);
-}
-
 </script>
 
 <template>
 <div class="menu">
-    <div class="menu-group !ml-2">
+    <div  v-if="view_mode!=='finalized'" class="menu-group !ml-2">
         <div class="menu-group-box">
             <Button text
                 :disabled="CDEHelper.checkSubmitAndFinalStatus()"
@@ -475,7 +461,7 @@ function fmtScore(score) {
     </div>
 
 
-    <div class="menu-group">
+    <div v-if="view_mode!=='finalized'" class="menu-group">
         <div class="menu-group-box !flex-col justify-start">
             <div class="flex align-center my-1 justify-start">
                 <ToggleSwitch inputId="sw-embedding"
@@ -507,6 +493,7 @@ function fmtScore(score) {
     <div class="menu-group">
         <div class="menu-group-box">
             <Button text
+                v-if="view_mode!=='finalized'"
                 :disabled="Object.values(store.working_mappings).some(mapping => mapping.status === 'mapped' || mapping.status === 'reviewed')"
                 class="menu-button"
                 v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
@@ -535,7 +522,7 @@ function fmtScore(score) {
     </div>
 
 
-    <div class="menu-group">
+    <div v-if="view_mode!=='finalized'" class="menu-group">
         <div class="menu-group-box">
             <Button text
                 :disabled="CDEHelper.checkSubmitAndFinalStatus()"

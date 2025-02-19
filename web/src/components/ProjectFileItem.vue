@@ -198,7 +198,7 @@ async function onClickContinue(file) {
     store.clearMappingData();
 
     try {
-        let ret = await Jimin.getConceptAndgrandReviewByFile(file.file_id);
+        let ret = await Jimin.getConceptAndGrandReviewByFile(file.file_id);
         store.working_mappings = {};
         console.log('* got concept:', ret);
         store.working_file_concepts = ret.concepts;
@@ -221,7 +221,44 @@ async function onClickContinue(file) {
         return;
     }
     store.changeView('grand_review');
-}                  
+}
+
+async function onClickView(file, user_id) {
+    console.log('* clicked View button');
+    // clear the existing mapping data
+    store.clearMappingData();
+
+    // set working project to this project
+    store.working_project = store.current_project;
+
+    // set working file to this file
+    store.working_file = file;
+    // then, switch to the mapping view
+    try{
+        let ret = await Jimin.getConceptAndReviewDataByFile(file.file_id, user_id);
+        console.log('* got concept:', ret);
+                // set working concepts and mapping to default
+                store.working_file_concepts = ret.concepts;
+                store.working_mappings = {};
+
+                // put all concepts into the working mappings
+                ret.mappings.forEach((mapping) => {
+                    store.working_mappings[mapping.concept_id] = {
+                        selected_results: mapping.selected_results,
+                        search_results: mapping.search_results,
+                        reviewed_results: mapping.reviewed_results,
+                        mapper_suggestion: mapping.mapper_suggestion,
+                        reviewer_suggestion: mapping.reviewer_suggestion,
+                        status: mapping.status
+                    };
+                });
+    } catch (err) {
+        console.error(err);
+        store.msg(err.message, 'Error', 'error');
+        return;
+    }
+    store.changeView('review');
+}
 
 </script>
 
@@ -464,6 +501,16 @@ async function onClickContinue(file) {
                 @click="onClickContinue(file)">
                 <font-awesome-icon :icon="['fas', 'fa-eye']" />
                 Continue Grand Review
+            </Button>
+            <Button 
+                severity="info"
+                size="small"
+                v-if="view_mode === 'file' && file.round[file.round.length - 1].stage ==='finalized'"
+                :disabled="file.round[file.round.length - 1].stage === 'completed'"
+                v-tooltip.bottom="'View Result'"
+                @click="onClickView(file, store.user.user_id)">
+                <font-awesome-icon :icon="['fas', 'fa-eye']" />
+                View
             </Button>
         </div>
 

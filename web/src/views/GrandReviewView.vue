@@ -225,7 +225,7 @@ async function onClickYesNextButton() {
 
 <Dialog v-model:visible="visible_dialog_finalized" 
         modal
-        header="Are you sure you want to make this file concept to final?"
+        header="Are you sure you want to make this file final?"
         width="400px" 
         :closable="false">
         <div class="flex flex-col gap-4">
@@ -248,7 +248,7 @@ async function onClickYesNextButton() {
 </Dialog>
 <Dialog v-model:visible="visible_dialog_next_round" 
         modal
-        header="Are you sure you want to make this file concept to final?"
+        header="Are you sure you want to move to next review round?"
         width="400px" 
         :closable="false">
         <div class="flex flex-col gap-4">

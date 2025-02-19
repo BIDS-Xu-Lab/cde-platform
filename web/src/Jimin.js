@@ -316,7 +316,7 @@ export const Jimin = {
 
         return rsp.data;
     },
-    getConceptAndgrandReviewByFile: async function (file_id) {
+    getConceptAndGrandReviewByFile: async function (file_id) {
         console.log('* get grand review by file', file_id);
 
         const rsp = await this.axios_instance.get(

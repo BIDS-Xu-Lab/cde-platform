@@ -236,7 +236,7 @@ const togglePopoverSuggest = (event) => {
                                 <span class="font-bold text-lg">Suggest: {{ item.suggestion.length }}</span>
                                 <span class="text-sm">Details:</span>
                                 <div class="card">
-                                    <DataTable :value="item.agreement" tableStyle="min-width: 18rem">
+                                    <DataTable :value="item.suggestion" tableStyle="min-width: 18rem">
                                         <Column field="name" header="Name"></Column>
                                         <Column field="email" header="Email"></Column>
                                     </DataTable>

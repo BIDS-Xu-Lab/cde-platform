@@ -1656,6 +1656,19 @@ async def get_concepts_and_review_data_by_file(
     concepts = await db.concepts.find({
         "file_id": file_id
     }).to_list(length=None)
+    # check if the round status is final, if so, return the final data
+    if file['round'][round]['stage'] == "finalized":
+        mappings = await db.mappings.find({
+            "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},
+            "user_id": user_id,
+            "round": round,
+            "status": "finalized"
+        }).to_list(length=None)
+        return {
+            'success': True,
+            'concepts': formatConcepts(concepts),
+            'mappings': formatMappings(mappings)
+        }
     # First, get all mappings
     mappings = await db.mappings.find({
         "concept_id": {"$in": [concept['concept_id'] for concept in concepts]},

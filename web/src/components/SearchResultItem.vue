@@ -210,7 +210,7 @@ function displayAgreementInfo(){
 
 <template>
 <div class="result-line"
-    :class="{ 'disabled-term': store.working_concept.final }">
+    :class="{ 'disabled-term': store.working_concept.final && view_mode === 'reviewing' }">
     <div class="result-tags">
         <div class="flex flex-row">
             <Badge :value="fmtScore(item.score)" 

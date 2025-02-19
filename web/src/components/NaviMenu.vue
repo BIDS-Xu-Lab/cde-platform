@@ -59,6 +59,13 @@ onMounted(() => {
             <font-awesome-icon :icon="['fas', 'users-viewfinder']" />
             Grand Review
         </div>
+        <div v-show="store.working_file != null && store.working_file?.round[store.working_file?.round.length - 1]?.stage == 'finalized'"
+            class="navi-item"
+            @click="store.changeView('review')"
+            :class="{'active-page': store.current_view=='review'}">
+            <font-awesome-icon :icon="['fas', 'magnifying-glass']" />
+            View
+        </div>
         <!-- <div class="navi-item"
             @click="store.changeView('create')"
             :class="{'active-page': store.current_view=='create'}">
