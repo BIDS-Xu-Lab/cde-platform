@@ -188,9 +188,9 @@ function agreeConsistency(item) {
                                 <div :class="{ 'font-bold': store.isWorkingConcept(item) }">
                                     {{ item.term }}
                                 </div>
-                                <span v-if="item.final" class="text-lg ml-10">
+                                <span v-if="item.final" class="text-lg ml-10 font-bold">
                                         <i class="fa-solid fa-flag-checkered"></i>
-                                        This concept in final
+                                        Finalized
                                 </span>
                             </div>
                             <div class="term-concept">
@@ -327,7 +327,7 @@ function agreeConsistency(item) {
                                         :disabled="store.working_concept !== item || store.working_concept.final"
                                         v-if:="!item.final"
                                         severity="info"
-                                        v-tooltip.bottom="'Disagree this to CDE.'"
+                                        v-tooltip.bottom="'Set this concept to Finalized.'"
                                         @click="onClickFinal()">
                                         <i class="fa-solid fa-flag-checkered"></i>
                                         Set to Final

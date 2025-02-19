@@ -496,7 +496,7 @@ const sort_results_options = [
                 v-if="view_mode!=='finalized'"
                 :disabled="Object.values(store.working_mappings).some(mapping => mapping.status === 'mapped' || mapping.status === 'reviewed')"
                 class="menu-button"
-                v-tooltip.bottom="'Save the current mapping results as a JSON file to local disk.'"
+                v-tooltip.bottom="'Submit the current work to the server.'"
                 @click="onClickSubmitButton">
                 <font-awesome-icon icon="fa-solid fa-upload" class="menu-icon" />
                 <span>

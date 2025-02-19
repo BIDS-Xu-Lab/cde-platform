@@ -191,8 +191,8 @@ async function onClickYesNextButton() {
                             v-model="checked"
                             :disabled="filteredGrandReviewData.suggest_cde.length == 0"
                             class="ml-2" 
-                            onLabel="Accpet" 
-                            offLabel="Deaccept" />
+                            onLabel="Not Accept" 
+                            offLabel="Accept" />
                         </div>
                     </div>
                 </template>

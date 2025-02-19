@@ -515,7 +515,7 @@ async function onClickView(file, user_id) {
         </div>
 
     </div>
-    <Dialog v-model:visible="visible_dialog_move_file" header="Move File" width="400px">
+    <Dialog v-model:visible="visible_dialog_move_file" header="Move Stage" width="400px">
         <div v-if="file.round[file.round.length - 1].stage==='mapping'" class="flex flex-col gap-4">
             <p>Please confirm all mappers finished</p>
             <div class="flex flex-row justify-end gap-2">
@@ -535,7 +535,7 @@ async function onClickView(file, user_id) {
             </div>
         </div>
         <div v-if="file.round[file.round.length - 1].stage==='reviewing'" class="flex flex-col gap-4">
-            <p>Do you want grand rview all review result, or finalize?</p>
+            <p>Do you want to grand review of this file?</p>
             <div class="flex flex-row justify-end gap-2">
                 <Button 
                 severity="secondary" 
