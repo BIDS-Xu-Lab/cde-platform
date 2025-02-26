@@ -8,7 +8,7 @@ import { Jimin } from './Jimin';
 export const useDataStore = defineStore('jarvis', {
 
 state: () => ({
-    version: '0.8.0',
+    version: '0.8.1',
 
     // current user
     // {

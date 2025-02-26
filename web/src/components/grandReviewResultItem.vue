@@ -253,9 +253,9 @@ const togglePopoverSuggest = (event) => {
                     size="small"
                     icon="fa-solid fa-xmark"
                     severity="danger"
-                    label="Exclude"
+                    label="Remove this concept"
                     class="mr-2"
-                    v-tooltip.right="'Exclude this concept to next reviewing round.'"
+                    v-tooltip.right="'Remove this concept from next reviewing round.'"
                     @click="onClickExclude(item)">
                 </Button>
                 <Button
@@ -263,9 +263,9 @@ const togglePopoverSuggest = (event) => {
                     size="small"
                     severity="warn"
                     icon="fa-solid fa-arrows-rotate"
-                    label="Include"
+                    label="Recall operation"
                     class="mr-2"
-                    v-tooltip.right="'Select this concept to next round.'"
+                    v-tooltip.right="'Recall the concept to next reviewing round.'"
                     @click="onClickInclude(item)">
                 </Button>
             </div>

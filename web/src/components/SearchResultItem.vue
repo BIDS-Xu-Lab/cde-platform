@@ -15,22 +15,63 @@ const props = defineProps({
 const popover_disagree_comments = ref(null);
 
 const togglePpoverDisagreeComments = (event) => {
+    // set comments to the original comment
+    comments.value = store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment;
     popover_disagree_comments.value.toggle(event);
 }
 
 const popover_view_comments = ref(null);
 
 const togglePpoverviewComments = (event) => {
+    // if show_edit_comments is true, set it to false
+    if (show_edit_comments.value) {
+        show_edit_comments.value = false;
+    }
     popover_view_comments.value.toggle(event);
 }
 
 const agree_comment_dialog_visible = ref(false);
 
 const agreeOptions = [
-    { label: 'With Comments', icon: 'pi pi-check', command: () => { agree_comment_dialog_visible.value = true; } }
+    { label: 'With Comments', icon: 'pi pi-check', command: () => { 
+        // set comments to the original comment
+        comments.value = store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment;
+        agree_comment_dialog_visible.value = true; 
+    } }
 ];
 
-const comments = ref('');
+const show_edit_comments = ref(false);
+function toggleShowEditComments() {
+    // set comments to the original comment
+    comments.value = store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment;
+    show_edit_comments.value = !show_edit_comments.value;
+}
+
+async function onClickEditSubmit() {
+    console.log('* clicked Edit Submit:', comments.value);
+    // Maintain the original agreement status when editing comments
+    const currentAgreement = store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.agreement;
+    console.log('* currentAgreement:', currentAgreement); 
+    // update store
+    store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx].comment = comments.value;
+    // send selected results to server
+    let ret = await Jimin.updateSelectedResults(
+        store.working_concept.concept_id,
+        store.working_file.round.length - 1,
+        store.working_mappings[store.working_concept.concept_id].selected_results,
+        store.working_mappings[store.working_concept.concept_id].reviewed_results
+    );
+    console.log('* updated selected results:', ret);
+    // clear the comments
+    comments.value = '';
+    // show a message
+    store.msg(ret.message);
+    toggleShowEditComments();
+    togglePpoverviewComments();
+}
+
+const comments = ref(store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment || '');
+
 async function onClickSelectResult(result) {
     console.log('* clicked Select Result:', result);
 
@@ -73,15 +114,6 @@ function fmtScore(score) {
     return score.toFixed(2);
 }
 
-function onClickShowValues(item) {
-    console.log('* clicked Show Values:', item.values);
-    
-    // the item.values is a list of values concatenated by a pipe
-    // we need to split it into a list of string
-    // and we need to remove the white spaces for each value
-    let values = item.values.split('|').map(v => v.trim());
-    console.log('* values:', values);
-}
 
 function itemValueCheck(item) {
     if (item.values?.length > 0) {
@@ -89,12 +121,6 @@ function itemValueCheck(item) {
     } else {
         return false;
     }
-}
-
-async function onClickSaveMapping(item) {
-    console.log('* clicked Value Mapping:', item);
-    
-   
 }
 
 async function onChangeValueMapping(item, value) {
@@ -312,7 +338,7 @@ function displayAgreementInfo(){
                     size="small"
                     severity="info"
                     icon="pi pi-eye"
-                    label="comments"
+                    label="Comments"
                     class="mr-2"
                     v-tooltip.right="'View comments'"
                     @click="togglePpoverviewComments">
@@ -324,15 +350,46 @@ function displayAgreementInfo(){
                                 <span class="font-bold">Comments</span>
                             </div>
                             <div class="flex flex-col items-center">
-                                <p class="mt-4 mb-2 w-[24rem]">{{store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment}}</p>
-                                <Button
-                                    severity="secondary"
-                                    size="small"
-                                    class="btn-mini w-24"
-                                    @click="togglePpoverviewComments"
-                                    >
-                                    Close
-                                </Button>
+                                <div v-if="!show_edit_comments">
+                                    <p v-if="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment" class="mt-4 mb-2 w-[24rem]">{{store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].comment}}</p>
+                                    <p v-else class="mt-4 mb-2 w-[24rem]">No comments available</p>
+                                </div>
+                                <div v-if="show_edit_comments" class="w-full mb-4">
+                                    <Textarea
+                                        v-model="comments"
+                                        rows="5"
+                                        class="w-full"
+                                        placeholder="Enter your comments here..."
+                                    />
+                                </div>
+                                <div class="flex flex-row">
+                                    <Button
+                                        v-if="!show_edit_comments"
+                                        severity="primary"
+                                        size="small"
+                                        class="btn-mini w-24 mr-2"
+                                        @click="toggleShowEditComments"
+                                        >
+                                        Edit
+                                    </Button>
+                                    <Button 
+                                        v-if="show_edit_comments"
+                                        severity="secondary"
+                                        size="small"
+                                        class="btn-mini w-24 ml-2"
+                                        @click="onClickEditSubmit()"
+                                        >
+                                        Submit
+                                    </Button>
+                                    <Button 
+                                        severity="secondary"
+                                        size="small"
+                                        class="btn-mini w-24 ml-2"
+                                        @click="togglePpoverviewComments"
+                                        >
+                                        Close
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>

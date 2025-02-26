@@ -95,6 +95,11 @@ TBD
 
 # Change log
 
+## 0.8.1
+
+- Added edit comments function
+- Revised some UI
+
 ## 0.8.0
 - Added basic mapping function
 - Added review function
