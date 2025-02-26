@@ -490,7 +490,7 @@ async function onClickView(file, user_id) {
                 v-tooltip.bottom="'Change the stage.'"
                 @click="onClickChangeStage()">
                 <font-awesome-icon :icon="['fas', 'arrow-right']" />
-                Change the Status
+                Change the stage
             </Button>
             <Button 
                 severity="info"
@@ -530,7 +530,7 @@ async function onClickView(file, user_id) {
                 severity="warn" 
                 @click="onClickMoveStage(file, 'reviewing')">
                 <font-awesome-icon :icon="['fas', 'arrow-right']" />
-                Set Review
+                Start Review
                 </Button>
             </div>
         </div>
