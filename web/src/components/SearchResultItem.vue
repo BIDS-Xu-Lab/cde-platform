@@ -461,7 +461,7 @@ function displayAgreementInfo(){
             </div>
 
             <Select v-model="item.value_mapping[value]"
-                :disabled="flag_submitted"
+                :disabled="flag_submitted || view_mode === 'reviewing'"
                 @change="onChangeValueMapping(item, value)"
                 filter 
                 :options="item.values"
@@ -469,7 +469,7 @@ function displayAgreementInfo(){
                 style="width: 20rem;"
                 v-tooltip.right="'Select a value to map.'" />
 
-            <Button v-if="item.value_mapping[value] && !flag_submitted"
+            <Button v-if="item.value_mapping[value] && !flag_submitted && view_mode != 'reviewing'"
                 severity="danger"
                 size="small"
                 icon="pi pi-trash"
