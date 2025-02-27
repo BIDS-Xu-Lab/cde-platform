@@ -118,11 +118,57 @@ state: () => ({
 
 getters: {
     working_mappings_search_results_without_selected(state) {
-        if (!state.working_concept) {
+        if (!state.working_concept || !state.working_mappings[state.working_concept.concept_id]?.search_results) {
             return [];
         }
+        let filtered_search_results = [];
+        // if filter_results_by is empty, just return all the search results
+        if (state.mapping.filter_results_by.trim() == '') {
+            filtered_search_results = state.working_mappings[state.working_concept.concept_id]?.search_results;
+        } 
 
-        return state.working_mappings[state.working_concept.concept_id]?.search_results.filter(r => !state.working_mappings[state.working_concept.concept_id].selected_results.includes(r));
+        // filter
+        filtered_search_results = state.working_mappings[state.working_concept.concept_id]?.search_results.filter(r => {
+            let flag_has_keyword = r.term.toLowerCase().includes(state.mapping.filter_results_by.toLowerCase());
+            return flag_has_keyword;
+        });
+
+        const sort_by = state.mapping.sort_results_by ? state.mapping.sort_results_by : "Score";
+        const order_by = state.mapping.sort_results_order_by 
+            ? state.mapping.sort_results_order_by['code'] 
+            : (sort_by === "Name" ? "asc" : "desc");
+
+        // Sort the filtered results based on the selected sort option and order
+        if (filtered_search_results.length > 0) {
+            filtered_search_results.sort((a, b) => {
+                // Handle different sort fields
+                if (sort_by === "Score") {
+                    // For score, higher is better
+                    if (order_by === "desc") {
+                        return b.score - a.score;
+                    } else {
+                        console.log('ascending order');
+                        return a.score - b.score;
+                    }
+                } else if (sort_by === "Name") {
+                    // For name, alphabetical sorting
+                    if (order_by === "desc") {
+                        return b.term.localeCompare(a.term);
+                    } else {
+                        return a.term.localeCompare(b.term);
+                    }
+                } else {
+                    // Default to score sorting if the sort field is not recognized
+                    return order_by === "desc" 
+                        ? b.score - a.score 
+                        : a.score - b.score;
+                }
+            });
+        }
+        
+
+        // filter out the selected results
+        return filtered_search_results.filter(r => !state.working_mappings[state.working_concept.concept_id].selected_results.includes(r));
     },
 
     filtered_working_file_concepts(state) {
@@ -272,6 +318,12 @@ actions: {
         this.working_file_concepts = [];
         this.working_mappings = {};
         this.grand_review_data = [];
+        this.mapping.filter_results_by = '';
+        this.mapping.filter_terms_by = '';
+        this.mapping.sort_results_by = null;
+        this.mapping.sort_results_order_by = null;
+        this.mapping.sort_terms_by = null;
+
     },
 
     addSelectedResultToWorkingConcept(result) {

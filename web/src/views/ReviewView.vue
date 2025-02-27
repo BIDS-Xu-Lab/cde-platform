@@ -166,6 +166,7 @@ onMounted(() => {
 
                         <Select v-model="store.mapping.sort_results_by" 
                             :options="sort_results_options" 
+                            showClear
                             optionLabel="name" 
                             optionValue="name" 
                             placeholder="Sort by" 
@@ -173,6 +174,7 @@ onMounted(() => {
 
                         <Select v-model="store.mapping.sort_results_order_by" 
                             :options="sort_order_options" 
+                            showClear
                             optionLabel="name" 
                             placeholder="Order by" 
                             class="term-sort"/>

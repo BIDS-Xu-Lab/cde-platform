@@ -401,7 +401,7 @@ const sort_results_options = [
                     :options="store.mapping.sources" 
                     @change="onChangeSource"
                     variant="in"
-                    filter 
+                    filter
                     optionLabel="name" 
                     optionValue="code" 
                     placeholder="Select a data source" 
