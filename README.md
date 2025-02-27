@@ -95,6 +95,12 @@ TBD
 
 # Change log
 
+## 0.8.2
+
+- Bug fixes
+- Add search results sorting function
+- Added accept suggestions function
+
 ## 0.8.1
 
 - Added edit comments function
