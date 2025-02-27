@@ -104,6 +104,25 @@ function agreeConsistency(item) {
 
     return total === 0 ? 0 : (agree / total) * 100;
 }
+
+function disabledByReview(item) {
+    // if selected_results greater than reviewed_results, then disable
+    if (store.working_mappings[item.concept_id]?.selected_results.length > store.working_mappings[item.concept_id]?.reviewed_results.length) {
+        return true;
+    }
+    // Then, count the number of disagreement in reviewed_results, where count how many reviewd_result['agreement'] is false (note: may null but not false, only count the false)
+    const disagreement = store.working_mappings[item.concept_id]?.reviewed_results.reduce((acc, result) => {
+        if (result.agreement === false) {
+            return acc + 1;
+        }
+        return acc;
+    }, 0);
+    // if disagreement is equal to reviewed_results, then disable
+    if (disagreement === store.working_mappings[item.concept_id]?.reviewed_results.length) {
+        return false;
+    }
+    return true;
+}
 </script>
 <template>
     <div>
@@ -254,7 +273,7 @@ function agreeConsistency(item) {
                                     :class="{ 'disabled-term': item.final }">
                                     <Button 
                                         class="btn-mini mr-2"
-                                        :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'mapped'"
+                                        :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'mapped' || store.working_mappings[item.concept_id]?.selected_results.length > 0"
                                         v-if="!store.working_mappings[item.concept_id]?.mapper_suggestion" 
                                         severity="warn"
                                         v-tooltip.bottom="'Recommend this concept as CDE.'"
@@ -289,7 +308,7 @@ function agreeConsistency(item) {
                                         </Button>
                                         <Button 
                                             class="btn-mini mr-2"
-                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed'"
+                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed' || disabledByReview(item)"
                                             v-if="!store.working_mappings[item.concept_id]?.reviewer_suggestion" 
                                             severity="info"
                                             v-tooltip.bottom="'Recall disagree.'"
@@ -301,7 +320,7 @@ function agreeConsistency(item) {
                                     <div v-else>
                                         <Button 
                                             class="btn-mini mr-2"
-                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed'"
+                                            :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed' || disabledByReview(item)"
                                             v-if="!store.working_mappings[item.concept_id]?.reviewer_suggestion" 
                                             severity="warn"
                                             v-tooltip.bottom="'Recommend this concept as CDE.'"

@@ -232,6 +232,15 @@ function displayAgreementInfo(){
     }
 }
 
+function selectionDisabled() {
+    if (props.view_mode === 'mapping'){
+        return store.working_mappings[store.working_concept.concept_id]?.mapper_suggestion;
+    } else if (props.view_mode === 'reviewing'){
+        return store.working_mappings[store.working_concept.concept_id]?.reviewer_suggestion;
+    } else {
+        return false;
+    }
+}
 </script>
 
 <template>
@@ -312,6 +321,7 @@ function displayAgreementInfo(){
 
         <div>
             <Button v-if="!flag_selected && !flag_submitted"
+                :disabled="selectionDisabled()"
                 size="small"
                 icon="pi pi-check"
                 severity="success"
@@ -398,7 +408,7 @@ function displayAgreementInfo(){
                 </div>
                 <SplitButton
                     v-if="!flag_submitted"
-                    :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === true"
+                    :disabled="store.working_mappings[store.working_concept.concept_id].reviewed_results[item_idx].agreement === true || store.working_mappings[store.working_concept.concept_id].reviewer_suggestion"
                     size="small"
                     severity="success"
                     icon="pi pi-check"
