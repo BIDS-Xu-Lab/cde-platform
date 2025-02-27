@@ -1870,7 +1870,7 @@ async def get_concepts_and_grand_review_by_file(
                 "selected_results": [selected_result['selected_result'] for selected_result in selected_results],
                 "reviewed_results": [{"agreement": None, "comment": None} for _ in range(len(selected_results))],
                 "search_results": [],
-                "mapper_suggestion": False,
+                "mapper_suggestion": len(suggest_cde) > 0,
                 "reviewer_suggestion": False,
                 "created": datetime.datetime.now(),
                 "updated": datetime.datetime.now(),

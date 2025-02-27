@@ -82,6 +82,22 @@ async function onClickYesNextButton() {
         store.changeView('project_list');
     }
     store.msg(ret.message);
+    }
+
+const visible_dialog_accept_suggestions = ref(false);
+async function onClickAcceptSuggestionsButton() {
+    visible_dialog_accept_suggestions.value = true;
+}
+
+async function onClickYesAcceptSuggestionsButton() {
+    console.log('* clicked accept suggestions');
+    visible_dialog_accept_suggestions.value = false;
+    let ret = await Jimin.finalizeConcept(store.working_concept.concept_id);
+    if (ret.success) {
+        store.working_concept.final = true;
+    }
+    store.working_concept = null;
+    store.msg(ret.message);
 }
 </script>
 
@@ -187,12 +203,14 @@ async function onClickYesNextButton() {
                                     </li>
                                 </div>
                             </Popover>
-                            <ToggleButton 
-                            v-model="checked"
-                            :disabled="filteredGrandReviewData.suggest_cde.length == 0"
-                            class="ml-2" 
-                            onLabel="Not Accept" 
-                            offLabel="Accept" />
+                            <Button
+                                severity="secondary"
+                                :disabled="filteredGrandReviewData.suggest_cde.length == 0 || store.working_concept?.final || store.working_mappings[store.working_concept.concept_id]?.selected_results.length > 0"
+                                class="ml-2"
+                                v-tooltip.bottom="'Accept all suggestions.'"
+                                @click="onClickAcceptSuggestionsButton">
+                                Accept
+                            </Button>
                         </div>
                     </div>
                 </template>
@@ -263,6 +281,29 @@ async function onClickYesNextButton() {
                 <Button 
                 severity="primary" 
                 @click="onClickYesNextButton()">
+                <font-awesome-icon :icon="['fas', 'arrow-right']" />
+                    Yes
+                </Button>
+            </div>
+        </div>
+</Dialog>
+<Dialog v-model:visible="visible_dialog_accept_suggestions" 
+        modal
+        header="Are you comfirm to accept this data elements to CDE?"
+        width="400px" 
+        :closable="false">
+        <div class="flex flex-col gap-4">
+            <div class="flex flex-row justify-end gap-2">
+                <Button 
+                severity="secondary" 
+                @click="visible_dialog_accept_suggestions = false">
+                <font-awesome-icon :icon="['fas', 'xmark']" />
+                No
+                </Button>
+
+                <Button 
+                severity="primary" 
+                @click="onClickYesAcceptSuggestionsButton()">
                 <font-awesome-icon :icon="['fas', 'arrow-right']" />
                     Yes
                 </Button>
