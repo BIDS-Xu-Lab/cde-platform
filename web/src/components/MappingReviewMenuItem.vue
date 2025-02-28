@@ -462,26 +462,50 @@ const sort_results_options = [
 
 
     <div v-if="view_mode!=='finalized'" class="menu-group">
-        <div class="menu-group-box !flex-col justify-start">
-            <div class="flex align-center my-1 justify-start">
-                <ToggleSwitch inputId="sw-embedding"
-                    :disabled="CDEHelper.checkSubmitAndFinalStatus()"
-                    class="mr-1"
-                    v-model="store.features.embedding_search.enabled" />
-                <label for="sw-embedding"
-                    v-tooltip.bottom="'Embedding-based similarity search.'">
-                    Embedding Search
-                </label>
+        <div class="menu-group-box !flex-row gap-4 justify-start">
+            <div>
+                <div class="flex align-center my-1 justify-start">
+                    <ToggleSwitch inputId="sw-auto-mapping"
+                        :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                        class="mr-1"
+                        v-model="store.features.auto_mapping.enabled" />
+                    <label for="sw-auto-mapping"
+                        v-tooltip.bottom="'Automatically map the current concept to the best CDE.'">
+                        Auto Mapping
+                    </label>
+                </div>
+                <div class="flex align-center my-1 justify-start">
+                    <ToggleSwitch inputId="sw-re-ranking"
+                        :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                        class="mr-1"
+                        v-model="store.features.re_ranking.enabled" />
+                    <label for="sw-re-ranking"
+                        v-tooltip.bottom="'Re-rank the current search results using AI technology.'">
+                        Re-ranking
+                    </label>
+                </div>
             </div>
-            <div class="flex align-center my-1 justify-start">
-                <ToggleSwitch inputId="sw-query-expansion"
-                    :disabled="CDEHelper.checkSubmitAndFinalStatus()"
-                    class="mr-1"
-                    v-model="store.features.query_expansion.enabled" />
-                <label for="sw-query-expansion"
-                    v-tooltip.bottom="'Use expanded query in search.'">
-                    Query Expansion
-                </label>
+            <div>
+                <div class="flex align-center my-1 justify-start">
+                    <ToggleSwitch inputId="sw-embedding"
+                        :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                        class="mr-1"
+                        v-model="store.features.embedding_search.enabled" />
+                    <label for="sw-embedding"
+                        v-tooltip.bottom="'Embedding-based similarity search.'">
+                        Embedding Search
+                    </label>
+                </div>
+                <div class="flex align-center my-1 justify-start">
+                    <ToggleSwitch inputId="sw-query-expansion"
+                        :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                        class="mr-1"
+                        v-model="store.features.query_expansion.enabled" />
+                    <label for="sw-query-expansion"
+                        v-tooltip.bottom="'Use expanded query in search.'">
+                        Query Expansion
+                    </label>
+                </div>
             </div>
         </div>
         <div class="menu-group-title">
@@ -524,7 +548,7 @@ const sort_results_options = [
 
     <div v-if="view_mode!=='finalized'" class="menu-group">
         <div class="menu-group-box">
-            <Button text
+            <!-- <Button text
                 :disabled="CDEHelper.checkSubmitAndFinalStatus()"
                 class="menu-button"
                 v-tooltip.bottom="'Re-rank the current search results using AI technology.'"
@@ -533,7 +557,7 @@ const sort_results_options = [
                 <span>
                     Re-rank
                 </span>
-            </Button>
+            </Button> -->
 
             <Button text
                 :disabled="CDEHelper.checkSubmitAndFinalStatus()"

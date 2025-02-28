@@ -101,6 +101,12 @@ state: () => ({
 
     // system features for users
     features: {
+        auto_mapping: {
+            enabled: false,
+        },
+        re_ranking: {
+            enabled: false,
+        },
         embedding_search: {
             enabled: false,
         },
