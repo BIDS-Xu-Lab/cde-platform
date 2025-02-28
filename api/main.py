@@ -4,7 +4,6 @@ import time
 import os
 import asyncio
 import uuid
-# from elasticsearch import Elasticsearch
 from elasticsearch import AsyncElasticsearch
 import jwt
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -12,8 +11,7 @@ import json
 import httpx
 import sys
 import logging
-from bson import json_util
-
+from ai_tool import get_embedding_from_text
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, Response, Body, Path, Depends, status, Security, APIRouter
 from fastapi.security import APIKeyHeader, HTTPBearer, HTTPAuthorizationCredentials
@@ -1994,9 +1992,11 @@ async def search(
 
     if search_data.source is None:
         raise HTTPException(status_code=400, detail="source is required")
-
+        
     bulk_search_body = []
     for query in search_data.queries:
+        if search_data.flag_embedding:
+            embeddings = get_embedding_from_text(query['term'])
         # search header
         header = {"index": search_data.source}
 
@@ -2013,6 +2013,22 @@ async def search(
                 }
             }
         }
+        if search_data.flag_embedding:
+            body['query']['bool']['should'].append(
+                {
+                    'knn': {
+                        'field': 'embedding',
+                        'query_vector': embeddings,
+                        "num_candidates": 50,
+                        'boost': 0.2,
+                        'filter': {
+                            'terms': {
+                                'source': search_data.collections
+                            }
+                        }
+                    }
+                }
+            )
 
         # add the collection filter
         if search_data.collections:
@@ -2021,7 +2037,7 @@ async def search(
                     'source': search_data.collections
                 }
             }
-        
+
         # add to the bulk search body
         bulk_search_body.append(header)
         bulk_search_body.append(body)

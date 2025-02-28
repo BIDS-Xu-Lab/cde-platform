@@ -20,7 +20,12 @@ ADMIN_EMAIL="admin@cde.org"
 ADMIN_PASSWORD='j29j-asdf-9234@jzz1'
 
 # For elasticsearch
-ES_PATH='http://elasticsearch:9200'
+ES_PATH='http://localhost:9200'
 
 # For mongodb
 MONGODB_URI='mongodb://localhost:27017/cdeDatabase'
+
+# For ai part
+OPENAI_API_KEY='put your openai api key here'
+EMBEDDING_MODEL='BAAI/bge-small-en-v1.5'
+OPENAI_CHAT_MODEL='gpt-3.5-turbo'

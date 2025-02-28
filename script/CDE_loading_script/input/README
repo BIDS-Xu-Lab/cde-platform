@@ -1,0 +1,14 @@
+Put the input files in this directory.
+
+Should be downloaded from the following link:
+https://cde.nlm.nih.gov/cde/search
+
+The files format must be json.
+
+The files should be named like this:
+SearchExport.json
+
+For NIH-EAndorsed collection, the files name must include endorsed in the filename.
+
+
+
