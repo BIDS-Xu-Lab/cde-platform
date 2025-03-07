@@ -258,7 +258,17 @@ async function onClickUpload() {
             if (__values == ''){
                 new_row.values = [];
             } else {
-                new_row.values = __values.split('|').map((value) => value.trim());
+                new_row.values = __values.split('|').map((value) => {
+                    // Trim whitespace and remove any surrounding quotes
+                    let trimmed = value.trim();
+                    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || 
+                        (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+                        trimmed = trimmed.substring(1, trimmed.length - 1);
+                    }
+                    // Handle any internal quotes that might need escaping
+                    trimmed = trimmed.replace(/\\(['"])/g, '$1'); // Replace escaped quotes with actual quotes
+                    return trimmed;
+                });
             }
         } catch (err) {
             console.error(err, new_row);
