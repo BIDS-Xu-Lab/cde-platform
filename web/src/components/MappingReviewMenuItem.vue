@@ -87,6 +87,23 @@ async function onClickSearch() {
             status: 'mapping'
         }
     }
+    if (store.features.auto_mapping.enabled) {
+        // check if current concept has selected results, if already has, do nothing
+        if (store.working_mappings[store.working_concept.concept_id].selected_results.length > 0 || results[0].length == 0) {
+            return;
+        }
+        // select the first result
+        store.addSelectedResultToWorkingConcept(results[0][0]);
+        // send selected results to server
+        let ret = await Jimin.updateSelectedResults(
+            store.working_concept.concept_id,
+            store.working_file.round.length - 1,
+            store.working_mappings[store.working_concept.concept_id].selected_results
+        );
+        console.log('* updated selected results:', ret);
+            // show a message
+        store.msg(ret.message);
+    }
 }
 
 async function onClickSearchAll() {
@@ -142,9 +159,25 @@ async function onClickSearchAll() {
                 status: 'mapping'
             }
         }
-        await new Promise(resolve => setTimeout(resolve, 100));
+        if (store.features.auto_mapping.enabled) {
+            // check if current concept has selected results, if already has, do nothing; and also if results is empty, do nothing
+            if (store.working_mappings[concept.concept_id].selected_results.length > 0 || results[0].length == 0) {
+                continue;
+            }
+            // select the first result
+            store.addSelectedResultsToSelectedConcept(concept.concept_id, results[0][0]);
+            // send selected results to server
+            let ret = await Jimin.updateSelectedResults(
+                concept.concept_id,
+                store.working_file.round.length - 1,
+                store.working_mappings[concept.concept_id].selected_results
+            );
+            console.log('* updated selected results:', ret);
+            // show a message
+            store.msg(ret.message);
+        }
     }
-    // sleep 1 sec let animation can be shown
+
     
     prograss_visible.value = false;
     prograss_value.value = 0;

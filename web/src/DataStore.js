@@ -376,6 +376,12 @@ actions: {
                 JSON.stringify(r) !== JSON.stringify(result)
             );
     },
+    addSelectedResultsToSelectedConcept(concept_id, selected_results) {
+        if (!this.working_mappings[concept_id]) {
+            return;
+        }
+        this.working_mappings[concept_id].selected_results.push(selected_results);
+    },
 
     ///////////////////////////////////////////////////////
     // User File
