@@ -508,8 +508,13 @@ const sort_results_options = [
                     </label>
                 </div>
                 <div class="flex align-center my-1 justify-start">
-                    <ToggleSwitch inputId="sw-re-ranking"
+                    <!-- TODO: re-ranking is not available yet -->
+                    <!-- <ToggleSwitch inputId="sw-re-ranking"
                         :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                        class="mr-1"
+                        v-model="store.features.re_ranking.enabled" /> -->
+                    <ToggleSwitch inputId="sw-re-ranking"
+                        :disabled="true"
                         class="mr-1"
                         v-model="store.features.re_ranking.enabled" />
                     <label for="sw-re-ranking"
@@ -530,8 +535,13 @@ const sort_results_options = [
                     </label>
                 </div>
                 <div class="flex align-center my-1 justify-start">
-                    <ToggleSwitch inputId="sw-query-expansion"
+                    <!-- TODO: query expansion is not available yet -->
+                    <!-- <ToggleSwitch inputId="sw-query-expansion"
                         :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                        class="mr-1"
+                        v-model="store.features.query_expansion.enabled" /> -->
+                    <ToggleSwitch inputId="sw-query-expansion"
+                        :disabled="true"
                         class="mr-1"
                         v-model="store.features.query_expansion.enabled" />
                     <label for="sw-query-expansion"
@@ -592,8 +602,19 @@ const sort_results_options = [
                 </span>
             </Button> -->
 
-            <Button text
+            <!-- TODO: value linking is not available yet -->
+            <!-- <Button text
                 :disabled="CDEHelper.checkSubmitAndFinalStatus()"
+                class="menu-button"
+                v-tooltip.bottom="'Automatically link the values to the current CDE\'s values.'"
+                @click="onClickValueLinking">
+                <font-awesome-icon icon="fa-solid fa-link" class="menu-icon" />
+                <span>
+                    Value Linking
+                </span>
+            </Button> -->
+            <Button text
+                :disabled="true"
                 class="menu-button"
                 v-tooltip.bottom="'Automatically link the values to the current CDE\'s values.'"
                 @click="onClickValueLinking">
