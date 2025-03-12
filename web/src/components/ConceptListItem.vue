@@ -127,10 +127,15 @@ function disabledByReview(item) {
 function checkReviewStatus(item) {
     // Check if there are any reviewed results for this concept
     if (!store.working_mappings[item.concept_id]?.reviewed_results || 
-        store.working_mappings[item.concept_id]?.reviewed_results.length === 0) {
-        return "unreviewed";
+        store.working_mappings[item.concept_id]?.reviewed_results.length === 0 && 
+        store.working_mappings[item.concept_id]?.selected_results.length === 0) {
+        return {status: "unreviewed", num: 0};
     }
-
+    // Check if there are selected results that haven't been reviewed yet
+    if (store.working_mappings[item.concept_id]?.reviewed_results.length === 0 && 
+        store.working_mappings[item.concept_id]?.selected_results.length > 0) {
+        return {status: "complete", num: store.working_mappings[item.concept_id]?.selected_results.length};
+    }
     // Check if all reviewed results have an agreement value (not null or undefined)
     const allHaveAgreement = store.working_mappings[item.concept_id].reviewed_results.every(
         result => result.agreement !== null && result.agreement !== undefined
