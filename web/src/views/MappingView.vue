@@ -203,6 +203,7 @@ onMounted(() => {
                 </template>
 
                 <!-- result list -->
+                <div class="search-results-section">
                 <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
 
                 <div class="text-lg font-bold mt-4">
@@ -227,6 +228,7 @@ onMounted(() => {
                         No search results
                     </div>
                 </template>
+            </div>
             </div>
         </Panel>
     </div>
@@ -293,6 +295,11 @@ onMounted(() => {
 
 .selected-results-section {
     background-color: var(--bg-color-selected);
+    padding: 0.5rem;
+}
+
+.search-results-section {
+    padding: 0.5rem;
 }
 
 .result-list-scroller {

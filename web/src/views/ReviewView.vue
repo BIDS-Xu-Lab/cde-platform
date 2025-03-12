@@ -211,7 +211,7 @@ onMounted(() => {
                 </template>
 
                 <!-- result list -->
-                 <div v-if="isFinalized()==='reviewing'">
+                 <div v-if="isFinalized()==='reviewing'" class="search-results-section">
                     <template v-if="store.working_mappings[store.working_concept?.concept_id]?.search_results.length > 0">
                         <div class="text-lg font-bold mt-4">
                             <i class="fa-solid fa-list-ul"></i>
@@ -302,6 +302,11 @@ onMounted(() => {
 
 .selected-results-section {
     background-color: var(--bg-color-selected);
+    padding: 0.5rem;
+}
+
+.search-results-section {
+    padding: 0.5rem;
 }
 
 .result-list-scroller {
