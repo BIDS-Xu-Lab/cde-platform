@@ -12,9 +12,9 @@ onMounted(() => {
 <div class="footer">
 <div class="footer-left">
     <font-awesome-icon :icon="['fa', 'edit']" />
-    CDEMapper 2.0
+    CDEMapper 2.0 | 
 
-    {{ store.version }}
+    Version: {{ store.version }}
 </div>
 
 <div class="footer-right flex flex-row items-center">

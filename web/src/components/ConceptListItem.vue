@@ -123,6 +123,37 @@ function disabledByReview(item) {
     }
     return true;
 }
+
+function checkReviewStatus(item) {
+    // Check if there are any reviewed results for this concept
+    if (!store.working_mappings[item.concept_id]?.reviewed_results || 
+        store.working_mappings[item.concept_id]?.reviewed_results.length === 0) {
+        return "unreviewed";
+    }
+
+    // Check if all reviewed results have an agreement value (not null or undefined)
+    const allHaveAgreement = store.working_mappings[item.concept_id].reviewed_results.every(
+        result => result.agreement !== null && result.agreement !== undefined
+    );
+
+    // Check if none of the reviewed results have an agreement value
+    const noneHaveAgreement = store.working_mappings[item.concept_id].reviewed_results.every(
+        result => result.agreement === null || result.agreement === undefined
+    );
+
+    // Count how many items have been reviewed (have an agreement value)
+    const reviewedCount = store.working_mappings[item.concept_id].reviewed_results.filter(
+        result => result.agreement !== null && result.agreement !== undefined
+    ).length;
+
+    if (allHaveAgreement) {
+        return {status: "complete", num: reviewedCount};
+    } else if (noneHaveAgreement) {
+        return {status: "unreviewed", num: 0};
+    } else {
+        return {status: "partial", num: reviewedCount};
+    }
+}
 </script>
 <template>
     <div>
@@ -193,7 +224,7 @@ function disabledByReview(item) {
                             :class="{ 'working-term': store.isWorkingConcept(item)}"
                             @click="onClickConcept(item)">
                             <div class="term-name">
-                                <div class="mr-1">
+                                <div v-if="view_mode === 'mapping'" class="mr-1">
                                     <template v-if="store.hasSelectedResults(item) || store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
                                         <Tag :value="item.id + 1" severity="success" />
                                     </template>
@@ -204,6 +235,20 @@ function disabledByReview(item) {
                                         <Tag :value="item.id + 1" severity="contrast" />
                                     </template>
                                 </div>
+                                <div v-if="view_mode === 'reviewing'" class="mr-1">
+                                    <template v-if="checkReviewStatus(item).status === 'complete'">
+                                            <Tag :value="item.id + 1" severity="success" />
+                                    </template>
+                                    <template v-else-if="checkReviewStatus(item).status === 'partial'">
+                                        <Tag :value="item.id + 1" severity="info" />
+                                    </template>
+                                    <template v-else>
+                                        <Tag :value="item.id + 1" severity="contrast" />
+                                    </template>
+                                </div>
+                                <div v-if="view_mode === 'grand_review'" class="mr-1">
+                                    <Tag :value="item.id + 1" severity="info" />
+                                </div>
                                 <div :class="{ 'font-bold': store.isWorkingConcept(item) }">
                                     {{ item.term }}
                                 </div>
@@ -213,7 +258,7 @@ function disabledByReview(item) {
                                 </span>
                             </div>
                             <div class="term-concept">
-                                <div v-if="view_mode !== 'grand_review'"
+                                <div v-if="view_mode === 'mapping'"
                                     class="flex flex-col text-small">
                                     <div class="flex items-center">
                                         <template v-if = "store.working_mappings[item.concept_id]?.selected_results.length === 0 & store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
@@ -230,6 +275,21 @@ function disabledByReview(item) {
                                             <i class="fa fa-exclamation-triangle mr-1"></i>
                                             Not Mapped.
                                         </template>
+                                    </div>
+                                </div>
+                                <div v-if="view_mode === 'reviewing'"
+                                    class="flex flex-col text-small">
+                                    <div v-if="checkReviewStatus(item).status === 'complete'">
+                                        <i class="fa-solid fa-check mr-1"></i>
+                                        {{ checkReviewStatus(item).num }} / {{ store.working_mappings[item.concept_id].reviewed_results.length }} Reviewed.
+                                    </div>
+                                    <div v-else-if="checkReviewStatus(item).status === 'partial'">
+                                        <i class="fa-solid fa-circle-half-stroke mr-1"></i>
+                                        {{ checkReviewStatus(item).num }} / {{ store.working_mappings[item.concept_id].reviewed_results.length }} Reviewed.
+                                    </div>
+                                    <div v-else>
+                                        <i class="fa fa-exclamation-triangle mr-1"></i>
+                                       0 / {{ store.working_mappings[item.concept_id].reviewed_results.length }} Reviewed.
                                     </div>
                                 </div>
                                 <div v-else class="flex flex-row items-center text-small mr-2">
