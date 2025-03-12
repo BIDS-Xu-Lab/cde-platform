@@ -380,6 +380,15 @@ actions: {
         if (!this.working_mappings[concept_id]) {
             return;
         }
+        // update the result with the values from the selected results
+        selected_results.value_mapping = {};
+
+        // check if there is a working concept
+        if (this.working_concept != null) {
+            this.working_concept.values.map(v => {
+                selected_results.value_mapping[v] = '';
+            });
+        }
         this.working_mappings[concept_id].selected_results.push(selected_results);
     },
 
