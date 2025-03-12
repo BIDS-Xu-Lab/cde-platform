@@ -11,7 +11,7 @@ const props = defineProps({
 
 const agree_color = ref('#5CB85C');
 const disagree_color = ref('#D9534F');
-const suggest_color = ref('#F0AD4E');
+const suggest_color = ref('#00ADD9');
 
 // helper functions
 function fmtScore(score) {

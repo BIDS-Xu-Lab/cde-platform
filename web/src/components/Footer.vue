@@ -12,7 +12,7 @@ onMounted(() => {
 <div class="footer">
 <div class="footer-left">
     <font-awesome-icon :icon="['fa', 'edit']" />
-    CDE Reviewer
+    CDEMapper 2.0
 
     {{ store.version }}
 </div>

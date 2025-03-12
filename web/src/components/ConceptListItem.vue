@@ -102,7 +102,7 @@ function agreeConsistency(item) {
         return acc;
     }, { total: 0, agree: 0 });
 
-    return total === 0 ? 0 : (agree / total) * 100;
+    return total === 0 ? 0 : Math.round((agree / total) * 100);
 }
 
 function disabledByReview(item) {
@@ -133,7 +133,7 @@ function disabledByReview(item) {
                         <div class="flex-col">
                             <div class="text-lg font-bold">
                                 <font-awesome-icon icon="fa-solid fa-list" />
-                                Concept List
+                                Data Element List
                             </div>
                             <div class="panel-subtitle text-sm">
                                 <b>{{ store.n_mapped_concepts_in_working_file }}</b>
@@ -232,10 +232,13 @@ function disabledByReview(item) {
                                         </template>
                                     </div>
                                 </div>
-                                <div v-else class="flex flex-row items-center text-small">
+                                <div v-else class="flex flex-row items-center text-small mr-2">
                                     <span class="mr-2">Consistency:</span>
                                     <div style="width: 100px;">
-                                        <ProgressBar :value="agreeConsistency(item)"></ProgressBar>
+                                        <ProgressBar 
+                                            :value="agreeConsistency(item)" 
+                                            :style="{ '--p-progressbar-value-background': '#28b463' }">
+                                        </ProgressBar>
                                     </div>
                                 </div>
                                 <div class="mr-1">
@@ -256,7 +259,7 @@ function disabledByReview(item) {
                                 </b>
                                 {{ item.description }}
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex justify-between ml-2">
                                 <div>
                                     <b>
                                         Values:
@@ -363,7 +366,7 @@ function disabledByReview(item) {
                                         </AccordionHeader>
                                         <AccordionContent>
                                             <template v-for="key in Object.keys(item)">
-                                                <div v-if="['id', 'term', 'description', 'user_id', 'project_id', 'concept_id', 'file_id', 'values'].indexOf(key) < 0" 
+                                                <div v-if="['id', 'term', 'description', 'user_id', 'project_id', 'concept_id', 'file_id', 'values', 'final'].indexOf(key) < 0" 
                                                     class="flex justify-between">
                                                     <div class="font-bold">{{ key }}</div>
                                                     <div>{{ item[key] }}</div>
@@ -476,10 +479,12 @@ function disabledByReview(item) {
     align-items: top;
     font-size: 1.2rem;
     line-height: 1.5rem;
+    margin-left: 0.5rem;
 }
 .term-detail {
     line-height: 1.2rem;
     margin: 0.5rem 0;
+    margin-left: 0.5rem;
 }
 .term-concept {
     display: flex;
