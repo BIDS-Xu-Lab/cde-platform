@@ -15,8 +15,6 @@ const props = defineProps({
 const popover_disagree_comments = ref(null);
 
 const togglePpoverDisagreeComments = (event) => {
-    // set comments to the original comment
-    comments.value = store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment;
     popover_disagree_comments.value.toggle(event);
 }
 
@@ -34,9 +32,7 @@ const agree_comment_dialog_visible = ref(false);
 
 const agreeOptions = [
     { label: 'With Comments', icon: 'pi pi-check', command: () => { 
-        // set comments to the original comment
-        comments.value = store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment;
-        agree_comment_dialog_visible.value = true; 
+           agree_comment_dialog_visible.value = true; 
     } }
 ];
 
@@ -70,7 +66,8 @@ async function onClickEditSubmit() {
     togglePpoverviewComments();
 }
 
-const comments = ref(store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment || '');
+// const comments = ref(store.working_mappings[store.working_concept.concept_id].reviewed_results[props.item_idx]?.comment || '');
+const comments = ref('');
 
 async function onClickSelectResult(result) {
     console.log('* clicked Select Result:', result);
