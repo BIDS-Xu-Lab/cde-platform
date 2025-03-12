@@ -102,13 +102,13 @@ state: () => ({
     // system features for users
     features: {
         auto_mapping: {
-            enabled: false,
+            enabled: true,
         },
         re_ranking: {
             enabled: false,
         },
         embedding_search: {
-            enabled: false,
+            enabled: true,
         },
         query_expansion: {
             enabled: false,
