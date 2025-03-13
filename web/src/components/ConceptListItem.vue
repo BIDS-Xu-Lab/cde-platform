@@ -282,7 +282,7 @@ function checkReviewStatus(item) {
                                         </template>
                                     </div>
                                 </div>
-                                <div v-if="view_mode === 'reviewing'"
+                                <div v-else-if="view_mode === 'reviewing'"
                                     class="flex flex-col text-small">
                                     <div v-if="checkReviewStatus(item).status === 'complete'">
                                         <i class="fa-solid fa-check mr-1"></i>
