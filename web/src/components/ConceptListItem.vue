@@ -290,17 +290,18 @@ function checkReviewStatus(item) {
                                 </div>
                                 <div v-else-if="view_mode === 'reviewing'"
                                     class="flex flex-col text-small">
-                                    <div v-if="checkReviewStatus(item).status === 'complete'">
-                                        <i class="fa-solid fa-check mr-1"></i>
-                                        {{ checkReviewStatus(item).num }} / {{ store.working_mappings[item.concept_id].reviewed_results.length }} Reviewed.
-                                    </div>
-                                    <div v-else-if="checkReviewStatus(item).status === 'partial'">
-                                        <i class="fa-solid fa-circle-half-stroke mr-1"></i>
-                                        {{ checkReviewStatus(item).num }} / {{ store.working_mappings[item.concept_id].reviewed_results.length }} Reviewed.
-                                    </div>
-                                    <div v-else>
-                                        <i class="fa fa-exclamation-triangle mr-1"></i>
-                                       0 / {{ store.working_mappings[item.concept_id].reviewed_results.length }} Reviewed.
+                                    <div>
+                                        <template v-if="checkReviewStatus(item).status === 'complete'">
+                                            <i class="fa-solid fa-check mr-1"></i>
+                                        </template>
+                                        <template v-else-if="checkReviewStatus(item).status === 'partial'">
+                                            <i class="fa-solid fa-circle-half-stroke mr-1"></i>
+                                        </template>
+                                        <template v-else>
+                                            <i class="fa fa-exclamation-triangle mr-1"></i>
+                                        </template>
+                                        {{ checkReviewStatus(item).status === 'complete' || checkReviewStatus(item).status === 'partial' ? 
+                                           checkReviewStatus(item).num : 0 }} / {{ store.working_mappings[item.concept_id].reviewed_results.length }} Reviewed.
                                     </div>
                                 </div>
                                 <div v-else class="flex flex-row items-center text-small mr-2">
@@ -323,6 +324,20 @@ function checkReviewStatus(item) {
                                         @click="store.showGuide()">
                                     </Button>
                                 </div>
+                            </div>
+                            <div v-if="view_mode === 'reviewing'"
+                                    class="text-small mr-2 ml-2">
+                                    <div class="flex flex-row justify-between w-full">
+                                        <div>
+                                            <font-awesome-icon :icon="['fas', 'check']" /> Agree: {{ store.working_mappings[item.concept_id].reviewed_results.reduce((acc, result) => acc + result.agreement, 0) }}
+                                        </div>
+                                        <div>
+                                            <font-awesome-icon :icon="['fas', 'xmark']" /> Disagree: {{ store.working_mappings[item.concept_id].reviewed_results.reduce((acc, result) => acc + !result.agreement, 0) }}
+                                        </div>
+                                        <div>
+                                            <font-awesome-icon :icon="['fas', 'arrow-right']" /> Suggestion: {{ Math.max(0, store.working_mappings[item.concept_id].selected_results.length - store.working_mappings[item.concept_id].reviewed_results.length) }}
+                                        </div>
+                                    </div>
                             </div>
                             <div class="term-detail">
                                 <b>
@@ -350,7 +365,7 @@ function checkReviewStatus(item) {
                                         :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'mapped' || store.working_mappings[item.concept_id]?.selected_results.length > 0"
                                         v-if="!store.working_mappings[item.concept_id]?.mapper_suggestion" 
                                         severity="warn"
-                                        v-tooltip.bottom="'Recommend this concept as CDE.'"
+                                        v-tooltip.bottom="'Propose this data element as a CDE.'"
                                         @click="onclickProposeCDE(item)">
                                         <i class="fa-solid fa-arrow-up-from-bracket"></i>
                                         Propose CDE
@@ -397,7 +412,7 @@ function checkReviewStatus(item) {
                                             :disabled="store.working_concept !== item || store.working_mappings[item.concept_id]?.status === 'reviewed' || disabledByReview(item)"
                                             v-if="!store.working_mappings[item.concept_id]?.reviewer_suggestion" 
                                             severity="warn"
-                                            v-tooltip.bottom="'Recommend this concept as CDE.'"
+                                            v-tooltip.bottom="'Propose this data element as a CDE.'"
                                             @click="onclickProposeCDE(item)">
                                             <i class="fa-solid fa-arrow-up-from-bracket"></i>
                                             Propose CDE
