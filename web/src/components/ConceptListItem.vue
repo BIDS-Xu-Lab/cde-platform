@@ -234,39 +234,43 @@ function checkReviewStatus(item) {
                         <div class="term-line"
                             :class="{ 'working-term': store.isWorkingConcept(item)}"
                             @click="onClickConcept(item)">
-                            <div class="term-name">
-                                <div v-if="view_mode === 'mapping'" class="mr-1">
-                                    <template v-if="store.hasSelectedResults(item) || store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
-                                        <Tag :value="item.id + 1" severity="success" />
-                                    </template>
-                                    <template v-else-if="store.hasSearchResults(item)">
-                                        <Tag :value="item.id + 1" severity="info" />
-                                    </template>
-                                    <template v-else>
-                                        <Tag :value="item.id + 1" severity="contrast" />
-                                    </template>
-                                </div>
-                                <div v-if="view_mode === 'reviewing'" class="mr-1">
-                                    <template v-if="checkReviewStatus(item).status === 'complete'">
+                            <div class="flex flex-row justify-between w-full">
+                                <div class="term-name">
+                                    <div v-if="view_mode === 'mapping'" class="mr-1">
+                                        <template v-if="store.hasSelectedResults(item) || store.working_mappings[item.concept_id]?.mapper_suggestion || store.working_mappings[item.concept_id]?.reviewer_suggestion">
                                             <Tag :value="item.id + 1" severity="success" />
-                                    </template>
-                                    <template v-else-if="checkReviewStatus(item).status === 'partial'">
+                                        </template>
+                                        <template v-else-if="store.hasSearchResults(item)">
+                                            <Tag :value="item.id + 1" severity="info" />
+                                        </template>
+                                        <template v-else>
+                                            <Tag :value="item.id + 1" severity="contrast" />
+                                        </template>
+                                    </div>
+                                    <div v-if="view_mode === 'reviewing'" class="mr-1">
+                                        <template v-if="checkReviewStatus(item).status === 'complete'">
+                                                <Tag :value="item.id + 1" severity="success" />
+                                        </template>
+                                        <template v-else-if="checkReviewStatus(item).status === 'partial'">
+                                            <Tag :value="item.id + 1" severity="info" />
+                                        </template>
+                                        <template v-else>
+                                            <Tag :value="item.id + 1" severity="contrast" />
+                                        </template>
+                                    </div>
+                                    <div v-if="view_mode === 'grand_review'" class="mr-1">
                                         <Tag :value="item.id + 1" severity="info" />
-                                    </template>
-                                    <template v-else>
-                                        <Tag :value="item.id + 1" severity="contrast" />
-                                    </template>
+                                    </div>
+                                    <div :class="{ 'font-bold': store.isWorkingConcept(item) }">
+                                        {{ item.term }}
+                                    </div>
                                 </div>
-                                <div v-if="view_mode === 'grand_review'" class="mr-1">
-                                    <Tag :value="item.id + 1" severity="info" />
+                                <div class="mr-4">
+                                    <span v-if="item.final" class="text-lg font-bold">
+                                            <i class="fa-solid fa-flag-checkered"></i>
+                                            Finalized
+                                    </span>
                                 </div>
-                                <div :class="{ 'font-bold': store.isWorkingConcept(item) }">
-                                    {{ item.term }}
-                                </div>
-                                <span v-if="item.final" class="text-lg ml-10 font-bold">
-                                        <i class="fa-solid fa-flag-checkered"></i>
-                                        Finalized
-                                </span>
                             </div>
                             <div class="term-concept">
                                 <div v-if="view_mode === 'mapping'"
