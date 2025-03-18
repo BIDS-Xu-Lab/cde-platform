@@ -171,11 +171,17 @@ function checkReviewStatus(item) {
                                 <font-awesome-icon icon="fa-solid fa-list" />
                                 Data Element List
                             </div>
-                            <div class="panel-subtitle text-sm">
+                            <div v-if="view_mode === 'mapping'" class="panel-subtitle text-sm">
                                 <b>{{ store.n_mapped_concepts_in_working_file }}</b>
                                 /
                                 {{ store.working_file_concepts.length }}  
                                 mapped
+                            </div>
+                            <div v-if="view_mode === 'reviewing'" class="panel-subtitle text-sm">
+                                <b>{{ store.working_file_concepts.filter(concept => checkReviewStatus(concept).status === "complete").length }}</b>
+                                /
+                                {{ store.working_file_concepts.length }}  
+                                Reviewed
                             </div>
                         </div>
                     </div>
