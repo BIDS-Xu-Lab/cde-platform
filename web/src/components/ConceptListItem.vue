@@ -336,7 +336,7 @@ function checkReviewStatus(item) {
                                             <font-awesome-icon :icon="['fas', 'check']" /> Agree: {{ store.working_mappings[item.concept_id].reviewed_results.reduce((acc, result) => acc + result.agreement, 0) }}
                                         </div>
                                         <div>
-                                            <font-awesome-icon :icon="['fas', 'xmark']" /> Disagree: {{ store.working_mappings[item.concept_id].reviewed_results.reduce((acc, result) => acc + !result.agreement, 0) }}
+                                            <font-awesome-icon :icon="['fas', 'xmark']" /> Disagree: {{ store.working_mappings[item.concept_id].reviewed_results.reduce((acc, result) => result.agreement === false ? acc + 1 : acc, 0) }}
                                         </div>
                                         <div>
                                             <font-awesome-icon :icon="['fas', 'arrow-right']" /> Suggestion: {{ Math.max(0, store.working_mappings[item.concept_id].selected_results.length - store.working_mappings[item.concept_id].reviewed_results.length) }}
