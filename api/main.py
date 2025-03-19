@@ -2220,7 +2220,7 @@ async def update_selected_results(
         if (result["term_id"], result["term_source"]) not in selected_term_keys
     ]
 
-    if len(resolved_selected_results) != 0:
+    if len(resolved_selected_results) != 0 and file['round'][len(file['round']) - 1]['stage'] != "grand_review":
         # put the resolved selected results back to filtered_search_results (check unique first)
         for result in resolved_selected_results:
             if result not in filtered_search_results:
