@@ -449,7 +449,7 @@ const sort_results_options = [
             <div class="flex flex-col">
                 <label class="text-sm" for="">
                     <font-awesome-icon icon="fa-solid fa-book-bookmark"></font-awesome-icon>
-                    Collections
+                    Collections/Forms
                 </label>
                 <MultiSelect v-model="store.mapping.selected_collections" 
                     :disabled="CDEHelper.checkSubmitAndFinalStatus()"

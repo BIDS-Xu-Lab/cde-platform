@@ -113,6 +113,23 @@ class Search:
     def search(self, **query_args):
         return self.es.search(index=self.index, **query_args)
     
+    def search_by_concept_id(self, concept_id):
+        return self.es.search(index=self.index, body = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"match": {"concept_id": concept_id}}
+                    ],
+                    "must_not": [
+                        {"match": {"source": "NIH-Endorsed"}}
+                    ]
+                }
+            },
+            "collapse": {
+                "field": "concept_id"
+            }
+        })
+    
     def retrieve_document(self, id):
         return self.es.get(index=self.index, id=id)
 
@@ -176,6 +193,46 @@ class Search:
             documents = json.loads(f.read())
         
         return self.insert_documents(documents)
+
+def process_cde_form_data(cde_data):
+    concept_search = Search('nih-cde', 'http://localhost:9200', dims=384)
+    concept_id = []
+    TinyId = []
+    CDE = []
+    Values = []
+    Definition = []
+    Collection = []
+    source_document = []
+    embeddings = []
+    for form in tqdm(cde_data):
+        form_org = form['stewardOrg']['name']
+        form_id = form['tinyId']
+        form_name = form['designations'][0]['designation']
+        if len(form['definitions']) > 0:
+            form_def = form['definitions'][0]['definition']
+        else:
+            form_def = ''
+        for cde in form["cdeTinyIds"]:
+            raw_concept = concept_search.search_by_concept_id(cde)
+            if len(raw_concept['hits']['hits']) > 0:
+                concept = raw_concept['hits']['hits'][0]['_source']
+                concept_id.append(concept['concept_id'])
+                TinyId.append(concept['code'])
+                CDE.append(concept['term'])
+                if 'value' in concept:
+                    Values.append(concept['value'])
+                else:
+                    Values.append('')
+                Definition.append(concept['description'])
+                Collection.append(f"{form_org} - {form_name} - CDEs: {len(form['cdeTinyIds'])} - {form_id}")
+                source_document.append(form)
+                embeddings.append(concept['embedding'])
+    CDE_df = pd.DataFrame({"concept_id":TinyId, "source":Collection,"code":TinyId, "term":CDE, "value":Values, "description":Definition,"source_document":source_document, "embedding":embeddings})
+
+    cde_list = []
+    for row in CDE_df.itertuples():
+        cde_list.append({"concept_id":row.concept_id, "source":row.source, "code":row.code, "term":row.term,"value":row.value,"description":row.description,"source_document":row.source_document, "embedding":row.embedding})
+    return cde_list
 
 def upload_cde_data(cde_list, index_name, force_update=False):
     search = Search(index_name,'http://localhost:9201', dims=384)
