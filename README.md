@@ -95,6 +95,13 @@ TBD
 
 # Change log
 
+## 1.0.0
+- Initial stable release
+
+# 0.8.3
+- Bug fixes
+- Add paginator in concept list
+
 ## 0.8.2
 
 - Bug fixes
