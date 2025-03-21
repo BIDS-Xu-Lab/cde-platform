@@ -1952,7 +1952,7 @@ async def get_collections_by_source(
                 "unique_sources": {
                     "terms": {
                         "field": "source",  # Adjust if your field name is different
-                        "size": 1000  # Adjust the size as needed
+                        "size": 2000  # Adjust the size as needed
                     }
                 }
             }
