@@ -10,6 +10,34 @@ const props = defineProps({
     view_mode: String
 });
 
+const current_page = ref(1);
+const page_size_options = [
+    10,
+    20,
+    50,
+    100
+];
+const page_size = ref(page_size_options[0]);
+
+
+const total_items = computed(() => {
+    return store.filtered_working_file_concepts.length;
+});
+
+const paginated_items = computed(() => {
+    const start = (current_page.value - 1) * page_size.value;
+    const end = start + page_size.value;
+    return store.filtered_working_file_concepts.slice(start, end);
+});
+
+const first_item_index = ref(0);
+const onPageChange = (event) => {
+    console.log('* onPageChange:', event);
+    page_size.value = event.rows;
+    current_page.value = Math.floor(event.first / page_size.value) + 1;
+    first_item_index.value = event.first;
+};
+
 const sort_terms_options = [
     {
         label: 'Name',
@@ -229,8 +257,8 @@ function checkReviewStatus(item) {
 
             <div class="term-list-box">
                 <div class="term-list-scroller"
-                    :style="{ height: 'calc(100vh - 18rem)'}">
-                    <template v-for="item in store.filtered_working_file_concepts">
+                    :style="{ height: 'calc(100vh - 24rem)'}">
+                    <template v-for="item in paginated_items">
                         <div class="term-line"
                             :class="{ 'working-term': store.isWorkingConcept(item)}"
                             @click="onClickConcept(item)">
@@ -485,7 +513,17 @@ function checkReviewStatus(item) {
                         </div>
                     </template>
                 </div>
-
+                <Divider />
+                <div class="paginator-container">
+                    <Paginator
+                        class="mt-2"
+                        :rows="page_size"
+                        :rowsPerPageOptions="page_size_options"
+                        :totalRecords="total_items"
+                        v-model:first="first_item_index"
+                        @page="onPageChange"
+                    />
+                </div>
             </div>
         </Panel>
     </div>
