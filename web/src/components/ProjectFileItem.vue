@@ -15,6 +15,7 @@ const popover_review_results_list = ref(null);
 const togglePopoverReviewResultsList = (event) => {
     popover_review_results_list.value.toggle(event);
 }
+const visible_dialog_loading = ref(false);
 // const popover_assign_users = ref(null);
 // const popover_assigned_users = ref(null);
 
@@ -45,7 +46,7 @@ async function onClickMapping(file) {
 
     // clear the existing mapping data
     store.clearMappingData();
-
+    visible_dialog_loading.value = true;
     // set working project to this project
     store.working_project = store.current_project;
 
@@ -81,13 +82,14 @@ async function onClickMapping(file) {
 
     // then, switch to the mapping view
     store.changeView('mapping');
+    visible_dialog_loading.value = false;
 }
 
 async function onClickReview(file, user_id) {
     console.log('* clicked Review button');
     // clear the existing mapping data
     store.clearMappingData();
-
+    visible_dialog_loading.value = true;
     // set working project to this project
     store.working_project = store.current_project;
 
@@ -117,6 +119,7 @@ async function onClickReview(file, user_id) {
         store.msg(err.message, 'Error', 'error');
         return;
     }
+    visible_dialog_loading.value = false;
     store.changeView('review');
 }
 
@@ -196,7 +199,7 @@ async function onClickgrandReview(file) {
 async function onClickContinue(file) {
     console.log('* clicked Continue Grand Review');
     store.clearMappingData();
-
+    visible_dialog_loading.value = true;
     try {
         let ret = await Jimin.getConceptAndGrandReviewByFile(file.file_id);
         store.working_mappings = {};
@@ -221,6 +224,7 @@ async function onClickContinue(file) {
         return;
     }
     store.changeView('grand_review');
+    visible_dialog_loading.value = false;
 }
 
 async function onClickView(file, user_id) {
@@ -556,6 +560,13 @@ async function onClickView(file, user_id) {
                 Finalize
                 </Button> -->
             </div>
+        </div>
+    </Dialog>
+    <Dialog v-model:visible="visible_dialog_loading" modal header="Processing" :closable="false" :style="{ width: '300px' }">
+        <div class="flex flex-col items-center justify-center p-4">
+            <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="transparent"
+                animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+            <p class="mt-3">Please wait while processing...</p>
         </div>
     </Dialog>
 </template>

@@ -274,11 +274,13 @@ actions: {
     ///////////////////////////////////////////////////////
     async updateCurrentProjectFiles() {
         // get all files for this project
+        this.files = [];
+        
         let files = await Jimin.getFilesByProject(
             this.current_project.project_id
         );
         console.log('* got project files:', files);
-        store.files = files;
+        this.files = files;
     },
 
     ///////////////////////////////////////////////////////

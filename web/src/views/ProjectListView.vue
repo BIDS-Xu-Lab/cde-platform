@@ -640,7 +640,11 @@ onMounted(() => {
             :style="{ height: 'calc(100vh - 21.5rem)', width: 'calc(100% + 1rem)', overflowY: 'auto' }">
             <!-- tab for managing files -->
             <TabPanel value="files">
-            <div class="flex flex-col h-full">
+            <div v-if=" store.current_project !== null && store.files.length == 0" class="flex justify-center items-center h-full mt-20">
+                <ProgressSpinner style="width: 100px; height: 100px" strokeWidth="3" fill="transparent"
+                animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+            </div>  
+            <div class="flex flex-col h-full" v-else>
                 <template v-for="file in store.files">
                     <ProjectFileItem 
                         :file="file"
@@ -650,7 +654,11 @@ onMounted(() => {
             </TabPanel>
             <!-- tab for mananging mapping files -->
             <TabPanel value="mapping_files">
-            <div class="flex flex-col h-full">
+            <div v-if=" store.current_project !== null && store.files.length == 0" class="flex justify-center items-center h-full mt-20">
+                <ProgressSpinner style="width: 100px; height: 100px" strokeWidth="3" fill="transparent"
+                animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+            </div>  
+            <div class="flex flex-col h-full" v-else>
                 <template v-for="file in filterFilesByStatus(store.files, 'mapping')">
                     <ProjectFileItem 
                         :file="file"
@@ -660,9 +668,13 @@ onMounted(() => {
             </TabPanel>
             <!-- tab for mananging review files -->
             <TabPanel value="review_files">
-                <div class="flex flex-col h-full">
-                    <template v-for="file in filterFilesByStatus(store.files, 'reviewing')">
-                        <ProjectFileItem 
+            <div v-if=" store.current_project !== null && store.files.length == 0" class="flex justify-center items-center h-full mt-20">
+                <ProgressSpinner style="width: 100px; height: 100px" strokeWidth="3" fill="transparent"
+                animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+            </div>  
+            <div class="flex flex-col h-full" v-else>
+                <template v-for="file in filterFilesByStatus(store.files, 'reviewing')">
+                    <ProjectFileItem 
                             :file="file"
                             :view_mode="'review'" />
                     </template>
