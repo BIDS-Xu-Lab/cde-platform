@@ -643,7 +643,14 @@ onMounted(() => {
             <div v-if="store.loading_files" class="flex justify-center items-center h-full mt-20">
                 <ProgressSpinner style="width: 100px; height: 100px" strokeWidth="3" fill="transparent"
                 animationDuration=".5s" aria-label="Custom ProgressSpinner" />
-            </div>  
+            </div>
+            <div class="flex flex-col h-full" v-else-if="store.files.length === 0">
+                <div class="flex flex-row justify-center items-center mt-20">
+                    <span class="text-2xl font-bold">
+                        This project is empty.
+                    </span>
+                </div>
+            </div>
             <div class="flex flex-col h-full" v-else>
                 <template v-for="file in store.files">
                     <ProjectFileItem 
