@@ -36,7 +36,10 @@ state: () => ({
 
     // all files belong to the selected project
     files: [],
-    
+
+    // loading files
+    loading_files: false,
+
     current_project: null,
     // working project
     working_project: null,
@@ -275,12 +278,13 @@ actions: {
     async updateCurrentProjectFiles() {
         // get all files for this project
         this.files = [];
-        
+        this.loading_files = true;
         let files = await Jimin.getFilesByProject(
             this.current_project.project_id
         );
         console.log('* got project files:', files);
         this.files = files;
+        this.loading_files = false;
     },
 
     ///////////////////////////////////////////////////////
